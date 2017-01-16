@@ -1,0 +1,37 @@
+// line comment;;;          asdfs
+
+class Sample(x: Int) extends Obj {
+   this.x = x;
+   def foo() : Int {
+       return this.x;
+   }
+}
+
+a = "strings can have \" escaped quotes and \t other escapes";
+b = "asdnnnf \n as";
+c = " multiline comment";
+y = Sample(5);
+y.PRINT();
+z = 1 < 2;
+b = 3 == 4;
+c = 1 + 2;
+d = 1 - 2;
+e = 1 * 2;
+f_zz = 1 / 2,
+g = a and b;
+
+""" comment "" \n asdfs
+
+ sdfsd sdf
+        \t .... " hi hi hi" """
+
+/* this is all
+
+commented       /*  out \t \t \\\\\
+
+*/
+
+r == t;
+//
+/*
+asdf
