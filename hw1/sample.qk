@@ -7,6 +7,12 @@ class Sample(x: Int) extends Obj {
    }
 }
 
+/* multiline
+
+comment
+
+*/
+
 a = "strings can have \" escaped quotes and \t other escapes";
 b = "asdnnnf \n as";
 c = " multiline comment";
@@ -34,4 +40,4 @@ commented       /*  out \t \t \\\\\
 r == t;
 //
 /*
-asdf
+asdf */
