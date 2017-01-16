@@ -8,7 +8,7 @@
 %x COMMENTS_C
 %x COMMENTS_LINE
 %%
-[ \t\r]                                    ; // whitespace
+[ \t\r\v\f]                                    ; // whitespace
 [\(\)\{\}:;=,\.]                           { return yytext[0]; }  // terminal characters
 class                                      { return CLASS; }
 def                                        { return DEF; }
@@ -37,16 +37,16 @@ not                                        { return NOT; }
 \"\"\"(.?.?[^\"])*\"\"\"                   { return STRING_LIT; }
 \n                                         { }
 
-\/\*                     { BEGIN(COMMENTS_C); }
-<COMMENTS_C>\*\/         { BEGIN(INITIAL); }
-<COMMENTS_C>\n           { }   // increment line count in comments
-<COMMENTS_C>.            ;     // ignore everything
+\/\*                                       { BEGIN(COMMENTS_C); }
+<COMMENTS_C>\*\/                           { BEGIN(INITIAL); }
+<COMMENTS_C>\n                             { }   // increment line count in comments
+<COMMENTS_C>.                              ;     // ignore everything
 
-\/\/                     { BEGIN(COMMENTS_LINE); }
-<COMMENTS_LINE>\n        { BEGIN(INITIAL); }
-<COMMENTS_LINE>.         ;
+\/\/                                       { BEGIN(COMMENTS_LINE); }
+<COMMENTS_LINE>\n                          { BEGIN(INITIAL); }
+<COMMENTS_LINE>.                           ;
 
-<<EOF>>          { return EOF; }
+<<EOF>>                                    { return EOF; }
 %%
 
 //.                { printf("something bad\n"); }
