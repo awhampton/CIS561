@@ -13,6 +13,8 @@ literals (colon, brace, etc), but those can be
 recognized as appearing in the ASCII range
 (and no other tokens should appear in the ASCII
 range).
+
+AUTHOR: Michal Young
 """
 
 import sys
@@ -56,4 +58,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    

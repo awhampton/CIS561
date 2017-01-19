@@ -1,3 +1,11 @@
+/*
+*  CIS 561: HW 1
+*  Andrew Hampton
+*
+*  I used the following tutorial as a starting point: http://aquamentus.com/flex_bison.html
+*/
+
+
 %{
 #include "quack.tab.h"
 %}
@@ -8,7 +16,7 @@
 %x COMMENTS_C
 %x COMMENTS_LINE
 %%
-[ \t\r\v\f]                                    ; // whitespace
+[ \t\r\v\f]                                ; // whitespace
 [\(\)\{\}:;=,\.]                           { return yytext[0]; }  // terminal characters
 class                                      { return CLASS; }
 def                                        { return DEF; }
@@ -39,14 +47,13 @@ not                                        { return NOT; }
 
 \/\*                                       { BEGIN(COMMENTS_C); }
 <COMMENTS_C>\*\/                           { BEGIN(INITIAL); }
-<COMMENTS_C>\n                             { }   // increment line count in comments
-<COMMENTS_C>.                              ;     // ignore everything
+<COMMENTS_C>\n                             { }
+<COMMENTS_C>.                              ;
 
 \/\/                                       { BEGIN(COMMENTS_LINE); }
 <COMMENTS_LINE>\n                          { BEGIN(INITIAL); }
 <COMMENTS_LINE>.                           ;
 
 <<EOF>>                                    { return EOF; }
+.                                          { fprintf(stderr, "something bad on line %d: %s\n", yylineno, yytext); }
 %%
-
-//.                { printf("something bad\n"); }
