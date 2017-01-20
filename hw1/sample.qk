@@ -14,7 +14,7 @@ comment
 */
 
 a = "strings can have \" escaped quotes and \t other escapes";
-a = "strings can't have other escapes \.";
+"Escaped dot \. is not legal, nor escaped comma \, "
 b = "asdnnnf \n as";
 c = " multiline comment";
 y = Sample(5);
