@@ -42,6 +42,8 @@ not                                        { return NOT; }
 [a-zA-Z_][a-zA-Z0-9_]*                     { return IDENT; }
 [0-9]+                                     { return INT_LIT; }
 \"(([\\][0btnrf\"\\])|[^\"\\\n])*\"        { return STRING_LIT; }
+\"(([\\][.])|[^\"\\\n])*\"                 { fprintf(stderr, "invalid string literal on line %d: %s\n", yylineno, yytext); return STRING_LIT; }
+\"(([\\][.])|[^\"\\\n])*\n                 { fprintf(stderr, "forgot to close string literal on line %d: %s\n", yylineno, yytext); return STRING_LIT; }
 \"\"\"(.?.?[^\"])*\"\"\"                   { return STRING_LIT; }
 \n                                         { }
 
