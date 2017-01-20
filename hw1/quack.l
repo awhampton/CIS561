@@ -45,6 +45,7 @@ not                                        { return NOT; }
 \"(([\\].)|[^\"\\\n])*\"                   { fprintf(stderr, "invalid string literal on line %d: %s\n", yylineno, yytext); return STRING_LIT; }
 \"(([\\][.])|[^\"\\\n])*\n                 { fprintf(stderr, "forgot to close string literal on line %d: %s\n", yylineno, yytext); return STRING_LIT; }
 \"\"\"(.?.?[^\"])*\"\"\"                   { return STRING_LIT; }
+
 \n                                         { }
 
 \/\*                                       { BEGIN(COMMENTS_C); }
