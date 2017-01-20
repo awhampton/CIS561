@@ -18,12 +18,6 @@
     NOT = 271,
     IDENT = 272,
     INT_LIT = 273,
-    STRING_LIT = 274,
-    LESS = 275,
-    MORE = 276,
-    PLUS = 277,
-    MINUS = 278,
-    TIMES = 279,
-    DIVIDE = 280
+    STRING_LIT = 274
   };
 #endif

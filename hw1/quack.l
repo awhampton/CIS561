@@ -32,12 +32,12 @@ not                                        { return NOT; }
 \<=                                        { return ATMOST; }
 ==                                         { return EQUALS; }
 \>=                                        { return ATLEAST; }
-\<                                         { return LESS; }
-\>                                         { return MORE; }
-\+                                         { return PLUS; }
-\-                                         { return MINUS; }
-\*                                         { return TIMES; }
-\/                                         { return DIVIDE; }
+\<                                         { return yytext[0]; }
+\>                                         { return yytext[0]; }
+\+                                         { return yytext[0]; }
+\-                                         { return yytext[0]; }
+\*                                         { return yytext[0]; }
+\/                                         { return yytext[0]; }
 
 [a-zA-Z_][a-zA-Z0-9_]*                     { return IDENT; }
 [0-9]+                                     { return INT_LIT; }

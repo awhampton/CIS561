@@ -25,13 +25,7 @@ static tok_name token_name_table[] = {
  ,{ 272, "IDENT" }
  ,{ 273, "INT_LIT" }
  ,{ 274, "STRING_LIT" }
- ,{ 275, "LESS" }
- ,{ 276, "MORE" }
- ,{ 277, "PLUS" }
- ,{ 278, "MINUS" }
- ,{ 279, "TIMES" }
- ,{ 280, "DIVIDE" }
 };
-int num_named_tokens = 23;
+int num_named_tokens = 17;
 
 #endif
