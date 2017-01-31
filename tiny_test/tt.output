@@ -1,0 +1,84 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: E
+
+    2 E: E '+' E
+    3  | INT_LIT
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'+' (43) 2
+error (256)
+INT_LIT (258) 3
+
+
+Nonterminals, with rules where they appear
+
+$accept (5)
+    on left: 0
+program (6)
+    on left: 1, on right: 0
+E (7)
+    on left: 2 3, on right: 1 2
+
+
+State 0
+
+    0 $accept: . program $end
+
+    INT_LIT  shift, and go to state 1
+
+    program  go to state 2
+    E        go to state 3
+
+
+State 1
+
+    3 E: INT_LIT .
+
+    $default  reduce using rule 3 (E)
+
+
+State 2
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 4
+
+
+State 3
+
+    1 program: E .
+    2 E: E . '+' E
+
+    '+'  shift, and go to state 5
+
+    $default  reduce using rule 1 (program)
+
+
+State 4
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 5
+
+    2 E: E '+' . E
+
+    INT_LIT  shift, and go to state 1
+
+    E  go to state 6
+
+
+State 6
+
+    2 E: E . '+' E
+    2  | E '+' E .
+
+    $default  reduce using rule 2 (E)
