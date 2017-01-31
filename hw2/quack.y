@@ -1,28 +1,72 @@
+/*
+*  CIS 561: HW 2
+*  Andrew Hampton
+*
+*  I used the following tutorial as a starting point: http://aquamentus.com/flex_bison.html
+*
+*  For building the AST in bison, I referenced the following:
+*  [1] http://www.progtools.org/compilers/tutorials/cxx_and_bison/cxx_and_bison.html
+*  [2] http://web.eecs.utk.edu/~bvz/teaching/cs461Sp11/notes/parse_tree/
+*/
+
+
 %{
 #include <cstdio>
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
+#include <list>
+#include "quack.h"
 using namespace std;
+
+// the root of the abstract syntax tree
+pgm_node *root;
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
+extern int yylineno;
 
 void yyerror(const char *s);
 %}
 
-// Bison fundamentally works by asking flex to get the next token, which it
-// returns as an object of type "yystype".  But tokens could be of any
-// arbitrary data type!  So we deal with that in Bison by defining a C union
-// holding each of the types of tokens that Flex could return, and have Bison
-// use that union instead of "int" for the definition of "yystype":
+
+// the union
 %union {
 	int   ival;
 	char *sval;
 	char  cval;
+	formal_arg_node          *formal_arg_type;
+	list<formal_arg_node *>  *formal_args_type;
+	class_body_node          *class_body_type;
+	class_signature_node     *class_signature_type;
+	class_node               *class_type;
+	statement_node           *statement_type;
+	list<statement_node *>   *statements_type;
+	list<class_node *>       *classes_type;
+	pgm_node                 *prog_type;
 }
 
-// define the constant-string tokens:
+
+// declare types
+%type <formal_arg_type>       formal_arg_repetition
+%type <formal_args_type>      formal_arg_repetitions
+%type <formal_args_type>      formal_arg
+%type <formal_args_type>      formal_args
+%type <class_body_type>       class_body
+%type <class_signature_type>  class_signature
+%type <class_signature_type>  class_sig_extends
+%type <class_signature_type>  class_sig_no_extends
+%type <statement_type>        statement
+%type <class_type>            class
+%type <statements_type>       statements
+%type <classes_type>          classes
+%type <prog_type>             program
+
+
+// define the constant-string tokens
+//  note: I was making too many typos so I gave these all names ...
 %token CLASS
 %token DEF
 %token EXTENDS
@@ -73,47 +117,47 @@ void yyerror(const char *s);
 %%
 
 program:
-	classes statements { cout << "done with a quack file!" << endl; }
+	classes statements { cout << "done with a quack file!" << endl; $$ = new pgm_node($1, $2); root = $$; }
 	;
 
 classes:
-	classes class { cout << "got classes" << endl; }
-	| /* empty */
+	classes class { cout << "got more classes" << endl; $$ = $1; $1->push_back($2); }
+	| /* empty */ { cout << "done with classes" << endl; $$ = new list<class_node *>(); }
 	;
 
 class:
-    class_signature class_body { cout << "got class" << endl; }
+    class_signature class_body { cout << "got class" << endl; $$ = new class_node($1, $2); }
 	;
 
 class_signature:
-    class_sig_extends {cout << "got class signature extends" << endl; }
-	| class_sig_no_extends {cout << "got class signature no extends" << endl; }
+    class_sig_extends {cout << "got class signature extends" << endl; $$ = $1; }
+	| class_sig_no_extends {cout << "got class signature no extends" << endl; $$ = $1; }
 	;
 
 class_sig_extends:
-    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { cout << "got class sig with extends:: " << $2 << endl; }
+    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { cout << "got class sig with extends:: " << $2 << endl; $$ = new class_signature_node($2, $7); }
 	;
 
 class_sig_no_extends:
-    CLASS IDENT LPAREN formal_args RPAREN { cout << "got class sig without extends:: " << $2 << endl; }
+    CLASS IDENT LPAREN formal_args RPAREN { cout << "got class sig without extends:: " << $2 << endl; $$ = new class_signature_node($2); }
 	;
 
 formal_args:
-    formal_arg { cout << "got formal args" << endl; }
-	| /* empty */
+    formal_arg    { cout << "got formal args" << endl; $$ = $1; }
+	| /* empty */ { $$ = new list<formal_arg_node *>(); }
 	;
 
 formal_arg:
-	IDENT COLON IDENT formal_arg_repetitions { cout << "got formal arg:: " << $1 << " : " << $3 << endl; }
+	IDENT COLON IDENT formal_arg_repetitions { cout << "got formal arg:: " << $1 << " : " << $3 << endl; $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; }
 	;
 
 formal_arg_repetitions:
-	formal_arg_repetitions formal_arg_repetition { cout << "got formal arg repetitions" << endl; }
-	| /* empty */
+	formal_arg_repetitions formal_arg_repetition { cout << "got formal arg repetitions" << endl; $$ = $1; $1->push_back($2); }
+	| /* empty */ { cout << "done with formal arg repetitions" << endl; $$ = new list<formal_arg_node *>(); }
 	;
 
 formal_arg_repetition:
-	COMMA IDENT COLON IDENT { cout << "got formal arg repetition:: " << $2 << " : " << $4 << endl; }
+	COMMA IDENT COLON IDENT { cout << "got formal arg repetition:: " << $2 << " : " << $4 << endl; $$ = new formal_arg_node($2, $4); }
 	;
 
 class_body:
@@ -121,8 +165,8 @@ class_body:
 	;
 
 statements:
-	statements statement { cout << "got statement" << endl; }
-	| /* empty */
+	statements statement { cout << "got more statements" << endl; $$ = $1; $1->push_back($2); }
+	| /* empty */        { cout << "done with statements" << endl; $$ = new list<statement_node *>(); }
 	;
 
 statement:
@@ -285,16 +329,17 @@ actual_arg_repetition:
 
 %%
 
-int main(int, char**) {
-	// open a file handle to a particular file:
-	FILE *myfile = fopen("sample.qk", "r");
-	// make sure it's valid:
-	if (!myfile) {
-		cout << "I can't open file!" << endl;
-		return -1;
-	}
-	// set flex to read from it instead of defaulting to STDIN:
-	yyin = myfile;
+int main(int argc, char **argv) {
+
+	// see if there is a file, otherwise take input from stdin
+	FILE *infile;
+    if (argc > 1) {
+    	if( !(infile = fopen(argv[1], "r"))){
+  			perror(argv[1]);
+  			exit(1);
+        }
+        yyin = infile;
+    }
 
 	// parse through the input until there is no more:
 	do {
@@ -304,7 +349,8 @@ int main(int, char**) {
 }
 
 void yyerror(const char *s) {
-	cout << "EEK, parse error!  Message: " << s << endl;
-	// might as well halt now:
-	exit(-1);
+	cout << "parse error on line " << yylineno << endl;
+	cout << "message: " <<  s << endl;
+	cout << "stopping!" << endl;
+	exit(1);
 }

@@ -1,5 +1,5 @@
 /*
-*  CIS 561: HW 1
+*  CIS 561: HW 2
 *  Andrew Hampton
 *
 *  I used the following tutorial as a starting point: http://aquamentus.com/flex_bison.html
@@ -9,6 +9,7 @@
 %{
 #include <cstdio>
 #include <iostream>
+#include "quack.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #include "quack.tab.h"

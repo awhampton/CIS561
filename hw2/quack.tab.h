@@ -85,13 +85,22 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 19 "quack.y" /* yacc.c:1909  */
+#line 36 "quack.y" /* yacc.c:1909  */
 
 	int   ival;
 	char *sval;
 	char  cval;
+	formal_arg_node          *formal_arg_type;
+	list<formal_arg_node *>  *formal_args_type;
+	class_body_node          *class_body_type;
+	class_signature_node     *class_signature_type;
+	class_node               *class_type;
+	statement_node           *statement_type;
+	list<statement_node *>   *statements_type;
+	list<class_node *>       *classes_type;
+	pgm_node                 *prog_type;
 
-#line 95 "quack.tab.h" /* yacc.c:1909  */
+#line 104 "quack.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
