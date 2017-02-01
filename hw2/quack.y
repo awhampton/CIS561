@@ -29,6 +29,7 @@ extern "C" FILE *yyin;
 extern int yylineno;
 
 extern void yyerror(const char *s);
+char* INFILE_NAME;
 %}
 
 
@@ -368,11 +369,13 @@ int main(int argc, char **argv) {
 
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
+	INFILE_NAME = (char *) "stdin";
     if (argc > 1) {
     	if( !(infile = fopen(argv[1], "r"))){
   			perror(argv[1]);
   			exit(1);
         }
+		INFILE_NAME = argv[1];
         yyin = infile;
     }
 
@@ -380,6 +383,9 @@ int main(int argc, char **argv) {
 	do {
 		yyparse();
 	} while (!feof(yyin));
+
+	// if we made it here, everything is OK
+	cout << "Finished parse with no errors" << endl;
 
 	// crawl the AST
 	cout << endl;

@@ -1,3 +1,5 @@
 **/*.tar
 **/scanner
+**/quack
+**/parser
 **/lex.yy.*

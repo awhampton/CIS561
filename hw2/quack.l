@@ -14,10 +14,14 @@ using namespace std;
 #define YY_DECL extern "C" int yylex()
 #include "quack.tab.h"
 
+extern char *INFILE_NAME;
+
 void yyerror (const char *msg) {
-   fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
-   fprintf(stderr, "Stopping!\n");
-   exit(1);
+    fprintf(stderr, "PARSE ERROR\n");
+    fprintf(stderr, "File: %s\n", INFILE_NAME);
+    fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
+    fprintf(stderr, "Stopping!\n");
+    exit(1);
 }
 %}
 
