@@ -13,7 +13,14 @@
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #include "quack.tab.h"
+
+void yyerror (const char *msg) {
+   fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
+   fprintf(stderr, "Stopping!\n");
+   exit(1);
+}
 %}
+
 %option yylineno
 %option warn nodefault
 %option noyywrap
@@ -54,8 +61,8 @@ not                                        { return NOT; }
 [a-zA-Z_][a-zA-Z0-9_]*                     { yylval.sval = strdup(yytext); return IDENT; }
 [0-9]+                                     { yylval.ival = atoi(yytext);   return INT_LIT; }
 \"(([\\][0btnrf\"\\])|[^\"\\\n])*\"        { yylval.sval = strdup(yytext); return STRING_LIT; }
-\"(([\\].)|[^\"\\\n])*\"                   { fprintf(stderr, "invalid string literal on line %d: %s\n", yylineno, yytext); return STRING_LIT; }
-\"(([\\][.])|[^\"\\\n])*\n                 { fprintf(stderr, "forgot to close string literal on line %d: %s\n", yylineno, yytext); return STRING_LIT; }
+\"(([\\].)|[^\"\\\n])*\"                   { yyerror("invalid string literal"); yylval.sval = strdup(yytext); return STRING_LIT; }
+\"(([\\][.])|[^\"\\\n])*\n                 { yyerror("forgot to close string literal?"); yylval.sval = strdup(yytext); return STRING_LIT; }
 \"\"\"(.?.?[^\"])*\"\"\"                   { yylval.sval = strdup(yytext); return STRING_LIT; }
 
 \n                                         { }
@@ -70,5 +77,5 @@ not                                        { return NOT; }
 <COMMENTS_LINE>.                           ;
 
 <<EOF>>                                    { return EOF; }
-.                                          { fprintf(stderr, "something bad on line %d: %s\n", yylineno, yytext); }
+.                                          { yyerror("lexical error"); }
 %%

@@ -28,7 +28,7 @@ extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int yylineno;
 
-void yyerror(const char *s);
+extern void yyerror(const char *s);
 %}
 
 
@@ -37,11 +37,17 @@ void yyerror(const char *s);
 	int   ival;
 	char *sval;
 	char  cval;
+	char                     *opt_ident_type;
+	method_node              *method_type;
+	list<method_node *>      *methods_type;
+	actual_arg_node          *actual_arg_type;
+	list<actual_arg_node *>  *actual_args_type;
 	formal_arg_node          *formal_arg_type;
 	list<formal_arg_node *>  *formal_args_type;
 	class_body_node          *class_body_type;
 	class_signature_node     *class_signature_type;
 	class_node               *class_type;
+	expr_node                *expr_type;
 	statement_node           *statement_type;
 	list<statement_node *>   *statements_type;
 	list<class_node *>       *classes_type;
@@ -50,6 +56,14 @@ void yyerror(const char *s);
 
 
 // declare types
+%type <expr_type>             l_expr r_expr
+%type <opt_ident_type>        opt_ident
+%type <method_type>           method
+%type <methods_type>          methods
+%type <actual_arg_type>       actual_arg_repetition
+%type <actual_args_type>      actual_arg_repetitions
+%type <actual_args_type>      actual_arg
+%type <actual_args_type>      actual_args
 %type <formal_arg_type>       formal_arg_repetition
 %type <formal_args_type>      formal_arg_repetitions
 %type <formal_args_type>      formal_arg
@@ -61,6 +75,7 @@ void yyerror(const char *s);
 %type <statement_type>        statement
 %type <class_type>            class
 %type <statements_type>       statements
+%type <statements_type>       statement_block
 %type <classes_type>          classes
 %type <prog_type>             program
 
@@ -135,11 +150,11 @@ class_signature:
 	;
 
 class_sig_extends:
-    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { cout << "got class sig with extends:: " << $2 << endl; $$ = new class_signature_node($2, $7); }
+    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { cout << "got class sig with extends:: " << $2 << endl; $$ = new class_signature_node($2, $7, $4); }
 	;
 
 class_sig_no_extends:
-    CLASS IDENT LPAREN formal_args RPAREN { cout << "got class sig without extends:: " << $2 << endl; $$ = new class_signature_node($2); }
+    CLASS IDENT LPAREN formal_args RPAREN { cout << "got class sig without extends:: " << $2 << endl; $$ = new class_signature_node($2, $4); }
 	;
 
 formal_args:
@@ -161,7 +176,7 @@ formal_arg_repetition:
 	;
 
 class_body:
-	LBRACE statements methods RBRACE { cout << "got class body" << endl; }
+	LBRACE statements methods RBRACE { cout << "got class body" << endl; $$ = new class_body_node($2, $3); }
 	;
 
 statements:
@@ -170,45 +185,45 @@ statements:
 	;
 
 statement:
-	IF r_expr statement_block elifs opt_else { cout << "statement if" << endl; }
+	IF r_expr statement_block elifs opt_else { cout << "statement if" << endl; $$ = new statement_node(); }
 	;
 
 statement:
-	WHILE r_expr statement_block { cout << "statement while" << endl; }
+	WHILE r_expr statement_block { cout << "statement while" << endl; $$ = new statement_node(); }
 	;
 
 statement:
-	l_expr opt_ident GETS r_expr SEMICOLON { cout << "statement assignment" << endl; }
+	l_expr opt_ident GETS r_expr SEMICOLON { cout << "statement assignment" << endl; $$ = new statement_node(); }
 	;
 
 statement:
-	r_expr SEMICOLON { cout << "statement r_expr" << endl; }
+	r_expr SEMICOLON { cout << "statement r_expr" << endl; $$ = new statement_node(); }
 	;
 
 statement:
-	RETURN r_expr SEMICOLON { cout << "statement return r_expr" << endl; }
+	RETURN r_expr SEMICOLON { cout << "statement return r_expr" << endl; $$ = new statement_node(); }
 	;
 
 statement:
-	RETURN SEMICOLON { cout << "statement return empty" << endl; }
+	RETURN SEMICOLON { cout << "statement return empty" << endl; $$ = new statement_node(); }
 	;
 
 methods:
-	methods method { cout << "got methods" << endl; }
-	| /* empty */
+	methods method { cout << "got methods" << endl; $$ = $1; $1->push_back($2); }
+	| /* empty */  { cout << "done with methods" << endl; $$ = new list<method_node *>(); }
 	;
 
 method:
-	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block {cout << "got method:: " << $2 << endl;}
+	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block {cout << "got method:: " << $2 << endl; $$ = new method_node($2, $6, $4, $7); }
 	;
 
 opt_ident:
-	COLON IDENT {cout << "got optional identifier:: " << $2 << endl;}
-	| /* empty */
+	COLON IDENT {cout << "got optional identifier:: " << $2 << endl; $$ = $2; }
+	| /* empty */ { $$ = (char *) "Obj"; }
 	;
 
 statement_block:
-	LBRACE statements RBRACE {cout << "got statement block" << endl;}
+	LBRACE statements RBRACE {cout << "got statement block" << endl; $$ = $2; }
 	;
 
 elifs:
@@ -230,104 +245,124 @@ else_rule:
 	;
 
 l_expr:
-	IDENT { cout << "got left expression ident:: " << $1 << endl; }
+	IDENT { cout << "got left expression ident:: " << $1 << endl; $$ = new expr_node(); }
 	;
 
 l_expr:
-	r_expr PERIOD IDENT { cout << "got left expression r_expr.ident:: " << $3 << endl; }
+	r_expr PERIOD IDENT { cout << "got left expression r_expr.ident:: " << $3 << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	STRING_LIT { cout << "right expression string lit:: " << $1 << endl; }
+	STRING_LIT { cout << "right expression string lit:: " << $1 << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	INT_LIT { cout << "right expression int lit:: " << $1 << endl; }
+	INT_LIT { cout << "right expression int lit:: " << $1 << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	l_expr { cout << "right expression l_expr" << endl; }
+	l_expr { cout << "right expression l_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr PLUS r_expr { cout << "right expression r_expr + r_expr" << endl; }
+	r_expr PLUS r_expr { cout << "right expression r_expr + r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr MINUS r_expr { cout << "right expression r_expr - r_expr" << endl; }
+	r_expr MINUS r_expr { cout << "right expression r_expr - r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr TIMES r_expr { cout << "right expression r_expr * r_expr" << endl; }
+	r_expr TIMES r_expr { cout << "right expression r_expr * r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr DIVIDE r_expr { cout << "right expression r_expr / r_expr" << endl; }
+	r_expr DIVIDE r_expr { cout << "right expression r_expr / r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	LPAREN r_expr RPAREN { cout << "right expression (r_expr)" << endl; }
+	LPAREN r_expr RPAREN { cout << "right expression (r_expr)" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr EQUALS r_expr { cout << "right expression r_expr == r_expr" << endl; }
+	r_expr EQUALS r_expr { cout << "right expression r_expr == r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr ATMOST r_expr { cout << "right expression r_expr <= r_expr" << endl; }
+	r_expr ATMOST r_expr { cout << "right expression r_expr <= r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr LESS r_expr { cout << "right expression r_expr < r_expr" << endl; }
+	r_expr LESS r_expr { cout << "right expression r_expr < r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr ATLEAST r_expr { cout << "right expression r_expr >= r_expr" << endl; }
+	r_expr ATLEAST r_expr { cout << "right expression r_expr >= r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr MORE r_expr { cout << "right expression r_expr > r_expr" << endl; }
+	r_expr MORE r_expr { cout << "right expression r_expr > r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr AND r_expr { cout << "right expression r_expr and r_expr" << endl; }
+	r_expr AND r_expr { cout << "right expression r_expr and r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr OR r_expr { cout << "right expression r_expr or r_expr" << endl; }
+	r_expr OR r_expr { cout << "right expression r_expr or r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	NOT r_expr { cout << "right expression not r_expr" << endl; }
+	NOT r_expr { cout << "right expression not r_expr" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	r_expr PERIOD IDENT LPAREN actual_args RPAREN { cout << "right expression method call" << endl; }
+	r_expr PERIOD IDENT LPAREN actual_args RPAREN { cout << "right expression method call" << endl; $$ = new expr_node(); }
 	;
 
 r_expr:
-	IDENT LPAREN actual_args RPAREN { cout << "right expression class instance" << endl; }
+	IDENT LPAREN actual_args RPAREN { cout << "right expression class instance" << endl; $$ = new expr_node(); }
 	;
 
 actual_args:
-    actual_arg { cout << "got actual args" << endl; }
-	| /* empty */
+    actual_arg { cout << "got actual args" << endl; $$ = $1; }
+	| /* empty */ { $$ = new list<actual_arg_node *>(); }
 	;
 
 actual_arg:
-	r_expr actual_arg_repetitions { cout << "got actual arg" << endl; }
+	r_expr actual_arg_repetitions { cout << "got actual arg" << endl; $2->push_front( new actual_arg_node($1) ); $$ = $2; }
 	;
 
 actual_arg_repetitions:
-	actual_arg_repetitions actual_arg_repetition { cout << "got actual arg repetitions" << endl; }
-	| /* empty */
+	actual_arg_repetitions actual_arg_repetition { cout << "got actual arg repetitions" << endl; $$ = $1; $1->push_back($2); }
+	| /* empty */ { cout << "done with actual arg repetitions" << endl; $$ = new list<actual_arg_node *>(); }
 	;
 
 actual_arg_repetition:
-	COMMA r_expr { cout << "got actual arg repetition" << endl; }
+	COMMA r_expr { cout << "got actual arg repetition" << endl; $$ = new actual_arg_node($2); }
 	;
 
+
 %%
+
+
+// pre-order traversal calling generic node methods
+void recursive_crawl(node *n){
+	n->speak();
+	list<node *> children = n->get_children();
+
+	for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+		recursive_crawl(*itr);
+	}
+
+	return;
+}
+
+// crawl the AST
+void crawl_ast(pgm_node *r){
+	recursive_crawl((node*) r);
+}
+
 
 int main(int argc, char **argv) {
 
@@ -346,11 +381,18 @@ int main(int argc, char **argv) {
 		yyparse();
 	} while (!feof(yyin));
 
+	// crawl the AST
+	cout << endl;
+	crawl_ast(root);
+	cout << endl;
+
 }
 
+/*
 void yyerror(const char *s) {
 	cout << "parse error on line " << yylineno << endl;
 	cout << "message: " <<  s << endl;
 	cout << "stopping!" << endl;
 	exit(1);
 }
+*/

@@ -90,17 +90,23 @@ union YYSTYPE
 	int   ival;
 	char *sval;
 	char  cval;
+	char                     *opt_ident_type;
+	method_node              *method_type;
+	list<method_node *>      *methods_type;
+	actual_arg_node          *actual_arg_type;
+	list<actual_arg_node *>  *actual_args_type;
 	formal_arg_node          *formal_arg_type;
 	list<formal_arg_node *>  *formal_args_type;
 	class_body_node          *class_body_type;
 	class_signature_node     *class_signature_type;
 	class_node               *class_type;
+	expr_node                *expr_type;
 	statement_node           *statement_type;
 	list<statement_node *>   *statements_type;
 	list<class_node *>       *classes_type;
 	pgm_node                 *prog_type;
 
-#line 104 "quack.tab.h" /* yacc.c:1909  */
+#line 110 "quack.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
