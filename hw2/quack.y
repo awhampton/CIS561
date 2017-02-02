@@ -27,6 +27,7 @@ extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int yylineno;
+extern int num_errors;
 
 extern void yyerror(const char *s);
 char* INFILE_NAME;
@@ -66,17 +67,11 @@ char* INFILE_NAME;
 %type <method_type>           method
 %type <methods_type>          methods
 %type <actual_arg_type>       actual_arg_repetition
-%type <actual_args_type>      actual_arg_repetitions
-%type <actual_args_type>      actual_arg
-%type <actual_args_type>      actual_args
+%type <actual_args_type>      actual_arg_repetitions actual_arg actual_args
 %type <formal_arg_type>       formal_arg_repetition
-%type <formal_args_type>      formal_arg_repetitions
-%type <formal_args_type>      formal_arg
-%type <formal_args_type>      formal_args
+%type <formal_args_type>      formal_arg_repetitions formal_arg formal_args
 %type <class_body_type>       class_body
-%type <class_signature_type>  class_signature
-%type <class_signature_type>  class_sig_extends
-%type <class_signature_type>  class_sig_no_extends
+%type <class_signature_type>  class_signature class_sig_extends class_sig_no_extends
 %type <statement_type>        statement
 %type <class_type>            class
 %type <statements_type>       statements statement_block opt_else else_rule
@@ -130,6 +125,7 @@ char* INFILE_NAME;
 %left LESS MORE EQUALS ATMOST ATLEAST
 %left PLUS MINUS
 %left TIMES DIVIDE
+%precedence NEG
 %left PERIOD
 
 
@@ -172,6 +168,7 @@ formal_arg:
 
 formal_arg_repetitions:
 	formal_arg_repetitions formal_arg_repetition { cout << "got formal arg repetitions" << endl; $$ = $1; $1->push_back($2); }
+	| formal_arg_repetitions error COMMA { } /* skip until next comma */
 	| /* empty */ { cout << "done with formal arg repetitions" << endl; $$ = new list<formal_arg_node *>(); }
 	;
 
@@ -185,6 +182,7 @@ class_body:
 
 statements:
 	statements statement { cout << "got more statements" << endl; $$ = $1; $1->push_back($2); }
+	| statements error '\n' { }
 	| /* empty */        { cout << "done with statements" << endl; $$ = new list<statement_node *>(); }
 	;
 
@@ -274,6 +272,10 @@ r_expr:
 
 r_expr:
 	r_expr MINUS r_expr { cout << "right expression r_expr - r_expr" << endl; $$ = new method_call_node($1, "MINUS", $3); }
+	;
+
+r_expr:
+	MINUS r_expr %prec NEG { cout << "right expression neg r_expr" << endl; $$ = new method_call_node(new intlit_node(0), "MINUS", $2); }
 	;
 
 r_expr:
@@ -387,21 +389,14 @@ int main(int argc, char **argv) {
 		yyparse();
 	} while (!feof(yyin));
 
-	// if we made it here, everything is OK
-	cout << "Finished parse with no errors" << endl;
+	// if everything is OK continue processing with AST
+	if(num_errors == 0){
+		cout << "Finished parse with no errors" << endl;
 
-	// crawl the AST
-	cout << endl;
-	crawl_ast(root);
-	cout << endl;
+		// crawl the AST
+		cout << endl;
+		crawl_ast(root);
+		cout << endl;
+	}
 
 }
-
-/*
-void yyerror(const char *s) {
-	cout << "parse error on line " << yylineno << endl;
-	cout << "message: " <<  s << endl;
-	cout << "stopping!" << endl;
-	exit(1);
-}
-*/

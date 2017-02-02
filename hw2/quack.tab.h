@@ -76,7 +76,8 @@ extern int yydebug;
     DIVIDE = 286,
     IDENT = 287,
     INT_LIT = 288,
-    STRING_LIT = 289
+    STRING_LIT = 289,
+    NEG = 290
   };
 #endif
 
@@ -85,7 +86,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 37 "quack.y" /* yacc.c:1909  */
+#line 38 "quack.y" /* yacc.c:1909  */
 
 	int   ival;
 	char *sval;
@@ -108,7 +109,7 @@ union YYSTYPE
 	list<class_node *>       *classes_type;
 	pgm_node                 *prog_type;
 
-#line 112 "quack.tab.h" /* yacc.c:1909  */
+#line 113 "quack.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
