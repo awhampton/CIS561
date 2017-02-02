@@ -102,11 +102,13 @@ union YYSTYPE
 	class_node               *class_type;
 	expr_node                *expr_type;
 	statement_node           *statement_type;
+	condition_node           *conditional_type;
+	list<condition_node *>   *conditionals_type;
 	list<statement_node *>   *statements_type;
 	list<class_node *>       *classes_type;
 	pgm_node                 *prog_type;
 
-#line 110 "quack.tab.h" /* yacc.c:1909  */
+#line 112 "quack.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

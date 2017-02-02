@@ -16,5 +16,7 @@ class BadInit() {
 	   rep = rep + 1;
 	   y = 42;
       }
+
+      return test + 4;
    }
 }
