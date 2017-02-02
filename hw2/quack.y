@@ -132,220 +132,220 @@ char* INFILE_NAME;
 %%
 
 program:
-	classes statements { cout << "done with a quack file!" << endl; $$ = new pgm_node($1, $2); root = $$; }
+	classes statements { $$ = new pgm_node($1, $2); root = $$; }
 	;
 
 classes:
-	classes class { cout << "got more classes" << endl; $$ = $1; $1->push_back($2); }
-	| /* empty */ { cout << "done with classes" << endl; $$ = new list<class_node *>(); }
+	classes class { $$ = $1; $1->push_back($2); }
+	| /* empty */ { $$ = new list<class_node *>(); }
 	;
 
 class:
-    class_signature class_body { cout << "got class" << endl; $$ = new class_node($1, $2); }
+    class_signature class_body { $$ = new class_node($1, $2); }
 	;
 
 class_signature:
-    class_sig_extends {cout << "got class signature extends" << endl; $$ = $1; }
-	| class_sig_no_extends {cout << "got class signature no extends" << endl; $$ = $1; }
+    class_sig_extends { $$ = $1; }
+	| class_sig_no_extends { $$ = $1; }
 	;
 
 class_sig_extends:
-    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { cout << "got class sig with extends:: " << $2 << endl; $$ = new class_signature_node($2, $7, $4); }
+    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { $$ = new class_signature_node($2, $7, $4); }
 	;
 
 class_sig_no_extends:
-    CLASS IDENT LPAREN formal_args RPAREN { cout << "got class sig without extends:: " << $2 << endl; $$ = new class_signature_node($2, $4); }
+    CLASS IDENT LPAREN formal_args RPAREN { $$ = new class_signature_node($2, $4); }
 	;
 
 formal_args:
-    formal_arg    { cout << "got formal args" << endl; $$ = $1; }
+    formal_arg    { $$ = $1; }
 	| /* empty */ { $$ = new list<formal_arg_node *>(); }
 	;
 
 formal_arg:
-	IDENT COLON IDENT formal_arg_repetitions { cout << "got formal arg:: " << $1 << " : " << $3 << endl; $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; }
+	IDENT COLON IDENT formal_arg_repetitions { $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; }
 	;
 
 formal_arg_repetitions:
-	formal_arg_repetitions formal_arg_repetition { cout << "got formal arg repetitions" << endl; $$ = $1; $1->push_back($2); }
+	formal_arg_repetitions formal_arg_repetition { $$ = $1; $1->push_back($2); }
 	| formal_arg_repetitions error COMMA { } /* skip until next comma */
-	| /* empty */ { cout << "done with formal arg repetitions" << endl; $$ = new list<formal_arg_node *>(); }
+	| /* empty */ { $$ = new list<formal_arg_node *>(); }
 	;
 
 formal_arg_repetition:
-	COMMA IDENT COLON IDENT { cout << "got formal arg repetition:: " << $2 << " : " << $4 << endl; $$ = new formal_arg_node($2, $4); }
+	COMMA IDENT COLON IDENT { $$ = new formal_arg_node($2, $4); }
 	;
 
 class_body:
-	LBRACE statements methods RBRACE { cout << "got class body" << endl; $$ = new class_body_node($2, $3); }
+	LBRACE statements methods RBRACE { $$ = new class_body_node($2, $3); }
 	;
 
 statements:
-	statements statement { cout << "got more statements" << endl; $$ = $1; $1->push_back($2); }
+	statements statement { $$ = $1; $1->push_back($2); }
 	| statements error '\n' { }
-	| /* empty */        { cout << "done with statements" << endl; $$ = new list<statement_node *>(); }
+	| /* empty */        { $$ = new list<statement_node *>(); }
 	;
 
 statement:
-	IF r_expr statement_block elifs opt_else { cout << "statement if" << endl; $$ = new if_elifs_else_node(new condition_node($2,$3), $4, $5); }
+	IF r_expr statement_block elifs opt_else { $$ = new if_elifs_else_node(new condition_node($2,$3), $4, $5); }
 	;
 
 statement:
-	WHILE r_expr statement_block { cout << "statement while" << endl; $$ = new while_node(new while_condition_node($2, $3)); }
+	WHILE r_expr statement_block { $$ = new while_node(new while_condition_node($2, $3)); }
 	;
 
 statement:
-	l_expr opt_ident GETS r_expr SEMICOLON { cout << "statement assignment" << endl; $$ = new assignment_node($1, $2, $4); }
+	l_expr opt_ident GETS r_expr SEMICOLON { $$ = new assignment_node($1, $2, $4); }
 	;
 
 statement:
-	r_expr SEMICOLON { cout << "statement r_expr" << endl; $$ = new bare_expr_node($1); }
+	r_expr SEMICOLON { $$ = new bare_expr_node($1); }
 	;
 
 statement:
-	RETURN r_expr SEMICOLON { cout << "statement return r_expr" << endl; $$ = new return_node($2); }
+	RETURN r_expr SEMICOLON { $$ = new return_node($2); }
 	;
 
 statement:
-	RETURN SEMICOLON { cout << "statement return empty" << endl; $$ = new return_node(); }
+	RETURN SEMICOLON { $$ = new return_node(); }
 	;
 
 methods:
-	methods method { cout << "got methods" << endl; $$ = $1; $1->push_back($2); }
-	| /* empty */  { cout << "done with methods" << endl; $$ = new list<method_node *>(); }
+	methods method { $$ = $1; $1->push_back($2); }
+	| /* empty */  { $$ = new list<method_node *>(); }
 	;
 
 method:
-	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block {cout << "got method:: " << $2 << endl; $$ = new method_node($2, $6, $4, $7); }
+	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); }
 	;
 
 opt_ident:
-	COLON IDENT {cout << "got optional identifier:: " << $2 << endl; $$ = $2; }
+	COLON IDENT { $$ = $2; }
 	| /* empty */ { $$ = (char *) "Obj"; }
 	;
 
 statement_block:
-	LBRACE statements RBRACE {cout << "got statement block" << endl; $$ = $2; }
+	LBRACE statements RBRACE { $$ = $2; }
 	;
 
 elifs:
-	elifs elif_rule { cout << "got an elif rule" << endl; $$ = $1; $1->push_back($2); }
-	| /* empty */   { cout << "done with elifs" << endl; $$ = new list<condition_node *>(); }
+	elifs elif_rule { $$ = $1; $1->push_back($2); }
+	| /* empty */   { $$ = new list<condition_node *>(); }
 	;
 
 elif_rule:
-	ELIF r_expr statement_block { cout << "got an elif" << endl; $$ = new condition_node($2, $3); }
+	ELIF r_expr statement_block { $$ = new condition_node($2, $3); }
 	;
 
 opt_else:
-	else_rule { cout << "got an else rule" << endl; $$ = $1; }
+	else_rule { $$ = $1; }
 	| /* empty */ { $$ = $$ = new list<statement_node *>(); }
 	;
 
 else_rule:
-	ELSE statement_block { cout << "got an else" << endl; $$ = $2; }
+	ELSE statement_block { $$ = $2; }
 	;
 
 l_expr:
-	IDENT { cout << "got left expression ident:: " << $1 << endl; $$ = new ident_node($1); }
+	IDENT { $$ = new ident_node($1); }
 	;
 
 l_expr:
-	r_expr PERIOD IDENT { cout << "got left expression r_expr.ident:: " << $3 << endl; $$ = new access_node($1, $3); }
+	r_expr PERIOD IDENT { $$ = new access_node($1, $3); }
 	;
 
 r_expr:
-	STRING_LIT { cout << "right expression string lit:: " << $1 << endl; $$ = new strlit_node($1); }
+	STRING_LIT { $$ = new strlit_node($1); }
 	;
 
 r_expr:
-	INT_LIT { cout << "right expression int lit:: " << $1 << endl; $$ = new intlit_node($1); }
+	INT_LIT { $$ = new intlit_node($1); }
 	;
 
 r_expr:
-	l_expr { cout << "right expression l_expr" << endl; $$ = $1; }
+	l_expr { $$ = $1; }
 	;
 
 r_expr:
-	r_expr PLUS r_expr { cout << "right expression r_expr + r_expr" << endl; $$ = new method_call_node($1, "PLUS", $3); }
+	r_expr PLUS r_expr { $$ = new method_call_node($1, "PLUS", $3); }
 	;
 
 r_expr:
-	r_expr MINUS r_expr { cout << "right expression r_expr - r_expr" << endl; $$ = new method_call_node($1, "MINUS", $3); }
+	r_expr MINUS r_expr { $$ = new method_call_node($1, "MINUS", $3); }
 	;
 
 r_expr:
-	MINUS r_expr %prec NEG { cout << "right expression neg r_expr" << endl; $$ = new method_call_node(new intlit_node(0), "MINUS", $2); }
+	MINUS r_expr %prec NEG { $$ = new method_call_node(new intlit_node(0), "MINUS", $2); }
 	;
 
 r_expr:
-	r_expr TIMES r_expr { cout << "right expression r_expr * r_expr" << endl; $$ = new method_call_node($1, "TIMES", $3); }
+	r_expr TIMES r_expr { $$ = new method_call_node($1, "TIMES", $3); }
 	;
 
 r_expr:
-	r_expr DIVIDE r_expr { cout << "right expression r_expr / r_expr" << endl; $$ = new method_call_node($1, "DIVIDE", $3); }
+	r_expr DIVIDE r_expr { $$ = new method_call_node($1, "DIVIDE", $3); }
 	;
 
 r_expr:
-	LPAREN r_expr RPAREN { cout << "right expression (r_expr)" << endl; $$ = $2; }
+	LPAREN r_expr RPAREN { $$ = $2; }
 	;
 
 r_expr:
-	r_expr EQUALS r_expr { cout << "right expression r_expr == r_expr" << endl; $$ = new method_call_node($1, "EQUALS", $3); }
+	r_expr EQUALS r_expr { $$ = new method_call_node($1, "EQUALS", $3); }
 	;
 
 r_expr:
-	r_expr ATMOST r_expr { cout << "right expression r_expr <= r_expr" << endl; $$ = new method_call_node($1, "ATMOST", $3); }
+	r_expr ATMOST r_expr { $$ = new method_call_node($1, "ATMOST", $3); }
 	;
 
 r_expr:
-	r_expr LESS r_expr { cout << "right expression r_expr < r_expr" << endl; $$ = new method_call_node($1, "LESS", $3); }
+	r_expr LESS r_expr { $$ = new method_call_node($1, "LESS", $3); }
 	;
 
 r_expr:
-	r_expr ATLEAST r_expr { cout << "right expression r_expr >= r_expr" << endl; $$ = new method_call_node($1, "ATLEAST", $3); }
+	r_expr ATLEAST r_expr { $$ = new method_call_node($1, "ATLEAST", $3); }
 	;
 
 r_expr:
-	r_expr MORE r_expr { cout << "right expression r_expr > r_expr" << endl; $$ = new method_call_node($1, "MORE", $3); }
+	r_expr MORE r_expr { $$ = new method_call_node($1, "MORE", $3); }
 	;
 
 r_expr:
-	r_expr AND r_expr { cout << "right expression r_expr and r_expr" << endl; $$ = new and_node($1, $3); }
+	r_expr AND r_expr { $$ = new and_node($1, $3); }
 	;
 
 r_expr:
-	r_expr OR r_expr { cout << "right expression r_expr or r_expr" << endl; $$ = new or_node($1, $3); }
+	r_expr OR r_expr { $$ = new or_node($1, $3); }
 	;
 
 r_expr:
-	NOT r_expr { cout << "right expression not r_expr" << endl; $$ = new not_node($2); }
+	NOT r_expr { $$ = new not_node($2); }
 	;
 
 r_expr:
-	r_expr PERIOD IDENT LPAREN actual_args RPAREN { cout << "right expression method call" << endl; $$ = new method_call_node($1, $3, $5); }
+	r_expr PERIOD IDENT LPAREN actual_args RPAREN { $$ = new method_call_node($1, $3, $5); }
 	;
 
 r_expr:
-	IDENT LPAREN actual_args RPAREN { cout << "right expression class instance" << endl; $$ = new class_instantiation_node($1, $3); }
+	IDENT LPAREN actual_args RPAREN { $$ = new class_instantiation_node($1, $3); }
 	;
 
 actual_args:
-    actual_arg { cout << "got actual args" << endl; $$ = $1; }
+    actual_arg { $$ = $1; }
 	| /* empty */ { $$ = new list<actual_arg_node *>(); }
 	;
 
 actual_arg:
-	r_expr actual_arg_repetitions { cout << "got actual arg" << endl; $2->push_front( new actual_arg_node($1) ); $$ = $2; }
+	r_expr actual_arg_repetitions { $2->push_front( new actual_arg_node($1) ); $$ = $2; }
 	;
 
 actual_arg_repetitions:
-	actual_arg_repetitions actual_arg_repetition { cout << "got actual arg repetitions" << endl; $$ = $1; $1->push_back($2); }
-	| /* empty */ { cout << "done with actual arg repetitions" << endl; $$ = new list<actual_arg_node *>(); }
+	actual_arg_repetitions actual_arg_repetition { $$ = $1; $1->push_back($2); }
+	| /* empty */ { $$ = new list<actual_arg_node *>(); }
 	;
 
 actual_arg_repetition:
-	COMMA r_expr { cout << "got actual arg repetition" << endl; $$ = new actual_arg_node($2); }
+	COMMA r_expr { $$ = new actual_arg_node($2); }
 	;
 
 

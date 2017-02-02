@@ -1394,55 +1394,55 @@ yyreduce:
     {
         case 2:
 #line 135 "quack.y" /* yacc.c:1646  */
-    { cout << "done with a quack file!" << endl; (yyval.prog_type) = new pgm_node((yyvsp[-1].classes_type), (yyvsp[0].statements_type)); root = (yyval.prog_type); }
+    { (yyval.prog_type) = new pgm_node((yyvsp[-1].classes_type), (yyvsp[0].statements_type)); root = (yyval.prog_type); }
 #line 1399 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
 #line 139 "quack.y" /* yacc.c:1646  */
-    { cout << "got more classes" << endl; (yyval.classes_type) = (yyvsp[-1].classes_type); (yyvsp[-1].classes_type)->push_back((yyvsp[0].class_type)); }
+    { (yyval.classes_type) = (yyvsp[-1].classes_type); (yyvsp[-1].classes_type)->push_back((yyvsp[0].class_type)); }
 #line 1405 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
 #line 140 "quack.y" /* yacc.c:1646  */
-    { cout << "done with classes" << endl; (yyval.classes_type) = new list<class_node *>(); }
+    { (yyval.classes_type) = new list<class_node *>(); }
 #line 1411 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
 #line 144 "quack.y" /* yacc.c:1646  */
-    { cout << "got class" << endl; (yyval.class_type) = new class_node((yyvsp[-1].class_signature_type), (yyvsp[0].class_body_type)); }
+    { (yyval.class_type) = new class_node((yyvsp[-1].class_signature_type), (yyvsp[0].class_body_type)); }
 #line 1417 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
 #line 148 "quack.y" /* yacc.c:1646  */
-    {cout << "got class signature extends" << endl; (yyval.class_signature_type) = (yyvsp[0].class_signature_type); }
+    { (yyval.class_signature_type) = (yyvsp[0].class_signature_type); }
 #line 1423 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
 #line 149 "quack.y" /* yacc.c:1646  */
-    {cout << "got class signature no extends" << endl; (yyval.class_signature_type) = (yyvsp[0].class_signature_type); }
+    { (yyval.class_signature_type) = (yyvsp[0].class_signature_type); }
 #line 1429 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
 #line 153 "quack.y" /* yacc.c:1646  */
-    { cout << "got class sig with extends:: " << (yyvsp[-5].sval) << endl; (yyval.class_signature_type) = new class_signature_node((yyvsp[-5].sval), (yyvsp[0].sval), (yyvsp[-3].formal_args_type)); }
+    { (yyval.class_signature_type) = new class_signature_node((yyvsp[-5].sval), (yyvsp[0].sval), (yyvsp[-3].formal_args_type)); }
 #line 1435 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
 #line 157 "quack.y" /* yacc.c:1646  */
-    { cout << "got class sig without extends:: " << (yyvsp[-3].sval) << endl; (yyval.class_signature_type) = new class_signature_node((yyvsp[-3].sval), (yyvsp[-1].formal_args_type)); }
+    { (yyval.class_signature_type) = new class_signature_node((yyvsp[-3].sval), (yyvsp[-1].formal_args_type)); }
 #line 1441 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
 #line 161 "quack.y" /* yacc.c:1646  */
-    { cout << "got formal args" << endl; (yyval.formal_args_type) = (yyvsp[0].formal_args_type); }
+    { (yyval.formal_args_type) = (yyvsp[0].formal_args_type); }
 #line 1447 "quack.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1454,13 +1454,13 @@ yyreduce:
 
   case 12:
 #line 166 "quack.y" /* yacc.c:1646  */
-    { cout << "got formal arg:: " << (yyvsp[-3].sval) << " : " << (yyvsp[-1].sval) << endl; (yyvsp[0].formal_args_type)->push_front( new formal_arg_node((yyvsp[-3].sval), (yyvsp[-1].sval)) ); (yyval.formal_args_type) = (yyvsp[0].formal_args_type); }
+    { (yyvsp[0].formal_args_type)->push_front( new formal_arg_node((yyvsp[-3].sval), (yyvsp[-1].sval)) ); (yyval.formal_args_type) = (yyvsp[0].formal_args_type); }
 #line 1459 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
 #line 170 "quack.y" /* yacc.c:1646  */
-    { cout << "got formal arg repetitions" << endl; (yyval.formal_args_type) = (yyvsp[-1].formal_args_type); (yyvsp[-1].formal_args_type)->push_back((yyvsp[0].formal_arg_type)); }
+    { (yyval.formal_args_type) = (yyvsp[-1].formal_args_type); (yyvsp[-1].formal_args_type)->push_back((yyvsp[0].formal_arg_type)); }
 #line 1465 "quack.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1472,25 +1472,25 @@ yyreduce:
 
   case 15:
 #line 172 "quack.y" /* yacc.c:1646  */
-    { cout << "done with formal arg repetitions" << endl; (yyval.formal_args_type) = new list<formal_arg_node *>(); }
+    { (yyval.formal_args_type) = new list<formal_arg_node *>(); }
 #line 1477 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
 #line 176 "quack.y" /* yacc.c:1646  */
-    { cout << "got formal arg repetition:: " << (yyvsp[-2].sval) << " : " << (yyvsp[0].sval) << endl; (yyval.formal_arg_type) = new formal_arg_node((yyvsp[-2].sval), (yyvsp[0].sval)); }
+    { (yyval.formal_arg_type) = new formal_arg_node((yyvsp[-2].sval), (yyvsp[0].sval)); }
 #line 1483 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
 #line 180 "quack.y" /* yacc.c:1646  */
-    { cout << "got class body" << endl; (yyval.class_body_type) = new class_body_node((yyvsp[-2].statements_type), (yyvsp[-1].methods_type)); }
+    { (yyval.class_body_type) = new class_body_node((yyvsp[-2].statements_type), (yyvsp[-1].methods_type)); }
 #line 1489 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
 #line 184 "quack.y" /* yacc.c:1646  */
-    { cout << "got more statements" << endl; (yyval.statements_type) = (yyvsp[-1].statements_type); (yyvsp[-1].statements_type)->push_back((yyvsp[0].statement_type)); }
+    { (yyval.statements_type) = (yyvsp[-1].statements_type); (yyvsp[-1].statements_type)->push_back((yyvsp[0].statement_type)); }
 #line 1495 "quack.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1502,67 +1502,67 @@ yyreduce:
 
   case 20:
 #line 186 "quack.y" /* yacc.c:1646  */
-    { cout << "done with statements" << endl; (yyval.statements_type) = new list<statement_node *>(); }
+    { (yyval.statements_type) = new list<statement_node *>(); }
 #line 1507 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
 #line 190 "quack.y" /* yacc.c:1646  */
-    { cout << "statement if" << endl; (yyval.statement_type) = new if_elifs_else_node(new condition_node((yyvsp[-3].expr_type),(yyvsp[-2].statements_type)), (yyvsp[-1].conditionals_type), (yyvsp[0].statements_type)); }
+    { (yyval.statement_type) = new if_elifs_else_node(new condition_node((yyvsp[-3].expr_type),(yyvsp[-2].statements_type)), (yyvsp[-1].conditionals_type), (yyvsp[0].statements_type)); }
 #line 1513 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
 #line 194 "quack.y" /* yacc.c:1646  */
-    { cout << "statement while" << endl; (yyval.statement_type) = new while_node(new while_condition_node((yyvsp[-1].expr_type), (yyvsp[0].statements_type))); }
+    { (yyval.statement_type) = new while_node(new while_condition_node((yyvsp[-1].expr_type), (yyvsp[0].statements_type))); }
 #line 1519 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
 #line 198 "quack.y" /* yacc.c:1646  */
-    { cout << "statement assignment" << endl; (yyval.statement_type) = new assignment_node((yyvsp[-4].expr_type), (yyvsp[-3].opt_ident_type), (yyvsp[-1].expr_type)); }
+    { (yyval.statement_type) = new assignment_node((yyvsp[-4].expr_type), (yyvsp[-3].opt_ident_type), (yyvsp[-1].expr_type)); }
 #line 1525 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
 #line 202 "quack.y" /* yacc.c:1646  */
-    { cout << "statement r_expr" << endl; (yyval.statement_type) = new bare_expr_node((yyvsp[-1].expr_type)); }
+    { (yyval.statement_type) = new bare_expr_node((yyvsp[-1].expr_type)); }
 #line 1531 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
 #line 206 "quack.y" /* yacc.c:1646  */
-    { cout << "statement return r_expr" << endl; (yyval.statement_type) = new return_node((yyvsp[-1].expr_type)); }
+    { (yyval.statement_type) = new return_node((yyvsp[-1].expr_type)); }
 #line 1537 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
 #line 210 "quack.y" /* yacc.c:1646  */
-    { cout << "statement return empty" << endl; (yyval.statement_type) = new return_node(); }
+    { (yyval.statement_type) = new return_node(); }
 #line 1543 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
 #line 214 "quack.y" /* yacc.c:1646  */
-    { cout << "got methods" << endl; (yyval.methods_type) = (yyvsp[-1].methods_type); (yyvsp[-1].methods_type)->push_back((yyvsp[0].method_type)); }
+    { (yyval.methods_type) = (yyvsp[-1].methods_type); (yyvsp[-1].methods_type)->push_back((yyvsp[0].method_type)); }
 #line 1549 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
 #line 215 "quack.y" /* yacc.c:1646  */
-    { cout << "done with methods" << endl; (yyval.methods_type) = new list<method_node *>(); }
+    { (yyval.methods_type) = new list<method_node *>(); }
 #line 1555 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
 #line 219 "quack.y" /* yacc.c:1646  */
-    {cout << "got method:: " << (yyvsp[-5].sval) << endl; (yyval.method_type) = new method_node((yyvsp[-5].sval), (yyvsp[-1].opt_ident_type), (yyvsp[-3].formal_args_type), (yyvsp[0].statements_type)); }
+    { (yyval.method_type) = new method_node((yyvsp[-5].sval), (yyvsp[-1].opt_ident_type), (yyvsp[-3].formal_args_type), (yyvsp[0].statements_type)); }
 #line 1561 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
 #line 223 "quack.y" /* yacc.c:1646  */
-    {cout << "got optional identifier:: " << (yyvsp[0].sval) << endl; (yyval.opt_ident_type) = (yyvsp[0].sval); }
+    { (yyval.opt_ident_type) = (yyvsp[0].sval); }
 #line 1567 "quack.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1574,31 +1574,31 @@ yyreduce:
 
   case 32:
 #line 228 "quack.y" /* yacc.c:1646  */
-    {cout << "got statement block" << endl; (yyval.statements_type) = (yyvsp[-1].statements_type); }
+    { (yyval.statements_type) = (yyvsp[-1].statements_type); }
 #line 1579 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
 #line 232 "quack.y" /* yacc.c:1646  */
-    { cout << "got an elif rule" << endl; (yyval.conditionals_type) = (yyvsp[-1].conditionals_type); (yyvsp[-1].conditionals_type)->push_back((yyvsp[0].conditional_type)); }
+    { (yyval.conditionals_type) = (yyvsp[-1].conditionals_type); (yyvsp[-1].conditionals_type)->push_back((yyvsp[0].conditional_type)); }
 #line 1585 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
 #line 233 "quack.y" /* yacc.c:1646  */
-    { cout << "done with elifs" << endl; (yyval.conditionals_type) = new list<condition_node *>(); }
+    { (yyval.conditionals_type) = new list<condition_node *>(); }
 #line 1591 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
 #line 237 "quack.y" /* yacc.c:1646  */
-    { cout << "got an elif" << endl; (yyval.conditional_type) = new condition_node((yyvsp[-1].expr_type), (yyvsp[0].statements_type)); }
+    { (yyval.conditional_type) = new condition_node((yyvsp[-1].expr_type), (yyvsp[0].statements_type)); }
 #line 1597 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
 #line 241 "quack.y" /* yacc.c:1646  */
-    { cout << "got an else rule" << endl; (yyval.statements_type) = (yyvsp[0].statements_type); }
+    { (yyval.statements_type) = (yyvsp[0].statements_type); }
 #line 1603 "quack.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1610,139 +1610,139 @@ yyreduce:
 
   case 38:
 #line 246 "quack.y" /* yacc.c:1646  */
-    { cout << "got an else" << endl; (yyval.statements_type) = (yyvsp[0].statements_type); }
+    { (yyval.statements_type) = (yyvsp[0].statements_type); }
 #line 1615 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
 #line 250 "quack.y" /* yacc.c:1646  */
-    { cout << "got left expression ident:: " << (yyvsp[0].sval) << endl; (yyval.expr_type) = new ident_node((yyvsp[0].sval)); }
+    { (yyval.expr_type) = new ident_node((yyvsp[0].sval)); }
 #line 1621 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
 #line 254 "quack.y" /* yacc.c:1646  */
-    { cout << "got left expression r_expr.ident:: " << (yyvsp[0].sval) << endl; (yyval.expr_type) = new access_node((yyvsp[-2].expr_type), (yyvsp[0].sval)); }
+    { (yyval.expr_type) = new access_node((yyvsp[-2].expr_type), (yyvsp[0].sval)); }
 #line 1627 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
 #line 258 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression string lit:: " << (yyvsp[0].sval) << endl; (yyval.expr_type) = new strlit_node((yyvsp[0].sval)); }
+    { (yyval.expr_type) = new strlit_node((yyvsp[0].sval)); }
 #line 1633 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
 #line 262 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression int lit:: " << (yyvsp[0].ival) << endl; (yyval.expr_type) = new intlit_node((yyvsp[0].ival)); }
+    { (yyval.expr_type) = new intlit_node((yyvsp[0].ival)); }
 #line 1639 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
 #line 266 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression l_expr" << endl; (yyval.expr_type) = (yyvsp[0].expr_type); }
+    { (yyval.expr_type) = (yyvsp[0].expr_type); }
 #line 1645 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
 #line 270 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr + r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "PLUS", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "PLUS", (yyvsp[0].expr_type)); }
 #line 1651 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
 #line 274 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr - r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "MINUS", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "MINUS", (yyvsp[0].expr_type)); }
 #line 1657 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
 #line 278 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression neg r_expr" << endl; (yyval.expr_type) = new method_call_node(new intlit_node(0), "MINUS", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node(new intlit_node(0), "MINUS", (yyvsp[0].expr_type)); }
 #line 1663 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
 #line 282 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr * r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "TIMES", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "TIMES", (yyvsp[0].expr_type)); }
 #line 1669 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
 #line 286 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr / r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "DIVIDE", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "DIVIDE", (yyvsp[0].expr_type)); }
 #line 1675 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
 #line 290 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression (r_expr)" << endl; (yyval.expr_type) = (yyvsp[-1].expr_type); }
+    { (yyval.expr_type) = (yyvsp[-1].expr_type); }
 #line 1681 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
 #line 294 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr == r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "EQUALS", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "EQUALS", (yyvsp[0].expr_type)); }
 #line 1687 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
 #line 298 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr <= r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "ATMOST", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "ATMOST", (yyvsp[0].expr_type)); }
 #line 1693 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
 #line 302 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr < r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "LESS", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "LESS", (yyvsp[0].expr_type)); }
 #line 1699 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
 #line 306 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr >= r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "ATLEAST", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "ATLEAST", (yyvsp[0].expr_type)); }
 #line 1705 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
 #line 310 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr > r_expr" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "MORE", (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "MORE", (yyvsp[0].expr_type)); }
 #line 1711 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
 #line 314 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr and r_expr" << endl; (yyval.expr_type) = new and_node((yyvsp[-2].expr_type), (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new and_node((yyvsp[-2].expr_type), (yyvsp[0].expr_type)); }
 #line 1717 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
 #line 318 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression r_expr or r_expr" << endl; (yyval.expr_type) = new or_node((yyvsp[-2].expr_type), (yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new or_node((yyvsp[-2].expr_type), (yyvsp[0].expr_type)); }
 #line 1723 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
 #line 322 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression not r_expr" << endl; (yyval.expr_type) = new not_node((yyvsp[0].expr_type)); }
+    { (yyval.expr_type) = new not_node((yyvsp[0].expr_type)); }
 #line 1729 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
 #line 326 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression method call" << endl; (yyval.expr_type) = new method_call_node((yyvsp[-5].expr_type), (yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); }
+    { (yyval.expr_type) = new method_call_node((yyvsp[-5].expr_type), (yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); }
 #line 1735 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
 #line 330 "quack.y" /* yacc.c:1646  */
-    { cout << "right expression class instance" << endl; (yyval.expr_type) = new class_instantiation_node((yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); }
+    { (yyval.expr_type) = new class_instantiation_node((yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); }
 #line 1741 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
 #line 334 "quack.y" /* yacc.c:1646  */
-    { cout << "got actual args" << endl; (yyval.actual_args_type) = (yyvsp[0].actual_args_type); }
+    { (yyval.actual_args_type) = (yyvsp[0].actual_args_type); }
 #line 1747 "quack.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1754,25 +1754,25 @@ yyreduce:
 
   case 62:
 #line 339 "quack.y" /* yacc.c:1646  */
-    { cout << "got actual arg" << endl; (yyvsp[0].actual_args_type)->push_front( new actual_arg_node((yyvsp[-1].expr_type)) ); (yyval.actual_args_type) = (yyvsp[0].actual_args_type); }
+    { (yyvsp[0].actual_args_type)->push_front( new actual_arg_node((yyvsp[-1].expr_type)) ); (yyval.actual_args_type) = (yyvsp[0].actual_args_type); }
 #line 1759 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
 #line 343 "quack.y" /* yacc.c:1646  */
-    { cout << "got actual arg repetitions" << endl; (yyval.actual_args_type) = (yyvsp[-1].actual_args_type); (yyvsp[-1].actual_args_type)->push_back((yyvsp[0].actual_arg_type)); }
+    { (yyval.actual_args_type) = (yyvsp[-1].actual_args_type); (yyvsp[-1].actual_args_type)->push_back((yyvsp[0].actual_arg_type)); }
 #line 1765 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
 #line 344 "quack.y" /* yacc.c:1646  */
-    { cout << "done with actual arg repetitions" << endl; (yyval.actual_args_type) = new list<actual_arg_node *>(); }
+    { (yyval.actual_args_type) = new list<actual_arg_node *>(); }
 #line 1771 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
 #line 348 "quack.y" /* yacc.c:1646  */
-    { cout << "got actual arg repetition" << endl; (yyval.actual_arg_type) = new actual_arg_node((yyvsp[0].expr_type)); }
+    { (yyval.actual_arg_type) = new actual_arg_node((yyvsp[0].expr_type)); }
 #line 1777 "quack.tab.c" /* yacc.c:1646  */
     break;
 
