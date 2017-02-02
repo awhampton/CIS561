@@ -394,9 +394,9 @@ int main(int argc, char **argv) {
 		cout << "Finished parse with no errors" << endl;
 
 		// crawl the AST
-		cout << endl;
-		crawl_ast(root);
-		cout << endl;
+		// cout << endl;
+		// crawl_ast(root);
+		// cout << endl;
 	}
 
 }
