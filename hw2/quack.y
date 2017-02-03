@@ -398,5 +398,9 @@ int main(int argc, char **argv) {
 		// crawl_ast(root);
 		// cout << endl;
 	}
+	// else print the number of errors on stdout
+	else{
+		cout << "Found " << num_errors << " errors!" << endl;
+	}
 
 }
