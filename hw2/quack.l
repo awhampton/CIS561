@@ -20,13 +20,21 @@ int num_errors = 0;
 int ERROR_LIMIT = 10;
 void yyerror (const char *msg) {
     num_errors++;
-    fprintf(stderr, "\n");
-    fprintf(stderr, "PARSE ERROR %d\n", num_errors);
-    fprintf(stderr, "File: %s\n", INFILE_NAME);
-    fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
-    if(num_errors >= ERROR_LIMIT){
-        fprintf(stderr, "Too many errors! Stopping ...\n");
-        exit(1);
+    if(num_errors > ERROR_LIMIT){
+        /* do nothing */
+    }
+    else if(num_errors == ERROR_LIMIT){
+        fprintf(stderr, "\n");
+        fprintf(stderr, "PARSE ERROR %d\n", num_errors);
+        fprintf(stderr, "File: %s\n", INFILE_NAME);
+        fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
+        fprintf(stderr, "Too many errors! Suppressing message ...\n");
+    }
+    else{
+        fprintf(stderr, "\n");
+        fprintf(stderr, "PARSE ERROR %d\n", num_errors);
+        fprintf(stderr, "File: %s\n", INFILE_NAME);
+        fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
     }
 }
 %}
