@@ -1,0 +1,30 @@
+class Negatron() extends Particle {
+  /* An experiment in parsing various expressions involving
+   * negation and subtraction
+   */
+   initial = -42;    /* Because 42 didn't turn out to be the actual answer */
+
+   def subr(i: int) {
+       i = -1;
+       initial = i - initial;
+       i = -i - initial -3 * i;
+   }
+   /* This is all complete nonsense ... I just want to try
+    * parsing it.
+    */
+
+ }
+
+class Particle() extends SmallThing{
+
+}
+
+class SmallThing(){
+
+}
+
+class Vapor() extends Nothing{
+
+}
+
+y = Negatron();
