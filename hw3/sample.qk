@@ -30,3 +30,5 @@ class Vapor() extends Nothing{
 }
 
 y = Vapor();
+n = Negatron();
+z = String();

@@ -229,7 +229,7 @@ methods:
 	;
 
 method:
-	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); free($2); }
+	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); free($2); }  /* should also free opt_ident */
 	;
 
 opt_ident:
@@ -479,8 +479,8 @@ void crawl_ast(pgm_node *r){
 
 // check for class constructor call
 void recursive_crawl_constructors(node *n){
-	if( n->type_of_node == "expr" && n->type_of_expression == "class_instantiation"){
-		CONSTRUCTOR_CALLS.insert(n->class_name);
+	if( n->type_of_node == "expr" && ((expr_node *) n)->type_of_expression == "class_instantiation"){
+		CONSTRUCTOR_CALLS.insert(((class_instantiation_node *) n)->class_name);
 	}
 
 	list<node *> children = n->get_children();
@@ -536,14 +536,14 @@ int main(int argc, char **argv) {
 		map<string, list<string> > class_graph = build_class_graph(root);
 
 		// crawl the class graph
-		cout << endl;
-		crawl_class_graph(class_graph, "Obj");
-		cout << endl;
+		// cout << endl;
+		// crawl_class_graph(class_graph, "Obj");
+		// cout << endl;
 
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(class_graph, "Obj");
 		if(class_res == 0){
-			cerr << "class structure good!" << endl;
+			cerr << "Class structure good" << endl;
 		}
 		else if(class_res == 1){
 			cerr << "cycle detected in class structure!" << endl;
@@ -583,6 +583,9 @@ int main(int argc, char **argv) {
 			for(set<string>::iterator itr = missing.begin(); itr != missing.end(); ++itr){
 				cerr << "  " << *itr << endl;
 			}
+		}
+		else{
+			cerr << "Constructor calls good" << endl;
 		}
 
 		// crawl the AST (for debugging)

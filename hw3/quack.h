@@ -10,9 +10,9 @@ using namespace std;
 class node {
 public:
 	string type_of_node;
-	string type_of_expression;
-	string type_of_statement;
-	string class_name;
+	// string type_of_expression;
+	// string type_of_statement;
+	// string class_name;
 
 	virtual ~node() {};
 	virtual void speak() = 0;
@@ -22,6 +22,8 @@ public:
 // expression node
 class expr_node : public node {
 public:
+
+	string type_of_expression;
 
 	void speak(void){
 		cout << "expression node: " << type_of_expression << endl;
@@ -34,6 +36,8 @@ public:
 // statements node
 class statement_node : public node {
 public:
+
+	string type_of_statement;
 
 	void speak(void){
 		cout << "statement node: " << type_of_statement << endl;
@@ -413,7 +417,7 @@ public:
 // class instantiation expression node
 class class_instantiation_node : public expr_node {
 public:
-	// string                    class_name; /* moved up to node */
+	string                    class_name;
 	list<actual_arg_node *>  *args;
 
 	class_instantiation_node(string s, list<actual_arg_node *> *a){
