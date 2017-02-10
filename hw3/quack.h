@@ -14,6 +14,7 @@ public:
 	string type_of_statement;
 	string class_name;
 
+	virtual ~node() {};
 	virtual void speak() = 0;
 	virtual list<node *> get_children() = 0;
 };
@@ -26,6 +27,7 @@ public:
 		cout << "expression node: " << type_of_expression << endl;
 	}
 
+	virtual ~expr_node() {};
 	virtual list<node *> get_children() = 0;
 };
 
@@ -37,6 +39,7 @@ public:
 		cout << "statement node: " << type_of_statement << endl;
 	}
 
+	virtual ~statement_node() {};
 	virtual list<node *> get_children() = 0;
 };
 
@@ -49,6 +52,10 @@ public:
 		type_of_node = "actual_arg";
 		expr = e;
     }
+
+	virtual ~actual_arg_node(){
+		delete expr;
+	}
 
 	void speak(void){
 		cout << "actual arg node" << endl;
@@ -73,6 +80,8 @@ public:
 		value = v;
     }
 
+	virtual ~formal_arg_node(){}
+
 	void speak(void){
 		cout << "formal arg node" << endl;
 	}
@@ -94,6 +103,14 @@ public:
 		expr = e;
 		stmts = s;
     }
+
+	virtual ~condition_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete (*itr);
+		}
+		delete stmts;
+	}
 
 	void speak(void){
 		cout << "condition node" << endl;
@@ -124,6 +141,15 @@ public:
 		type_of_statement = "if";
     }
 
+	virtual ~if_elifs_else_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete (*itr);
+		}
+		delete elif_branches;
+		delete else_stmts;
+	}
+
 	list<node *> get_children(){
 		list<node *> res;
 		res.push_back(if_branch);
@@ -146,6 +172,8 @@ public:
 		type_of_node = "while_condition";
     }
 
+	virtual ~while_condition_node(){}
+
 	void speak(void){
 		cout << "while condition node" << endl;
 	}
@@ -161,6 +189,10 @@ public:
 		wc = w;
 		type_of_node = "statement";
 		type_of_statement = "while";
+	}
+
+	virtual ~while_node(){
+		delete wc;
 	}
 
 	list<node *> get_children(){
@@ -185,6 +217,11 @@ public:
 		type_of_statement = "assignment";
 	}
 
+	virtual ~assignment_node(){
+		delete left;
+		delete right;
+	}
+
 	list<node *> get_children(){
 		list<node *> res;
 		res.push_back(left);
@@ -202,6 +239,10 @@ public:
 		expr = e;
 		type_of_node = "statement";
 		type_of_statement = "bare_expression";
+	}
+
+	virtual ~bare_expr_node(){
+		delete expr;
 	}
 
 	list<node *> get_children(){
@@ -231,6 +272,12 @@ public:
 		type_of_statement = "return";
 	}
 
+	virtual ~return_node(){
+		if(has_return_expr){
+			delete expr;
+		}
+	}
+
 	list<node *> get_children(){
 		list<node *> res;
 		if(has_return_expr){
@@ -251,6 +298,8 @@ public:
 		type_of_expression = "ident";
 	}
 
+	virtual ~ident_node(){}
+
 	list<node *> get_children(){
 		list<node *> res;
 		return res;
@@ -268,6 +317,10 @@ public:
 		ident_value = s;
 		type_of_node = "expr";
 		type_of_expression = "access";
+	}
+
+	virtual ~access_node(){
+		delete expr;
 	}
 
 	list<node *> get_children(){
@@ -288,6 +341,8 @@ public:
 		type_of_expression = "string_lit";
 	}
 
+	virtual ~strlit_node(){}
+
 	list<node *> get_children(){
 		list<node *> res;
 		return res;
@@ -304,6 +359,8 @@ public:
 		type_of_node = "expr";
 		type_of_expression = "int_lit";
 	}
+
+	virtual ~intlit_node(){}
 
 	list<node *> get_children(){
 		list<node *> res;
@@ -335,6 +392,14 @@ public:
 		type_of_expression = "method_call";
 	}
 
+	virtual ~method_call_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete (*itr);
+		}
+		delete args;
+	}
+
 	list<node *> get_children(){
 		list<node *> res;
 		res.push_back(expr);
@@ -356,6 +421,14 @@ public:
 		args = a;
 		type_of_node = "expr";
 		type_of_expression = "class_instantiation";
+	}
+
+	virtual ~class_instantiation_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete (*itr);
+		}
+		delete args;
 	}
 
 	list<node *> get_children(){
@@ -380,6 +453,11 @@ public:
 		type_of_expression = "and";
 	}
 
+	virtual ~and_node(){
+		delete left;
+		delete right;
+	}
+
 	list<node *> get_children(){
 		list<node *> res;
 		res.push_back(left);
@@ -401,6 +479,11 @@ public:
 		type_of_expression = "or";
 	}
 
+	virtual ~or_node(){
+		delete left;
+		delete right;
+	}
+
 	list<node *> get_children(){
 		list<node *> res;
 		res.push_back(left);
@@ -418,6 +501,10 @@ public:
 		expr = e;
 		type_of_node = "expr";
 		type_of_expression = "not";
+	}
+
+	virtual ~not_node(){
+		delete expr;
 	}
 
 	list<node *> get_children(){
@@ -442,6 +529,15 @@ public:
 		args = a;
 		stmts = s;
     }
+
+	virtual ~method_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete *itr;
+		}
+		delete args;
+		delete stmts;
+	}
 
 	void speak(void){
 		cout << "method node" << endl;
@@ -470,6 +566,15 @@ public:
 		stmts = s;
 		mthds = m;
     }
+
+	virtual ~class_body_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete *itr;
+		}
+		delete stmts;
+		delete mthds;
+	}
 
 	void speak(void){
 		cout << "class body node" << endl;
@@ -508,6 +613,14 @@ public:
 		args = a;
     }
 
+	virtual ~class_signature_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete *itr;
+		}
+		delete args;
+	}
+
 	void speak(void){
 		cout << "class signature node" << endl;
 	}
@@ -533,6 +646,13 @@ public:
 		body = cb;
     }
 
+	virtual ~class_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete *itr;
+		}
+	}
+
 	void speak(void){
 		cout << "class node" << endl;
 	}
@@ -555,6 +675,15 @@ public:
         classes = c;
 		stmts = s;
     }
+
+	virtual ~pgm_node(){
+		list<node *> children = get_children();
+		for(list<node *>::iterator itr = children.begin(); itr != children.end(); ++itr){
+			delete *itr;
+		}
+		delete classes;
+		delete stmts;
+	}
 
 	void speak(void){
 		cout << "program node" << endl;

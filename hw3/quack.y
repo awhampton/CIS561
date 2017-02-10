@@ -1,5 +1,5 @@
 /*
-*  CIS 561: HW 2
+*  CIS 561: HW 3
 *  Andrew Hampton
 *
 *  I used the following tutorial as a starting point: http://aquamentus.com/flex_bison.html
@@ -13,6 +13,7 @@
 %{
 #include <cstdio>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <iostream>
 #include <list>
@@ -24,7 +25,7 @@
 using namespace std;
 
 // the root of the abstract syntax tree
-pgm_node *root;
+pgm_node *root = NULL;
 
 // helpful globals for class structure errors
 string CLASS_CYCLE_SUPERCLASS;
@@ -162,11 +163,11 @@ class_signature:
 	;
 
 class_sig_extends:
-    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { $$ = new class_signature_node($2, $7, $4); }
+    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { $$ = new class_signature_node($2, $7, $4); free($2); free($7); }
 	;
 
 class_sig_no_extends:
-    CLASS IDENT LPAREN formal_args RPAREN { $$ = new class_signature_node($2, $4); }
+    CLASS IDENT LPAREN formal_args RPAREN { $$ = new class_signature_node($2, $4); free($2); }
 	;
 
 formal_args:
@@ -175,7 +176,7 @@ formal_args:
 	;
 
 formal_arg:
-	IDENT COLON IDENT formal_arg_repetitions { $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; }
+	IDENT COLON IDENT formal_arg_repetitions { $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; free($1); }
 	;
 
 formal_arg_repetitions:
@@ -185,7 +186,7 @@ formal_arg_repetitions:
 	;
 
 formal_arg_repetition:
-	COMMA IDENT COLON IDENT { $$ = new formal_arg_node($2, $4); }
+	COMMA IDENT COLON IDENT { $$ = new formal_arg_node($2, $4); free($2); free($4); }
 	;
 
 class_body:
@@ -228,12 +229,12 @@ methods:
 	;
 
 method:
-	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); }
+	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); free($2); }
 	;
 
 opt_ident:
-	COLON IDENT { $$ = $2; }
-	| /* empty */ { $$ = (char *) "Obj"; }
+	COLON IDENT { $$ = $2; }  /* note: small memory leak here that I'm struggling to fix! */
+	| /* empty */ { char nothing[8] = "Nothing"; $$ = nothing; }  /* same as above */
 	;
 
 statement_block:
@@ -259,15 +260,15 @@ else_rule:
 	;
 
 l_expr:
-	IDENT { $$ = new ident_node($1); }
+	IDENT { $$ = new ident_node($1); free($1); }
 	;
 
 l_expr:
-	r_expr PERIOD IDENT { $$ = new access_node($1, $3); }
+	r_expr PERIOD IDENT { $$ = new access_node($1, $3); free($3); }
 	;
 
 r_expr:
-	STRING_LIT { $$ = new strlit_node($1); }
+	STRING_LIT { $$ = new strlit_node($1); free($1); }
 	;
 
 r_expr:
@@ -335,11 +336,11 @@ r_expr:
 	;
 
 r_expr:
-	r_expr PERIOD IDENT LPAREN actual_args RPAREN { $$ = new method_call_node($1, $3, $5); }
+	r_expr PERIOD IDENT LPAREN actual_args RPAREN { $$ = new method_call_node($1, $3, $5); free($3); }
 	;
 
 r_expr:
-	IDENT LPAREN actual_args RPAREN { $$ = new class_instantiation_node($1, $3); }
+	IDENT LPAREN actual_args RPAREN { $$ = new class_instantiation_node($1, $3); free($1); }
 	;
 
 actual_args:
@@ -531,18 +532,13 @@ int main(int argc, char **argv) {
 	if(num_errors == 0){
 		cout << "Finished parse with no errors" << endl;
 
-		// crawl the AST
-		// cout << endl;
-		// crawl_ast(root);
-		// cout << endl;
-
 		// make the class hierarchy graph
 		map<string, list<string> > class_graph = build_class_graph(root);
 
 		// crawl the class graph
-		// cout << endl;
-		// crawl_class_graph(class_graph, "Obj");
-		// cout << endl;
+		cout << endl;
+		crawl_class_graph(class_graph, "Obj");
+		cout << endl;
 
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(class_graph, "Obj");
@@ -589,10 +585,18 @@ int main(int argc, char **argv) {
 			}
 		}
 
+		// crawl the AST (for debugging)
+		// cout << endl;
+		// crawl_ast(root);
+		// cout << endl;
+
 	}
 	// else print the number of errors on stdout
 	else{
 		cout << "Found " << num_errors << " errors!" << endl;
 	}
 
+	if(root != NULL){
+		delete root;
+	}
 }

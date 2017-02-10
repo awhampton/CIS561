@@ -4,11 +4,13 @@ class Negatron() extends Particle {
    */
    initial = -42;    /* Because 42 didn't turn out to be the actual answer */
 
-   def subr(i: int) {
+
+   def subr(i: int) : abc{
        i = -1;
        initial = i - initial;
        i = -i - initial -3 * i;
    }
+
    /* This is all complete nonsense ... I just want to try
     * parsing it.
     */
@@ -27,4 +29,4 @@ class Vapor() extends Nothing{
 
 }
 
-y = Negatron();
+y = Vapor();

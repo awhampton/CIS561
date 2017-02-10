@@ -66,6 +66,7 @@
 
 #include <cstdio>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <iostream>
 #include <list>
@@ -77,7 +78,7 @@
 using namespace std;
 
 // the root of the abstract syntax tree
-pgm_node *root;
+pgm_node *root = NULL;
 
 // helpful globals for class structure errors
 string CLASS_CYCLE_SUPERCLASS;
@@ -97,7 +98,7 @@ extern int num_errors;
 extern void yyerror(const char *s);
 char* INFILE_NAME;
 
-#line 101 "quack.tab.c" /* yacc.c:339  */
+#line 102 "quack.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -173,7 +174,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 50 "quack.y" /* yacc.c:355  */
+#line 51 "quack.y" /* yacc.c:355  */
 
 	int   ival;
 	char *sval;
@@ -196,7 +197,7 @@ union YYSTYPE
 	list<class_node *>       *classes_type;
 	pgm_node                 *prog_type;
 
-#line 200 "quack.tab.c" /* yacc.c:355  */
+#line 201 "quack.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -213,7 +214,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 217 "quack.tab.c" /* yacc.c:358  */
+#line 218 "quack.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -514,13 +515,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   147,   147,   151,   152,   156,   160,   161,   165,   169,
-     173,   174,   178,   182,   183,   184,   188,   192,   196,   197,
-     198,   202,   206,   210,   214,   218,   222,   226,   227,   231,
-     235,   236,   240,   244,   245,   249,   253,   254,   258,   262,
-     266,   270,   274,   278,   282,   286,   290,   294,   298,   302,
-     306,   310,   314,   318,   322,   326,   330,   334,   338,   342,
-     346,   347,   351,   355,   356,   360
+       0,   148,   148,   152,   153,   157,   161,   162,   166,   170,
+     174,   175,   179,   183,   184,   185,   189,   193,   197,   198,
+     199,   203,   207,   211,   215,   219,   223,   227,   228,   232,
+     236,   237,   241,   245,   246,   250,   254,   255,   259,   263,
+     267,   271,   275,   279,   283,   287,   291,   295,   299,   303,
+     307,   311,   315,   319,   323,   327,   331,   335,   339,   343,
+     347,   348,   352,   356,   357,   361
 };
 #endif
 
@@ -1405,391 +1406,391 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 147 "quack.y" /* yacc.c:1646  */
+#line 148 "quack.y" /* yacc.c:1646  */
     { (yyval.prog_type) = new pgm_node((yyvsp[-1].classes_type), (yyvsp[0].statements_type)); root = (yyval.prog_type); }
-#line 1411 "quack.tab.c" /* yacc.c:1646  */
+#line 1412 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 151 "quack.y" /* yacc.c:1646  */
+#line 152 "quack.y" /* yacc.c:1646  */
     { (yyval.classes_type) = (yyvsp[-1].classes_type); (yyvsp[-1].classes_type)->push_back((yyvsp[0].class_type)); }
-#line 1417 "quack.tab.c" /* yacc.c:1646  */
+#line 1418 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 152 "quack.y" /* yacc.c:1646  */
+#line 153 "quack.y" /* yacc.c:1646  */
     { (yyval.classes_type) = new list<class_node *>(); }
-#line 1423 "quack.tab.c" /* yacc.c:1646  */
+#line 1424 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 156 "quack.y" /* yacc.c:1646  */
+#line 157 "quack.y" /* yacc.c:1646  */
     { (yyval.class_type) = new class_node((yyvsp[-1].class_signature_type), (yyvsp[0].class_body_type)); }
-#line 1429 "quack.tab.c" /* yacc.c:1646  */
+#line 1430 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 160 "quack.y" /* yacc.c:1646  */
+#line 161 "quack.y" /* yacc.c:1646  */
     { (yyval.class_signature_type) = (yyvsp[0].class_signature_type); }
-#line 1435 "quack.tab.c" /* yacc.c:1646  */
+#line 1436 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 161 "quack.y" /* yacc.c:1646  */
+#line 162 "quack.y" /* yacc.c:1646  */
     { (yyval.class_signature_type) = (yyvsp[0].class_signature_type); }
-#line 1441 "quack.tab.c" /* yacc.c:1646  */
+#line 1442 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 165 "quack.y" /* yacc.c:1646  */
-    { (yyval.class_signature_type) = new class_signature_node((yyvsp[-5].sval), (yyvsp[0].sval), (yyvsp[-3].formal_args_type)); }
-#line 1447 "quack.tab.c" /* yacc.c:1646  */
+#line 166 "quack.y" /* yacc.c:1646  */
+    { (yyval.class_signature_type) = new class_signature_node((yyvsp[-5].sval), (yyvsp[0].sval), (yyvsp[-3].formal_args_type)); free((yyvsp[-5].sval)); free((yyvsp[0].sval)); }
+#line 1448 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 169 "quack.y" /* yacc.c:1646  */
-    { (yyval.class_signature_type) = new class_signature_node((yyvsp[-3].sval), (yyvsp[-1].formal_args_type)); }
-#line 1453 "quack.tab.c" /* yacc.c:1646  */
+#line 170 "quack.y" /* yacc.c:1646  */
+    { (yyval.class_signature_type) = new class_signature_node((yyvsp[-3].sval), (yyvsp[-1].formal_args_type)); free((yyvsp[-3].sval)); }
+#line 1454 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 173 "quack.y" /* yacc.c:1646  */
+#line 174 "quack.y" /* yacc.c:1646  */
     { (yyval.formal_args_type) = (yyvsp[0].formal_args_type); }
-#line 1459 "quack.tab.c" /* yacc.c:1646  */
+#line 1460 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 174 "quack.y" /* yacc.c:1646  */
+#line 175 "quack.y" /* yacc.c:1646  */
     { (yyval.formal_args_type) = new list<formal_arg_node *>(); }
-#line 1465 "quack.tab.c" /* yacc.c:1646  */
+#line 1466 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 178 "quack.y" /* yacc.c:1646  */
-    { (yyvsp[0].formal_args_type)->push_front( new formal_arg_node((yyvsp[-3].sval), (yyvsp[-1].sval)) ); (yyval.formal_args_type) = (yyvsp[0].formal_args_type); }
-#line 1471 "quack.tab.c" /* yacc.c:1646  */
+#line 179 "quack.y" /* yacc.c:1646  */
+    { (yyvsp[0].formal_args_type)->push_front( new formal_arg_node((yyvsp[-3].sval), (yyvsp[-1].sval)) ); (yyval.formal_args_type) = (yyvsp[0].formal_args_type); free((yyvsp[-3].sval)); }
+#line 1472 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 182 "quack.y" /* yacc.c:1646  */
+#line 183 "quack.y" /* yacc.c:1646  */
     { (yyval.formal_args_type) = (yyvsp[-1].formal_args_type); (yyvsp[-1].formal_args_type)->push_back((yyvsp[0].formal_arg_type)); }
-#line 1477 "quack.tab.c" /* yacc.c:1646  */
+#line 1478 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 183 "quack.y" /* yacc.c:1646  */
+#line 184 "quack.y" /* yacc.c:1646  */
     { }
-#line 1483 "quack.tab.c" /* yacc.c:1646  */
+#line 1484 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 184 "quack.y" /* yacc.c:1646  */
+#line 185 "quack.y" /* yacc.c:1646  */
     { (yyval.formal_args_type) = new list<formal_arg_node *>(); }
-#line 1489 "quack.tab.c" /* yacc.c:1646  */
+#line 1490 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 188 "quack.y" /* yacc.c:1646  */
-    { (yyval.formal_arg_type) = new formal_arg_node((yyvsp[-2].sval), (yyvsp[0].sval)); }
-#line 1495 "quack.tab.c" /* yacc.c:1646  */
+#line 189 "quack.y" /* yacc.c:1646  */
+    { (yyval.formal_arg_type) = new formal_arg_node((yyvsp[-2].sval), (yyvsp[0].sval)); free((yyvsp[-2].sval)); free((yyvsp[0].sval)); }
+#line 1496 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 192 "quack.y" /* yacc.c:1646  */
+#line 193 "quack.y" /* yacc.c:1646  */
     { (yyval.class_body_type) = new class_body_node((yyvsp[-2].statements_type), (yyvsp[-1].methods_type)); }
-#line 1501 "quack.tab.c" /* yacc.c:1646  */
+#line 1502 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 196 "quack.y" /* yacc.c:1646  */
+#line 197 "quack.y" /* yacc.c:1646  */
     { (yyval.statements_type) = (yyvsp[-1].statements_type); (yyvsp[-1].statements_type)->push_back((yyvsp[0].statement_type)); }
-#line 1507 "quack.tab.c" /* yacc.c:1646  */
+#line 1508 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 197 "quack.y" /* yacc.c:1646  */
+#line 198 "quack.y" /* yacc.c:1646  */
     { }
-#line 1513 "quack.tab.c" /* yacc.c:1646  */
+#line 1514 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 198 "quack.y" /* yacc.c:1646  */
+#line 199 "quack.y" /* yacc.c:1646  */
     { (yyval.statements_type) = new list<statement_node *>(); }
-#line 1519 "quack.tab.c" /* yacc.c:1646  */
+#line 1520 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 202 "quack.y" /* yacc.c:1646  */
+#line 203 "quack.y" /* yacc.c:1646  */
     { (yyval.statement_type) = new if_elifs_else_node(new condition_node((yyvsp[-3].expr_type),(yyvsp[-2].statements_type)), (yyvsp[-1].conditionals_type), (yyvsp[0].statements_type)); }
-#line 1525 "quack.tab.c" /* yacc.c:1646  */
+#line 1526 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 206 "quack.y" /* yacc.c:1646  */
+#line 207 "quack.y" /* yacc.c:1646  */
     { (yyval.statement_type) = new while_node(new while_condition_node((yyvsp[-1].expr_type), (yyvsp[0].statements_type))); }
-#line 1531 "quack.tab.c" /* yacc.c:1646  */
+#line 1532 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 210 "quack.y" /* yacc.c:1646  */
+#line 211 "quack.y" /* yacc.c:1646  */
     { (yyval.statement_type) = new assignment_node((yyvsp[-4].expr_type), (yyvsp[-3].opt_ident_type), (yyvsp[-1].expr_type)); }
-#line 1537 "quack.tab.c" /* yacc.c:1646  */
+#line 1538 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 214 "quack.y" /* yacc.c:1646  */
+#line 215 "quack.y" /* yacc.c:1646  */
     { (yyval.statement_type) = new bare_expr_node((yyvsp[-1].expr_type)); }
-#line 1543 "quack.tab.c" /* yacc.c:1646  */
+#line 1544 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 218 "quack.y" /* yacc.c:1646  */
+#line 219 "quack.y" /* yacc.c:1646  */
     { (yyval.statement_type) = new return_node((yyvsp[-1].expr_type)); }
-#line 1549 "quack.tab.c" /* yacc.c:1646  */
+#line 1550 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 222 "quack.y" /* yacc.c:1646  */
+#line 223 "quack.y" /* yacc.c:1646  */
     { (yyval.statement_type) = new return_node(); }
-#line 1555 "quack.tab.c" /* yacc.c:1646  */
+#line 1556 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 226 "quack.y" /* yacc.c:1646  */
+#line 227 "quack.y" /* yacc.c:1646  */
     { (yyval.methods_type) = (yyvsp[-1].methods_type); (yyvsp[-1].methods_type)->push_back((yyvsp[0].method_type)); }
-#line 1561 "quack.tab.c" /* yacc.c:1646  */
+#line 1562 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 227 "quack.y" /* yacc.c:1646  */
+#line 228 "quack.y" /* yacc.c:1646  */
     { (yyval.methods_type) = new list<method_node *>(); }
-#line 1567 "quack.tab.c" /* yacc.c:1646  */
+#line 1568 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 231 "quack.y" /* yacc.c:1646  */
-    { (yyval.method_type) = new method_node((yyvsp[-5].sval), (yyvsp[-1].opt_ident_type), (yyvsp[-3].formal_args_type), (yyvsp[0].statements_type)); }
-#line 1573 "quack.tab.c" /* yacc.c:1646  */
+#line 232 "quack.y" /* yacc.c:1646  */
+    { (yyval.method_type) = new method_node((yyvsp[-5].sval), (yyvsp[-1].opt_ident_type), (yyvsp[-3].formal_args_type), (yyvsp[0].statements_type)); free((yyvsp[-5].sval)); }
+#line 1574 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 235 "quack.y" /* yacc.c:1646  */
+#line 236 "quack.y" /* yacc.c:1646  */
     { (yyval.opt_ident_type) = (yyvsp[0].sval); }
-#line 1579 "quack.tab.c" /* yacc.c:1646  */
+#line 1580 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 236 "quack.y" /* yacc.c:1646  */
-    { (yyval.opt_ident_type) = (char *) "Obj"; }
-#line 1585 "quack.tab.c" /* yacc.c:1646  */
+#line 237 "quack.y" /* yacc.c:1646  */
+    { char nothing[8] = "Nothing"; (yyval.opt_ident_type) = nothing; }
+#line 1586 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 240 "quack.y" /* yacc.c:1646  */
+#line 241 "quack.y" /* yacc.c:1646  */
     { (yyval.statements_type) = (yyvsp[-1].statements_type); }
-#line 1591 "quack.tab.c" /* yacc.c:1646  */
+#line 1592 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 244 "quack.y" /* yacc.c:1646  */
+#line 245 "quack.y" /* yacc.c:1646  */
     { (yyval.conditionals_type) = (yyvsp[-1].conditionals_type); (yyvsp[-1].conditionals_type)->push_back((yyvsp[0].conditional_type)); }
-#line 1597 "quack.tab.c" /* yacc.c:1646  */
+#line 1598 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 245 "quack.y" /* yacc.c:1646  */
+#line 246 "quack.y" /* yacc.c:1646  */
     { (yyval.conditionals_type) = new list<condition_node *>(); }
-#line 1603 "quack.tab.c" /* yacc.c:1646  */
+#line 1604 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 249 "quack.y" /* yacc.c:1646  */
+#line 250 "quack.y" /* yacc.c:1646  */
     { (yyval.conditional_type) = new condition_node((yyvsp[-1].expr_type), (yyvsp[0].statements_type)); }
-#line 1609 "quack.tab.c" /* yacc.c:1646  */
+#line 1610 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 253 "quack.y" /* yacc.c:1646  */
+#line 254 "quack.y" /* yacc.c:1646  */
     { (yyval.statements_type) = (yyvsp[0].statements_type); }
-#line 1615 "quack.tab.c" /* yacc.c:1646  */
+#line 1616 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 254 "quack.y" /* yacc.c:1646  */
+#line 255 "quack.y" /* yacc.c:1646  */
     { (yyval.statements_type) = (yyval.statements_type) = new list<statement_node *>(); }
-#line 1621 "quack.tab.c" /* yacc.c:1646  */
+#line 1622 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 258 "quack.y" /* yacc.c:1646  */
+#line 259 "quack.y" /* yacc.c:1646  */
     { (yyval.statements_type) = (yyvsp[0].statements_type); }
-#line 1627 "quack.tab.c" /* yacc.c:1646  */
+#line 1628 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 262 "quack.y" /* yacc.c:1646  */
-    { (yyval.expr_type) = new ident_node((yyvsp[0].sval)); }
-#line 1633 "quack.tab.c" /* yacc.c:1646  */
+#line 263 "quack.y" /* yacc.c:1646  */
+    { (yyval.expr_type) = new ident_node((yyvsp[0].sval)); free((yyvsp[0].sval)); }
+#line 1634 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 266 "quack.y" /* yacc.c:1646  */
-    { (yyval.expr_type) = new access_node((yyvsp[-2].expr_type), (yyvsp[0].sval)); }
-#line 1639 "quack.tab.c" /* yacc.c:1646  */
+#line 267 "quack.y" /* yacc.c:1646  */
+    { (yyval.expr_type) = new access_node((yyvsp[-2].expr_type), (yyvsp[0].sval)); free((yyvsp[0].sval)); }
+#line 1640 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 270 "quack.y" /* yacc.c:1646  */
-    { (yyval.expr_type) = new strlit_node((yyvsp[0].sval)); }
-#line 1645 "quack.tab.c" /* yacc.c:1646  */
+#line 271 "quack.y" /* yacc.c:1646  */
+    { (yyval.expr_type) = new strlit_node((yyvsp[0].sval)); free((yyvsp[0].sval)); }
+#line 1646 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 274 "quack.y" /* yacc.c:1646  */
+#line 275 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new intlit_node((yyvsp[0].ival)); }
-#line 1651 "quack.tab.c" /* yacc.c:1646  */
+#line 1652 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 278 "quack.y" /* yacc.c:1646  */
+#line 279 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = (yyvsp[0].expr_type); }
-#line 1657 "quack.tab.c" /* yacc.c:1646  */
+#line 1658 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 282 "quack.y" /* yacc.c:1646  */
+#line 283 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "PLUS", (yyvsp[0].expr_type)); }
-#line 1663 "quack.tab.c" /* yacc.c:1646  */
+#line 1664 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 286 "quack.y" /* yacc.c:1646  */
+#line 287 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "MINUS", (yyvsp[0].expr_type)); }
-#line 1669 "quack.tab.c" /* yacc.c:1646  */
+#line 1670 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 290 "quack.y" /* yacc.c:1646  */
+#line 291 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node(new intlit_node(0), "MINUS", (yyvsp[0].expr_type)); }
-#line 1675 "quack.tab.c" /* yacc.c:1646  */
+#line 1676 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 294 "quack.y" /* yacc.c:1646  */
+#line 295 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "TIMES", (yyvsp[0].expr_type)); }
-#line 1681 "quack.tab.c" /* yacc.c:1646  */
+#line 1682 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 298 "quack.y" /* yacc.c:1646  */
+#line 299 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "DIVIDE", (yyvsp[0].expr_type)); }
-#line 1687 "quack.tab.c" /* yacc.c:1646  */
+#line 1688 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 302 "quack.y" /* yacc.c:1646  */
+#line 303 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = (yyvsp[-1].expr_type); }
-#line 1693 "quack.tab.c" /* yacc.c:1646  */
+#line 1694 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 306 "quack.y" /* yacc.c:1646  */
+#line 307 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "EQUALS", (yyvsp[0].expr_type)); }
-#line 1699 "quack.tab.c" /* yacc.c:1646  */
+#line 1700 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 310 "quack.y" /* yacc.c:1646  */
+#line 311 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "ATMOST", (yyvsp[0].expr_type)); }
-#line 1705 "quack.tab.c" /* yacc.c:1646  */
+#line 1706 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 314 "quack.y" /* yacc.c:1646  */
+#line 315 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "LESS", (yyvsp[0].expr_type)); }
-#line 1711 "quack.tab.c" /* yacc.c:1646  */
+#line 1712 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 318 "quack.y" /* yacc.c:1646  */
+#line 319 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "ATLEAST", (yyvsp[0].expr_type)); }
-#line 1717 "quack.tab.c" /* yacc.c:1646  */
+#line 1718 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 322 "quack.y" /* yacc.c:1646  */
+#line 323 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new method_call_node((yyvsp[-2].expr_type), "MORE", (yyvsp[0].expr_type)); }
-#line 1723 "quack.tab.c" /* yacc.c:1646  */
+#line 1724 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 326 "quack.y" /* yacc.c:1646  */
+#line 327 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new and_node((yyvsp[-2].expr_type), (yyvsp[0].expr_type)); }
-#line 1729 "quack.tab.c" /* yacc.c:1646  */
+#line 1730 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 330 "quack.y" /* yacc.c:1646  */
+#line 331 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new or_node((yyvsp[-2].expr_type), (yyvsp[0].expr_type)); }
-#line 1735 "quack.tab.c" /* yacc.c:1646  */
+#line 1736 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 334 "quack.y" /* yacc.c:1646  */
+#line 335 "quack.y" /* yacc.c:1646  */
     { (yyval.expr_type) = new not_node((yyvsp[0].expr_type)); }
-#line 1741 "quack.tab.c" /* yacc.c:1646  */
+#line 1742 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 338 "quack.y" /* yacc.c:1646  */
-    { (yyval.expr_type) = new method_call_node((yyvsp[-5].expr_type), (yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); }
-#line 1747 "quack.tab.c" /* yacc.c:1646  */
+#line 339 "quack.y" /* yacc.c:1646  */
+    { (yyval.expr_type) = new method_call_node((yyvsp[-5].expr_type), (yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); free((yyvsp[-3].sval)); }
+#line 1748 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 342 "quack.y" /* yacc.c:1646  */
-    { (yyval.expr_type) = new class_instantiation_node((yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); }
-#line 1753 "quack.tab.c" /* yacc.c:1646  */
+#line 343 "quack.y" /* yacc.c:1646  */
+    { (yyval.expr_type) = new class_instantiation_node((yyvsp[-3].sval), (yyvsp[-1].actual_args_type)); free((yyvsp[-3].sval)); }
+#line 1754 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 346 "quack.y" /* yacc.c:1646  */
+#line 347 "quack.y" /* yacc.c:1646  */
     { (yyval.actual_args_type) = (yyvsp[0].actual_args_type); }
-#line 1759 "quack.tab.c" /* yacc.c:1646  */
+#line 1760 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 347 "quack.y" /* yacc.c:1646  */
+#line 348 "quack.y" /* yacc.c:1646  */
     { (yyval.actual_args_type) = new list<actual_arg_node *>(); }
-#line 1765 "quack.tab.c" /* yacc.c:1646  */
+#line 1766 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 351 "quack.y" /* yacc.c:1646  */
+#line 352 "quack.y" /* yacc.c:1646  */
     { (yyvsp[0].actual_args_type)->push_front( new actual_arg_node((yyvsp[-1].expr_type)) ); (yyval.actual_args_type) = (yyvsp[0].actual_args_type); }
-#line 1771 "quack.tab.c" /* yacc.c:1646  */
+#line 1772 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 355 "quack.y" /* yacc.c:1646  */
+#line 356 "quack.y" /* yacc.c:1646  */
     { (yyval.actual_args_type) = (yyvsp[-1].actual_args_type); (yyvsp[-1].actual_args_type)->push_back((yyvsp[0].actual_arg_type)); }
-#line 1777 "quack.tab.c" /* yacc.c:1646  */
+#line 1778 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 356 "quack.y" /* yacc.c:1646  */
+#line 357 "quack.y" /* yacc.c:1646  */
     { (yyval.actual_args_type) = new list<actual_arg_node *>(); }
-#line 1783 "quack.tab.c" /* yacc.c:1646  */
+#line 1784 "quack.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 360 "quack.y" /* yacc.c:1646  */
+#line 361 "quack.y" /* yacc.c:1646  */
     { (yyval.actual_arg_type) = new actual_arg_node((yyvsp[0].expr_type)); }
-#line 1789 "quack.tab.c" /* yacc.c:1646  */
+#line 1790 "quack.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1793 "quack.tab.c" /* yacc.c:1646  */
+#line 1794 "quack.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2017,7 +2018,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 364 "quack.y" /* yacc.c:1906  */
+#line 365 "quack.y" /* yacc.c:1906  */
 
 
 // build the class hierarchy tree (represented as an adjacency list)
@@ -2188,18 +2189,13 @@ int main(int argc, char **argv) {
 	if(num_errors == 0){
 		cout << "Finished parse with no errors" << endl;
 
-		// crawl the AST
-		// cout << endl;
-		// crawl_ast(root);
-		// cout << endl;
-
 		// make the class hierarchy graph
 		map<string, list<string> > class_graph = build_class_graph(root);
 
 		// crawl the class graph
-		// cout << endl;
-		// crawl_class_graph(class_graph, "Obj");
-		// cout << endl;
+		cout << endl;
+		crawl_class_graph(class_graph, "Obj");
+		cout << endl;
 
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(class_graph, "Obj");
@@ -2246,10 +2242,18 @@ int main(int argc, char **argv) {
 			}
 		}
 
+		// crawl the AST (for debugging)
+		// cout << endl;
+		// crawl_ast(root);
+		// cout << endl;
+
 	}
 	// else print the number of errors on stdout
 	else{
 		cout << "Found " << num_errors << " errors!" << endl;
 	}
 
+	if(root != NULL){
+		delete root;
+	}
 }
