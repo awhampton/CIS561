@@ -2083,27 +2083,34 @@ int check_class_graph(map<string, list<string> > cg, string r){
 		string current = stack.back();
 		// cout << "current: " << current << endl;
 		stack.pop_back();
-		closed_set.insert(current);
+		// seen_set.insert(current);
+
+		if(closed_set.find(current) != closed_set.end()){
+			MULTIPLE_SUBCLASS = current;
+			return 3;  // class has two superclasses
+		}
+
 		for(list<string>::iterator itr = cg[current].begin(); itr != cg[current].end(); ++itr){
 			// cout << "  neighbor: " << *itr << endl;
 
 			if(closed_set.find(*itr) == closed_set.end()){
+				// seen_set.insert(*itr);
 				stack.push_back(*itr);
 			}
 			else{
-				CLASS_CYCLE_SUPERCLASS = current;
-				CLASS_CYCLE_SUBCLASS = *itr;
-				return 1;  // we have found a cycle
-			}
-
-			if(seen_set.find(*itr) == seen_set.end()){
-				seen_set.insert(*itr);
-			}
-			else{
-				MULTIPLE_SUBCLASS = *itr;
-				return 3;  // class has two superclasses
+				list<string>::iterator f = find(stack.begin(), stack.end(), *itr);
+				if(f == stack.end()){
+					MULTIPLE_SUBCLASS = *itr;
+					return 3;  // class has two superclasses
+				}
+				else{
+					CLASS_CYCLE_SUPERCLASS = current;
+					CLASS_CYCLE_SUBCLASS = *itr;
+					return 1;  // we have found a cycle
+				}
 			}
 		}
+		closed_set.insert(current);
 	}
 
 	// set the global containing the classes we found in the search
@@ -2210,14 +2217,15 @@ int main(int argc, char **argv) {
 			set<string> class_extends = get_class_extends(root);
 			set<string> missing;
 			set_difference(class_extends.begin(), class_extends.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
-			cerr << "class definition missing! tried to extend the following undefined classes: " << endl;
+			cerr << "class definition missing or unreachable from Obj!" << endl;
+			cerr << "the following classes are undefined or unreachable: " << endl;
 			for(set<string>::iterator itr = missing.begin(); itr != missing.end(); ++itr){
 				cerr << "  " << *itr << endl;
 			}
 		}
 		else if(class_res == 3){
-			cerr << "multiple inheritance! class defined twice?" << endl;
-			cerr << "  (" << MULTIPLE_SUBCLASS << " inherits from more than one class)" << endl;
+			cerr << "multiple inheritance! (or class defined twice?)" << endl;
+			cerr << "  (" << MULTIPLE_SUBCLASS << " inherits or is defined twice)" << endl;
 		}
 
 		// check that constructor calls are valid
