@@ -1,0 +1,6 @@
+class ShortWord() extends Word {y = Word();}
+
+class Word() extends String {}
+
+x = String();
+

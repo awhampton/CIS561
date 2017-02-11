@@ -418,15 +418,12 @@ void crawl_class_graph(map<string, list<string> > cg, string r){
 // return: 0 - good; 1 - has cycle; 2 - multiple components; 3 - multiple inheritance
 int check_class_graph(map<string, list<string> > cg, string r){
 	set<string> closed_set;
-	set<string> seen_set;
 	list<string> stack;
 	stack.push_back(r);
-	seen_set.insert(r);
 	while(!stack.empty()){
 		string current = stack.back();
 		// cout << "current: " << current << endl;
 		stack.pop_back();
-		// seen_set.insert(current);
 
 		if(closed_set.find(current) != closed_set.end()){
 			MULTIPLE_SUBCLASS = current;
@@ -437,7 +434,6 @@ int check_class_graph(map<string, list<string> > cg, string r){
 			// cout << "  neighbor: " << *itr << endl;
 
 			if(closed_set.find(*itr) == closed_set.end()){
-				// seen_set.insert(*itr);
 				stack.push_back(*itr);
 			}
 			else{

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for filename in quack_tests/*.qk; do
+	echo
+	echo $(basename $filename .qk)
+	./quack $filename
+done
