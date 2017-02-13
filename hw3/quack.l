@@ -1,5 +1,5 @@
 /*
-*  CIS 561: HW 2
+*  CIS 561: HW 3
 *  Andrew Hampton
 *
 *  I used the following tutorial as a starting point: http://aquamentus.com/flex_bison.html

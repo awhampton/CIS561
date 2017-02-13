@@ -365,7 +365,7 @@ actual_arg_repetition:
 %%
 
 // build the class hierarchy tree (represented as an adjacency list)
-//   note: we can imagine the class hierarchy as a directed tree rooted at "Obj", with
+//   note: we imagine the class hierarchy as a directed tree rooted at "Obj", with
 //         edges pointing from the superclass to the sublcass
 map<string, list<string> > build_class_graph(pgm_node *r){
 	list<class_node *> classes = *(r->classes);
@@ -383,6 +383,7 @@ map<string, list<string> > build_class_graph(pgm_node *r){
 	return res;
 }
 
+
 // get a set containing all the class names
 set<string> get_class_names(pgm_node *r){
 	list<class_node *> classes = *(r->classes);
@@ -393,6 +394,7 @@ set<string> get_class_names(pgm_node *r){
 	}
 	return res;
 }
+
 
 // get a set containing all the class extends
 set<string> get_class_extends(pgm_node *r){
@@ -405,6 +407,7 @@ set<string> get_class_extends(pgm_node *r){
 	return res;
 }
 
+
 // crawl the class graph
 void crawl_class_graph(map<string, list<string> > cg, string r){
 	cout << r << endl;
@@ -413,6 +416,7 @@ void crawl_class_graph(map<string, list<string> > cg, string r){
 	}
 	return;
 }
+
 
 // check that the class graph is a tree with one component
 // return: 0 - good; 1 - has cycle; 2 - multiple components; 3 - multiple inheritance
@@ -463,7 +467,9 @@ int check_class_graph(map<string, list<string> > cg, string r){
 	return 0;
 }
 
+
 // pre-order traversal calling generic node methods
+//   note: this just calls the debug method speak
 void recursive_crawl(node *n){
 	n->speak();
 	list<node *> children = n->get_children();
@@ -475,10 +481,12 @@ void recursive_crawl(node *n){
 	return;
 }
 
-// crawl the AST
+
+// crawl the AST, printing debug statements
 void crawl_ast(pgm_node *r){
 	recursive_crawl((node*) r);
 }
+
 
 // check for class constructor call
 void recursive_crawl_constructors(node *n){
@@ -494,10 +502,12 @@ void recursive_crawl_constructors(node *n){
 	return;
 }
 
+
 // crawl the AST, looking for class instantiations
 void get_constructor_names(pgm_node *r){
 	recursive_crawl_constructors((node*) r);
 }
+
 
 // populate the builtin class set
 void populate_builtin_classes(void){
@@ -538,71 +548,52 @@ int main(int argc, char **argv) {
 		// make the class hierarchy graph
 		map<string, list<string> > class_graph = build_class_graph(root);
 
-		// crawl the class graph
-		// cout << endl;
-		// crawl_class_graph(class_graph, "Obj");
-		// cout << endl;
-
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(class_graph, "Obj");
 		if(class_res == 0){
-			cerr << "Class structure good" << endl;
+			cout << "Class structure good" << endl;
 		}
 		else if(class_res == 1){
-			cerr << "cycle detected in class structure!" << endl;
+			cout << "cycle detected in class structure!" << endl;
 			cerr << "  (" << CLASS_CYCLE_SUPERCLASS << " -> " << CLASS_CYCLE_SUBCLASS << " is on the cycle)" << endl;
 		}
 		else if(class_res == 2){
 			set<string> class_extends = get_class_extends(root);
 			set<string> missing;
 			set_difference(class_extends.begin(), class_extends.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
-			cerr << "class definition missing or unreachable from Obj!" << endl;
+			cout << "class definition missing or unreachable from Obj!" << endl;
 			cerr << "the following classes are undefined or unreachable: " << endl;
 			for(set<string>::iterator itr = missing.begin(); itr != missing.end(); ++itr){
 				cerr << "  " << *itr << endl;
 			}
 		}
 		else if(class_res == 3){
-			cerr << "multiple inheritance! (or class defined twice?)" << endl;
+			cout << "multiple inheritance! (or class defined twice?)" << endl;
 			cerr << "  (" << MULTIPLE_SUBCLASS << " inherits or is defined twice)" << endl;
 		}
 
 		// check that constructor calls are valid
 		get_constructor_names(root);  // stored in global CONSTRUCTOR_CALLS
 
-		// cout << "classes found:" << endl;
-		// for(set<string>::iterator itr = CLASSES_FOUND.begin(); itr != CLASSES_FOUND.end(); ++itr){
-		// 	cerr << "  " << *itr << endl;
-		// }
-
-		// cout << "constructor calls:" << endl;
-		// for(set<string>::iterator itr = CONSTRUCTOR_CALLS.begin(); itr != CONSTRUCTOR_CALLS.end(); ++itr){
-		// 	cerr << "  " << *itr << endl;
-		// }
-
 		set<string> missing;
 		set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
 		if(!missing.empty()){
-			cerr << "class definition missing! tried to construct the following undefined classes: " << endl;
+			cout << "class definition missing!" << endl;
+			cerr << "tried to construct the following undefined classes: " << endl;
 			for(set<string>::iterator itr = missing.begin(); itr != missing.end(); ++itr){
 				cerr << "  " << *itr << endl;
 			}
 		}
 		else{
-			cerr << "Constructor calls good" << endl;
+			cout << "Constructor calls good" << endl;
 		}
-
-		// crawl the AST (for debugging)
-		// cout << endl;
-		// crawl_ast(root);
-		// cout << endl;
-
 	}
 	// else print the number of errors on stdout
 	else{
-		cout << "Found " << num_errors << " errors!" << endl;
+		cout << "Found " << num_errors << " parse errors!" << endl;
 	}
 
+	// delete the root of the AST (which should delete the entire thing)
 	if(root != NULL){
 		delete root;
 	}
