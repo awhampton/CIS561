@@ -1,8 +1,13 @@
-quack.tab.c quack.tab.h: quack.y quack.h
-	bison -d -v quack.y
+PROGNAME=quack
 
-lex.yy.c: quack.l quack.tab.h quack.h
-	flex quack.l
+${PROGNAME}: lex.yy.c ${PROGNAME}.tab.c ${PROGNAME}.tab.h ${PROGNAME}.h
+	g++ ${PROGNAME}.tab.c lex.yy.c -lfl -o ${PROGNAME}
 
-quack: lex.yy.c quack.tab.c quack.tab.h quack.h
-	g++ quack.tab.c lex.yy.c -lfl -o quack
+${PROGNAME}.tab.c ${PROGNAME}.tab.h: ${PROGNAME}.y ${PROGNAME}.h
+	bison -d -v ${PROGNAME}.y
+
+lex.yy.c: ${PROGNAME}.l ${PROGNAME}.tab.h ${PROGNAME}.h
+	flex ${PROGNAME}.l
+
+clean:
+	rm -f *.o *.tab.* *.yy.* ${PROGNAME} ${PROGNAME}.output
