@@ -21,6 +21,7 @@
 #include <set>
 #include <iterator>
 #include <algorithm>
+#include <vector>
 #include "quack.h"
 using namespace std;
 
@@ -34,6 +35,11 @@ string MULTIPLE_SUBCLASS;
 set<string> BUILTIN_CLASSES;
 set<string> CLASSES_FOUND;
 set<string> CONSTRUCTOR_CALLS;
+
+// globals for type checking
+typedef vector< pair< string, list<string> > > VTable;
+map<string, VTable> VTABLE_MAP;
+map<string, map<string, string> > RT_MAP;
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -364,6 +370,104 @@ actual_arg_repetition:
 
 %%
 
+// build the map from class name to vtable
+// result goes into global variable VTABLE_MAP
+VTable build_vtable(string c, VTable parent_vt){
+	VTable res = parent_vt;
+	int table_size = res.size();
+	list<class_node *> classes = *(root->classes);
+	for(list<class_node *>::iterator itr = classes.begin(); itr != classes.end(); ++itr){
+		string class_name = (*itr)->signature->class_name;
+		if(class_name == c){
+			for(list<method_node *>::iterator itr2 = ((*itr)->body->mthds)->begin(); itr2 != ((*itr)->body->mthds)->end(); ++itr2){
+				list<string> arg_types;
+				for(list<formal_arg_node *>::iterator itr3 = ((*itr2)->args)->begin(); itr3 != ((*itr2)->args)->end(); ++itr3){
+					arg_types.push_back((*itr3)->value);
+				}
+				string method_name = (*itr2)->name;
+				bool inserted = false;
+				for(int i=0; i < table_size; i++){
+					if(method_name == res[i].first){
+						res[i] = make_pair(method_name, arg_types);
+						inserted = true;
+						break;
+					}
+				}
+				if(!inserted){
+					res.push_back(make_pair(method_name, arg_types));
+				}
+				RT_MAP[class_name][method_name] = (*itr2)->return_type;
+			}
+		}
+	}
+	return res;
+}
+
+void build_vtable_map_recursive(map<string, list<string> > cg, string r, VTable parent_vt){
+	VTable r_vtable = build_vtable(r, parent_vt);
+	VTABLE_MAP[r] = r_vtable;
+	for(list<string>::iterator itr = cg[r].begin(); itr != cg[r].end(); ++itr){
+		build_vtable_map_recursive(cg, *itr, r_vtable);
+	}
+	return;
+}
+
+void build_vtable_map(map<string, list<string> > cg){
+	VTable obj_vtable;
+	list<string> obj_equals_types;
+	obj_equals_types.push_back("Obj");
+	obj_equals_types.push_back("Obj");
+	list<string> obj_print_types;
+	obj_print_types.push_back("Obj");
+	obj_vtable.push_back(make_pair("EQUALS", obj_equals_types));
+	obj_vtable.push_back(make_pair("PRINT", obj_print_types));
+	VTABLE_MAP["Obj"] = obj_vtable;
+	RT_MAP["Obj"]["EQUALS"] = "Boolean";
+	RT_MAP["Obj"]["PRINT"] = "Nothing";
+	for(list<string>::iterator itr = cg["Obj"].begin(); itr != cg["Obj"].end(); ++itr){
+		build_vtable_map_recursive(cg, *itr, obj_vtable);
+	}
+	return;
+}
+
+void print_vtable(string c){
+	VTable vt = VTABLE_MAP[c];
+	for(vector< pair< string, list<string> > >::iterator itr = vt.begin(); itr != vt.end(); ++itr){
+		cout << "  " << itr->first << ": ";
+		for(list<string>::iterator itr2 = (itr->second).begin(); itr2 != (itr->second).end(); ++itr2){
+			cout << *itr2 << "  ";
+		}
+		cout << endl;
+	}
+}
+
+
+// check VTABLE_MAP
+void check_vtable_map(void){
+	cout << endl;
+	cout << "CHECKING VTABLE MAP!" << endl;
+	for(set<string>::iterator itr = CLASSES_FOUND.begin(); itr != CLASSES_FOUND.end(); ++itr){
+		cout << *itr << ": " << endl;
+		print_vtable(*itr);
+	}
+}
+
+// check RT_MAP
+void check_rt_map(void){
+	cout << endl;
+	cout << "CHECKING RETURN TYPE MAP!" << endl;
+	for(set<string>::iterator itr = CLASSES_FOUND.begin(); itr != CLASSES_FOUND.end(); ++itr){
+		map<string, string> rtm = RT_MAP[*itr];
+		cout << *itr << ":" << endl;
+		for(map<string, string>::iterator itr2 = rtm.begin(); itr2 != rtm.end(); ++itr2){
+			cout << "  " << (*itr2).first << ": " << (*itr2).second << endl;
+		}
+	}
+}
+
+
+
+
 // build the class hierarchy tree (represented as an adjacency list)
 //   note: we imagine the class hierarchy as a directed tree rooted at "Obj", with
 //         edges pointing from the superclass to the sublcass
@@ -587,6 +691,17 @@ int main(int argc, char **argv) {
 		else{
 			cout << "Constructor calls good" << endl;
 		}
+
+		// type checking stuff
+		build_vtable_map(class_graph);
+		check_vtable_map();
+		check_rt_map();
+
+
+
+
+
+
 	}
 	// else print the number of errors on stdout
 	else{
