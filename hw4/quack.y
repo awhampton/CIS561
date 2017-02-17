@@ -403,11 +403,12 @@ VTable build_vtable(string c, VTable parent_vt){
 	return res;
 }
 
-void build_vtable_map_recursive(map<string, list<string> > cg, string r, VTable parent_vt){
+void build_vtable_map_recursive(map<string, list<string> > cg, string r, VTable parent_vt, string parent){
+	RT_MAP[r] = RT_MAP[parent];
 	VTable r_vtable = build_vtable(r, parent_vt);
 	VTABLE_MAP[r] = r_vtable;
 	for(list<string>::iterator itr = cg[r].begin(); itr != cg[r].end(); ++itr){
-		build_vtable_map_recursive(cg, *itr, r_vtable);
+		build_vtable_map_recursive(cg, *itr, r_vtable, r);
 	}
 	return;
 }
@@ -425,7 +426,7 @@ void build_vtable_map(map<string, list<string> > cg){
 	RT_MAP["Obj"]["EQUALS"] = "Boolean";
 	RT_MAP["Obj"]["PRINT"] = "Nothing";
 	for(list<string>::iterator itr = cg["Obj"].begin(); itr != cg["Obj"].end(); ++itr){
-		build_vtable_map_recursive(cg, *itr, obj_vtable);
+		build_vtable_map_recursive(cg, *itr, obj_vtable, "Obj");
 	}
 	return;
 }

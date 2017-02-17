@@ -11,6 +11,8 @@ class C1()  extends Obj {
    def foo(x: Int):  Top {
        return C1();    /* CHANGED */
    }
+
+   def bar() {}
 }
 
 class C2() extends C1 {
