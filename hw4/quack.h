@@ -14,6 +14,7 @@ public:
 	virtual ~node() {};
 	virtual void speak() = 0;
 	virtual list<node *> get_children() = 0;
+	virtual string type_check(/* symbol table */) = 0;
 };
 
 // expression node
@@ -28,6 +29,7 @@ public:
 
 	virtual ~expr_node() {};
 	virtual list<node *> get_children() = 0;
+	virtual string type_check(/* symbol table */) = 0;
 };
 
 // statements node
@@ -42,7 +44,9 @@ public:
 
 	virtual ~statement_node() {};
 	virtual list<node *> get_children() = 0;
+	virtual string type_check(/* symbol table */) = 0;
 };
+
 
 // actual arg node
 class actual_arg_node : public node {
@@ -67,13 +71,18 @@ public:
 		res.push_back(expr);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		return expr->type_check(/* symbol table */);
+	}
 };
+
 
 // formal arg node
 class formal_arg_node : public node {
 public:
 	string name;
-	string value;
+	string value;  // this is the declared type
 
     formal_arg_node(string n, string v){
 		type_of_node = "formal_arg";
@@ -91,7 +100,13 @@ public:
 		list<node *> res;
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		// update symbol table?
+		return value;
+	}
 };
+
 
 // condition node
 class condition_node : public node {
@@ -125,7 +140,24 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		string should_be_boolean = expr->type_check(/* symbol table */);
+		if(should_be_boolean != "Boolean"){
+			// update the error list
+		}
+
+		// copy symbol table?
+
+		for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+			(*itr)->type_check(/* symbol table copy */);
+			// update symbol table copy?
+		}
+
+		return "OK";  // probably not every type_check needs to return a string ... better way to do this?
+	}
 };
+
 
 // if_elifs_else node
 class if_elifs_else_node : public statement_node {
@@ -162,9 +194,30 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		if_branch->type_check(/* symbol table */);
+
+		for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
+			(*itr)->type_check(/* symbol table */);
+		}
+
+		// copy symbol table?
+
+		for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
+			(*itr)->type_check(/* symbol table copy */);
+			// update symbol table copy?
+		}
+
+		// need some way to intersect the symbol tables that were generated in the branches
+
+		return "OK";
+	}
 };
 
+
 // while condition node
+//   note: inherits most methods from condition_node
 class while_condition_node : public condition_node {
 public:
 
@@ -180,6 +233,7 @@ public:
 	}
 
 };
+
 
 // while node
 class while_node : public statement_node {
@@ -200,6 +254,10 @@ public:
 		list<node *> res;
 		res.push_back(wc);
 		return res;
+	}
+
+	string type_check(/* symbol table */){
+		return wc->type_check(/* symbol table */);
 	}
 };
 
@@ -229,7 +287,28 @@ public:
 		res.push_back(right);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		string left_type_eval = left->type_check(/* symbol table */);
+		string right_type_eval = right->type_check(/* symbol table */);
+
+		// bool check1 = check that left_type_eval is consistent with declared type left_type?
+		bool check1 = true;
+		if(!check1){
+			// add to error list
+		}
+
+		// bool check2 = check that left_type_eval is consistent with right_type_eval?
+		bool check2 = true;
+		if(!check2){
+			// add to error list
+		}
+
+		// return something?
+		return "OK";
+	}
 };
+
 
 // bare expression statement node
 class bare_expr_node : public statement_node {
@@ -251,7 +330,12 @@ public:
 		res.push_back(expr);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		return expr->type_check(/* symbol table */);
+	}
 };
+
 
 // return statement node
 class return_node : public statement_node {
@@ -286,6 +370,16 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		if(has_return_expr){
+			expr->type_check(/* symbol table */);
+		}
+
+		// is this the right place to check that the return type matches the declared type?
+
+		return "OK";
+	}
 };
 
 // ident expression node
@@ -305,9 +399,17 @@ public:
 		list<node *> res;
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		// return symbol_table.get_actual_type(ident_value);
+		//   if ident_value is not found in the symbol table, add to the error list
+		return "need to implement the symbol table";
+	}
 };
 
+
 // access expression node
+//   note: this represents an access of a class data member (expr).data
 class access_node : public expr_node {
 public:
 	expr_node  *expr;
@@ -329,7 +431,15 @@ public:
 		res.push_back(expr);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		string expr_type = expr->type_check(/* symbol table */);
+
+		// try to find the type of ident_vlaue in the symbol table for class expr_type
+		return "need to implement the symbol table";
+	}
 };
+
 
 // string literal expression node
 class strlit_node : public expr_node {
@@ -347,6 +457,10 @@ public:
 	list<node *> get_children(){
 		list<node *> res;
 		return res;
+	}
+
+	string type_check(/* symbol table */){
+		return "String";
 	}
 };
 
@@ -367,7 +481,12 @@ public:
 		list<node *> res;
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		return "Int";
+	}
 };
+
 
 // method call expression node
 class method_call_node : public expr_node {
@@ -409,7 +528,22 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		string expr_type = expr->type_check(/* symbol table */);
+
+		list<string> arg_types;
+		for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+			arg_types.push_back((*itr)->type_check(/* symbol table */));
+		}
+
+		// check that (method_name, arg_types) is in the vtable for class expr_type
+
+		// return the return type of the method?
+		return "OK";
+	}
 };
+
 
 // class instantiation expression node
 class class_instantiation_node : public expr_node {
@@ -439,7 +573,21 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		list<string> arg_types;
+		for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+			arg_types.push_back((*itr)->type_check(/* symbol table */));
+		}
+
+		// check that (class_name, arg_types) is in the vtable for class class_name
+		//   note: should the class constructor be in the vtable?
+
+		// return the class type?
+		return class_name;
+	}
 };
+
 
 // and expression node
 class and_node : public expr_node {
@@ -465,7 +613,22 @@ public:
 		res.push_back(right);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		string left_type = left->type_check(/* symbol table */);
+		if(left_type != "Boolean"){
+			/* add to error list */
+		}
+
+		string right_type = right->type_check(/* symbol table */);
+		if(right_type != "Boolean"){
+			/* add to error list */
+		}
+
+		return "Boolean";
+	}
 };
+
 
 // or expression node
 class or_node : public expr_node {
@@ -491,7 +654,22 @@ public:
 		res.push_back(right);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		string left_type = left->type_check(/* symbol table */);
+		if(left_type != "Boolean"){
+			/* add to error list */
+		}
+
+		string right_type = right->type_check(/* symbol table */);
+		if(right_type != "Boolean"){
+			/* add to error list */
+		}
+
+		return "Boolean";
+	}
 };
+
 
 // not expression node
 class not_node : public expr_node {
@@ -513,9 +691,20 @@ public:
 		res.push_back(expr);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+		string expr_type = expr->type_check(/* symbol table */);
+		if(expr_type != "Boolean"){
+			/* add to error list */
+		}
+
+		return "Boolean";
+	}
 };
 
+
 // method node
+//  note: this is a method definition node
 class method_node : public node {
 public:
 	string name;
@@ -554,7 +743,23 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+
+		// make a copy of the symbol table?
+
+		// update symbol table copy with formal args?
+
+		for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+			(*itr)->type_check(/* symbol table copy */);
+			// update symbol table copy?
+		}
+
+		// is there something better to return?
+		return "OK";
+	}
 };
+
 
 // class body node
 class class_body_node : public node {
@@ -591,7 +796,28 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+
+		// make a copy of the symbol table?
+
+		// these statements are the class constructor
+		for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+			(*itr)->type_check(/* symbol table copy */);
+			// update symbol table copy?
+		}
+
+		for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
+			(*itr)->type_check(/* symbol table copy */);
+		}
+
+		// do something with the class symbol table that's built?
+
+		// is there something better to return?
+		return "OK";
+	}
 };
+
 
 // class signature node
 class class_signature_node : public node {
@@ -633,7 +859,16 @@ public:
 		}
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+
+		// update symbol table with formal args?
+
+		// is there something better to return?
+		return "OK";
+	}
 };
+
 
 // class node
 class class_node : public node {
@@ -664,7 +899,22 @@ public:
 		res.push_back(body);
 		return res;
 	}
+
+	string type_check(/* symbol table */){
+
+		// where is the symbol table for this class created?
+
+		signature->type_check(/* symbol table */);
+
+		body->type_check(/* symbol table */);
+
+		// what should we do with the symbol table for this class?
+
+		// is there something better to return?
+		return "OK";
+	}
 };
+
 
 // program node
 class pgm_node : public node {
@@ -699,5 +949,19 @@ public:
 			res.push_back(*itr);
 		}
 		return res;
+	}
+
+	string type_check(/* symbol table */){
+
+		for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
+			(*itr)->type_check(/* symbol table */);
+		}
+
+		// what's a good way to type check the statements in the body of the program?
+		for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+			(*itr)->type_check(/* symbol table */);
+		}
+
+		return "OK";
 	}
 };

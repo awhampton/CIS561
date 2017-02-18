@@ -417,9 +417,9 @@ void build_vtable_map(map<string, list<string> > cg){
 	VTable obj_vtable;
 	list<string> obj_equals_types;
 	obj_equals_types.push_back("Obj");
-	obj_equals_types.push_back("Obj");
+	// obj_equals_types.push_back("Obj");  /* I think the first argument type is implied */
 	list<string> obj_print_types;
-	obj_print_types.push_back("Obj");
+	// obj_print_types.push_back("Obj");  /* I think the first argument type is implied */
 	obj_vtable.push_back(make_pair("EQUALS", obj_equals_types));
 	obj_vtable.push_back(make_pair("PRINT", obj_print_types));
 	VTABLE_MAP["Obj"] = obj_vtable;
@@ -698,6 +698,7 @@ int main(int argc, char **argv) {
 		check_vtable_map();
 		check_rt_map();
 
+		root->type_check();
 
 
 
