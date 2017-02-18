@@ -11,18 +11,21 @@
 
 
 %{
+#include <algorithm>
+#include <array>
 #include <cstdio>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <map>
 #include <set>
-#include <iterator>
-#include <algorithm>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unordered_map>
 #include <vector>
 #include "quack.h"
+
 using namespace std;
 
 // the root of the abstract syntax tree
@@ -38,6 +41,7 @@ set<string> CONSTRUCTOR_CALLS;
 
 // globals for type checking
 typedef vector< pair< string, list<string> > > VTable;
+typedef unordered_map< string, array< string, 2 > > SymTable;
 map<string, VTable> VTABLE_MAP;
 map<string, map<string, string> > RT_MAP;
 
@@ -182,7 +186,7 @@ formal_args:
 	;
 
 formal_arg:
-	IDENT COLON IDENT formal_arg_repetitions { $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; free($1); }
+	IDENT COLON IDENT formal_arg_repetitions { $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; free($1); free($3); }
 	;
 
 formal_arg_repetitions:
@@ -235,12 +239,12 @@ methods:
 	;
 
 method:
-	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); free($2); }  /* should also free opt_ident */
+	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); free($2); free($6); }
 	;
 
 opt_ident:
 	COLON IDENT { $$ = $2; }  /* note: small memory leak here that I'm struggling to fix! */
-	| /* empty */ { char nothing[8] = "Nothing"; $$ = nothing; }  /* same as above */
+	| /* empty */ { char id[8] = "Nothing"; char* nothing = strdup(id); $$ = nothing; }  /* same as above */
 	;
 
 statement_block:
@@ -622,6 +626,19 @@ void populate_builtin_classes(void){
 	BUILTIN_CLASSES.insert("Boolean");
 	BUILTIN_CLASSES.insert("Nothing");
 }
+
+
+//TODO: need the following:
+//  - Something to hold all our class symtables
+//  - Something to hold all method symtables (perhaps map from class ident to method symtable)
+//  - Function that prints out symtable values (for debugging)
+//  - Function that initializes symtables
+//      - Will involve starting from Obj and doing a traversal down the class hierarchy towards the leaves
+//      - At each step, initialize its symtable to the symtable of its parent, do type checking on its symbols to find conflicts, and continue
+//          - note: might need to do full type inference loop on each class before we can continue down the tree
+//          -       need LCA for that
+//  - note: probably best to treat program as a special class that doesn't inherit from anything (not even Obj) that we do in its own seperate part
+//          to capture 'global' statements
 
 
 int main(int argc, char **argv) {
