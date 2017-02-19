@@ -2027,6 +2027,81 @@ yyreturn:
 #line 371 "quack.y" /* yacc.c:1906  */
 
 
+// LCA functions
+
+// builds a path of inheritance from r to t
+//   returns true on success, else false
+bool make_path(string r, string t, vector<string> &path, map< string, list<string> > cg){
+
+	// put r on the path
+	path.push_back(r);
+
+	// check if we're done
+	if(r == t){
+		return true;
+	}
+
+	// try to find r in the class graph
+	map< string, list<string> >::iterator itr_f = cg.find(r);
+	if(itr_f == cg.end()){
+		path.pop_back();
+		return false;
+	}
+
+	// search down the graph
+	bool found_it = false;
+	for(list<string>::iterator itr = cg[r].begin(); itr != cg[r].end(); ++itr){
+		found_it = make_path(*itr, t, path, cg) || found_it;
+	}
+
+	if(found_it){
+		return true;
+	}
+
+	// didn't find it
+	path.pop_back();
+	return false;
+
+}
+
+string find_lca(string s1, string s2, map< string, list<string> > cg){
+
+	// find paths from Obj to s1 and s2
+	vector<string> path1, path2;
+	bool res1 = make_path("Obj", s1, path1, cg);
+	bool res2 = make_path("Obj", s2, path2, cg);
+
+	// cout << endl;
+	// cout << "here is path1: " << endl;
+	// for(int i=0; i < path1.size(); i++){
+	// 	cout << path1[i] << endl;
+	// }
+	//
+	// cout << endl;
+	// cout << "here is path2: " << endl;
+	// for(int i=0; i < path2.size(); i++){
+	// 	cout << path2[i] << endl;
+	// }
+
+	if( !res1 ){
+		return "ERROR! s1 not in class graph";
+	}
+	if( !res2 ){
+		return "ERROR! s2 not in class graph";
+	}
+
+	// the lca is where the paths differ
+	int idx;
+	for(idx = 0; idx < path1.size() && idx < path2.size(); idx++){
+		if(path1[idx] != path2[idx]){
+			break;
+		}
+	}
+
+	return path1[idx-1];
+}
+
+
 // build the map from class name to vtable
 // result goes into global variable VTABLE_MAP
 VTable build_vtable(string c, VTable parent_vt){
@@ -2350,10 +2425,15 @@ int main(int argc, char **argv) {
 			cout << "Constructor calls good" << endl;
 		}
 
+		// test the lca function
+		// crawl_class_graph(class_graph, "Obj");
+		// string lca = find_lca("C2", "C4", class_graph);
+		// cout << "LCA: " << lca << endl;
+
 		// type checking stuff
 		build_vtable_map(class_graph);
-		check_vtable_map();
-		check_rt_map();
+		// check_vtable_map();
+		// check_rt_map();
 
 		root->type_check();
 
