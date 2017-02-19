@@ -2,9 +2,13 @@
 #include <stdlib.h>
 #include <string>
 #include <list>
+#include <unordered_map>
+#include <array>
 
 
 using namespace std;
+
+typedef unordered_map< string, array< string, 2 > > SymTable;
 
 // node class
 class node {
@@ -875,6 +879,7 @@ class class_node : public node {
 public:
 	class_signature_node *signature;
 	class_body_node      *body;
+    SymTable             symbols;
 
     class_node(class_signature_node *cs, class_body_node *cb){
 		type_of_node = "class";
@@ -891,6 +896,11 @@ public:
 
 	void speak(void){
 		cout << "class node" << endl;
+        cout << "symbol table: " << endl;
+        for (SymTable::iterator itr = symbols.begin(); itr != symbols.end(); ++itr)
+        {
+            cout << itr->first << ": " << itr->second[0] << " - " << itr->second[1] << endl;
+        }
 	}
 
 	list<node *> get_children(){
@@ -899,18 +909,27 @@ public:
 		res.push_back(body);
 		return res;
 	}
-
-	string type_check(/* symbol table */){
-
-		// where is the symbol table for this class created?
-
-		signature->type_check(/* symbol table */);
-
-		body->type_check(/* symbol table */);
-
-		// what should we do with the symbol table for this class?
-
-		// is there something better to return?
+    
+    // Takes in the symbol table of its superclass and infers and validates its own symbol table
+	string type_check(SymTable* super){
+        bool hasChanged = true;
+        //TODO: validate that superclass constructors are initialized in the subclass
+        //      note: when performing this check we check that the type they are initialized to is
+        //            a subtype of the type they were set as in the superclass
+	    list<statement_node *> statements = body->stmts;
+        while(hasChanged){
+            hasChanged = false;
+            for (list<statement_node *>::iterator itr = statements.begin(); itr != statements.end(); ++itr){
+                // if its an assignment statement, check if its in the symtable, if not add it (infer type based on value assigned to it)
+                // if its in the symtable use LCA on its inferred type and stored type to update type to new value
+                // in both these cases set hasChanged to true
+                
+                // for now, if it's not an assignment statement just check if it calls a method at any point and check the vtable to confirm that the method exists
+            }
+        }
+        
+        // TODO: if we haven't broken anything by this point, descend into the class methods and typecheck each of them
+        
 		return "OK";
 	}
 };
