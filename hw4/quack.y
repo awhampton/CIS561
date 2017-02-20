@@ -499,11 +499,14 @@ void build_vtable_map(map<string, list<string> > cg){
 	// obj_equals_types.push_back("Obj");  /* I think the first argument type is implied */
 	list<string> obj_print_types;
 	// obj_print_types.push_back("Obj");  /* I think the first argument type is implied */
+	list<string> obj_str_types;
 	obj_vtable.push_back(make_pair("EQUALS", obj_equals_types));
 	obj_vtable.push_back(make_pair("PRINT", obj_print_types));
+	obj_vtable.push_back(make_pair("STR", obj_str_types));
 	VTABLE_MAP["Obj"] = obj_vtable;
 	RT_MAP["Obj"]["EQUALS"] = "Boolean";
 	RT_MAP["Obj"]["PRINT"] = "Nothing";
+	RT_MAP["Obj"]["STR"] = "String";
 	for(list<string>::iterator itr = cg["Obj"].begin(); itr != cg["Obj"].end(); ++itr){
 		build_vtable_map_recursive(cg, *itr, obj_vtable, "Obj");
 	}

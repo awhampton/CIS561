@@ -748,18 +748,18 @@ public:
 		return res;
 	}
 
-	string type_check(/* symbol table */){
+	string type_check(/* SymTable *class_symtable */){
 
 		// make a copy of the symbol table?
+		// SymTable method_symtable = *class_symtable;
 
-		// update symbol table copy with formal args?
+		// update method symbol table with formal args
 
+		// type check the method's statements
 		for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-			(*itr)->type_check(/* symbol table copy */);
-			// update symbol table copy?
+			(*itr)->type_check(/* &method_symtable */);
 		}
 
-		// is there something better to return?
 		return "OK";
 	}
 };
@@ -801,21 +801,43 @@ public:
 		return res;
 	}
 
-	string type_check(/* symbol table */){
+	// string type_check(SymTable* super){
+	// 	bool hasChanged = true;
+	// 	//TODO: validate that superclass constructors are initialized in the subclass
+	// 	//      note: when performing this check we check that the type they are initialized to is
+	// 	//            a subtype of the type they were set as in the superclass
+	// 	list<statement_node *> statements = *(body->stmts);
+	// 	while(hasChanged){
+	// 		hasChanged = false;
+	// 		for (list<statement_node *>::iterator itr = statements.begin(); itr != statements.end(); ++itr){
+	// 			// if its an assignment statement, check if its in the symtable, if not add it (infer type based on value assigned to it)
+	// 			// if its in the symtable use LCA on its inferred type and stored type to update type to new value
+	// 			// in both these cases set hasChanged to true
+	//
+	// 			// for now, if it's not an assignment statement just check if it calls a method at any point and check the vtable to confirm that the method exists
+	// 		}
+	// 	}
+	//
+	// 	// TODO: if we haven't broken anything by this point, descend into the class methods and typecheck each of them
+	//
+	// 	return "OK";
+	// }
 
-		// make a copy of the symbol table?
+	string type_check(/* SymTable *class_symtable */){
+
+		// note: we have already copied the superclass symtable into class_symtable
 
 		// these statements are the class constructor
+		// we need to check that every class data member has been also defined here
+		//    should class members be prefixed with $ or something in the symtable so they can be recognized?
 		for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-			(*itr)->type_check(/* symbol table copy */);
-			// update symbol table copy?
+			(*itr)->type_check(/* class_symtable */);
 		}
 
+		// send the class_symtable to the methods for typechecking (the method will make a copy)
 		for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
-			(*itr)->type_check(/* symbol table copy */);
+			(*itr)->type_check(/* class_symtable */);
 		}
-
-		// do something with the class symbol table that's built?
 
 		// is there something better to return?
 		return "OK";
@@ -864,11 +886,10 @@ public:
 		return res;
 	}
 
-	string type_check(/* symbol table */){
+	string type_check(/* SymTable *class_symtable */){
 
-		// update symbol table with formal args?
+		// update symbol table with formal args
 
-		// is there something better to return?
 		return "OK";
 	}
 };
@@ -909,29 +930,45 @@ public:
 		res.push_back(body);
 		return res;
 	}
-    
-    // Takes in the symbol table of its superclass and infers and validates its own symbol table
-	string type_check(SymTable* super){
-        bool hasChanged = true;
-        //TODO: validate that superclass constructors are initialized in the subclass
-        //      note: when performing this check we check that the type they are initialized to is
-        //            a subtype of the type they were set as in the superclass
-	    list<statement_node *> statements = body->stmts;
-        while(hasChanged){
-            hasChanged = false;
-            for (list<statement_node *>::iterator itr = statements.begin(); itr != statements.end(); ++itr){
-                // if its an assignment statement, check if its in the symtable, if not add it (infer type based on value assigned to it)
-                // if its in the symtable use LCA on its inferred type and stored type to update type to new value
-                // in both these cases set hasChanged to true
-                
-                // for now, if it's not an assignment statement just check if it calls a method at any point and check the vtable to confirm that the method exists
-            }
-        }
-        
-        // TODO: if we haven't broken anything by this point, descend into the class methods and typecheck each of them
-        
+
+	string type_check(/* SymTable *super */){
+
+		// make a copy of the symbol table?
+		// SymTable class_symtable = *super;
+
+		// send class_symtable to the signature to add formal arguments
+		signature->type_check(/* &class_symtable */);
+
+		// type check the body of the class
+		body->type_check(/* &class_symtable */);
+
+		// do something with the class symtable?
+
 		return "OK";
 	}
+
+    // Takes in the symbol table of its superclass and infers and validates its own symbol table
+	// string type_check(SymTable* super){
+    //     bool hasChanged = true;
+    //     //TODO: validate that superclass constructors are initialized in the subclass
+    //     //      note: when performing this check we check that the type they are initialized to is
+    //     //            a subtype of the type they were set as in the superclass
+	//     list<statement_node *> statements = *(body->stmts);
+    //     while(hasChanged){
+    //         hasChanged = false;
+    //         for (list<statement_node *>::iterator itr = statements.begin(); itr != statements.end(); ++itr){
+    //             // if its an assignment statement, check if its in the symtable, if not add it (infer type based on value assigned to it)
+    //             // if its in the symtable use LCA on its inferred type and stored type to update type to new value
+    //             // in both these cases set hasChanged to true
+	//
+    //             // for now, if it's not an assignment statement just check if it calls a method at any point and check the vtable to confirm that the method exists
+    //         }
+    //     }
+	//
+    //     // TODO: if we haven't broken anything by this point, descend into the class methods and typecheck each of them
+	//
+	// 	return "OK";
+	// }
 };
 
 
