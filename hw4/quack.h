@@ -9,6 +9,7 @@
 using namespace std;
 
 typedef unordered_map< string, array< string, 2 > > SymTable;
+unordered_map< string, SymTable > SymTables;
 
 // node class
 class node {
