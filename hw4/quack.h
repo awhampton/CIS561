@@ -834,10 +834,12 @@ public:
 		for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
 			(*itr)->type_check(/* class_symtable */);
 		}
-
+        
+        // Copy class_symtable to SymTables global structure
+        
 		// send the class_symtable to the methods for typechecking (the method will make a copy)
 		for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
-			(*itr)->type_check(/* class_symtable */);
+			(*itr)->type_check();
 		}
 
 		// is there something better to return?
@@ -936,12 +938,13 @@ public:
 
 		// make a copy of the symbol table?
 		// SymTable class_symtable = *super;
-
+        // SymTable tmp_class_symtable = new SymTable
+        
 		// send class_symtable to the signature to add formal arguments
-		signature->type_check(/* &class_symtable */);
+		signature->type_check(/* &tmp_class_symtable */);
 
 		// type check the body of the class
-		body->type_check(/* &class_symtable */);
+		body->type_check(/* &tmp_class_symtable */);
 
 		// do something with the class symtable?
 
