@@ -41,9 +41,11 @@ set<string> CONSTRUCTOR_CALLS;
 
 // globals for type checking
 typedef vector< pair< string, list<string> > > VTable;
-typedef unordered_map< string, array< string, 2 > > SymTable;
 map<string, VTable> VTABLE_MAP;
 map<string, map<string, string> > RT_MAP;
+map<string, list<string> > CLASS_GRAPH;
+typedef unordered_map< string, array< string, 2 > > SymTable;
+unordered_map< string, SymTable > SymTables;
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -374,6 +376,10 @@ actual_arg_repetition:
 
 %%
 
+/////////////////////////////////
+// helper functions
+/////////////////////////////////
+
 // LCA functions
 
 // builds a path of inheritance from r to t
@@ -413,6 +419,14 @@ bool make_path(string r, string t, vector<string> &path, map< string, list<strin
 
 string find_lca(string s1, string s2, map< string, list<string> > cg){
 
+	// the fake class "*ERROR" inherits from everything, so the lca of *ERROR and x is always x
+	if(s1 == "*ERROR"){
+		return s2;
+	}
+	if(s2 == "*ERROR"){
+		return s1;
+	}
+
 	// find paths from Obj to s1 and s2
 	vector<string> path1, path2;
 	bool res1 = make_path("Obj", s1, path1, cg);
@@ -431,10 +445,10 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
 	// }
 
 	if( !res1 ){
-		return "ERROR! s1 not in class graph";
+		return "ERROR! s1 not in class graph: " + s1;
 	}
 	if( !res2 ){
-		return "ERROR! s2 not in class graph";
+		return "ERROR! s2 not in class graph: " + s2;
 	}
 
 	// the lca is where the paths differ
@@ -746,10 +760,10 @@ int main(int argc, char **argv) {
 		cout << "Finished parse with no errors" << endl;
 
 		// make the class hierarchy graph
-		map<string, list<string> > class_graph = build_class_graph(root);
+		CLASS_GRAPH = build_class_graph(root);
 
 		// check that the class graph is a tree with one connected component
-		int class_res = check_class_graph(class_graph, "Obj");
+		int class_res = check_class_graph(CLASS_GRAPH, "Obj");
 		if(class_res == 0){
 			cout << "Class structure good" << endl;
 		}
@@ -789,12 +803,12 @@ int main(int argc, char **argv) {
 		}
 
 		// test the lca function
-		// crawl_class_graph(class_graph, "Obj");
-		// string lca = find_lca("C2", "C4", class_graph);
+		// crawl_class_graph(CLASS_GRAPH, "Obj");
+		// string lca = find_lca("C2", "C4", CLASS_GRAPH);
 		// cout << "LCA: " << lca << endl;
 
 		// type checking stuff
-		build_vtable_map(class_graph);
+		build_vtable_map(CLASS_GRAPH);
 		// check_vtable_map();
 		// check_rt_map();
 
