@@ -466,33 +466,55 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
 // build the map from class name to vtable
 // result goes into global variable VTABLE_MAP
 VTable build_vtable(string c, VTable parent_vt){
+    // Initialize variables
 	VTable res = parent_vt;
 	int table_size = res.size();
 	list<class_node *> classes = *(root->classes);
+    
+    // Crawl through all classes
 	for(list<class_node *>::iterator itr = classes.begin(); itr != classes.end(); ++itr){
 		string class_name = (*itr)->signature->class_name;
 		if(class_name == c){
+            // Add class constructor to vtable in first slot
+            list<string> cons_arg_types;
+            for(list<formal_arg_node *>::iterator formal_itr =  ((*itr)->signature->args)->begin(); formal_itr != ((*itr)->signature->args)->end(); ++formal_itr){
+                cons_arg_types.push_back((*formal_itr)->value);
+            }
+            res[0] = make_pair(class_name, cons_arg_types);
+            
+            
+            // Add class methods to its vtable
 			for(list<method_node *>::iterator itr2 = ((*itr)->body->mthds)->begin(); itr2 != ((*itr)->body->mthds)->end(); ++itr2){
+                // Pull out args for current method
 				list<string> arg_types;
 				for(list<formal_arg_node *>::iterator itr3 = ((*itr2)->args)->begin(); itr3 != ((*itr2)->args)->end(); ++itr3){
 					arg_types.push_back((*itr3)->value);
 				}
+                
+                // Pull out ident for current method
 				string method_name = (*itr2)->name;
 				bool inserted = false;
-				for(int i=0; i < table_size; i++){
+                
+                // Check superclass vtable to see if method already exists
+				for(int i=1; i < table_size; i++){
 					if(method_name == res[i].first){
 						res[i] = make_pair(method_name, arg_types);
 						inserted = true;
 						break;
 					}
 				}
+                // If it doesn't, add it
 				if(!inserted){
 					res.push_back(make_pair(method_name, arg_types));
 				}
+                
+                // Also add its return type to the ReturnTypeTable for the class
 				RT_MAP[class_name][method_name] = (*itr2)->return_type;
 			}
+        
 		}
 	}
+    
 	return res;
 }
 
@@ -809,7 +831,7 @@ int main(int argc, char **argv) {
 
 		// type checking stuff
 		build_vtable_map(CLASS_GRAPH);
-		// check_vtable_map();
+		//check_vtable_map();
 		// check_rt_map();
 
 		root->type_check();

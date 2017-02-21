@@ -1,7 +1,7 @@
 PROGNAME=quack
 
 ${PROGNAME}: lex.yy.c ${PROGNAME}.tab.c ${PROGNAME}.tab.h ${PROGNAME}.h
-	g++ -g -std=c++11 ${PROGNAME}.tab.c lex.yy.c -lfl -o ${PROGNAME}
+	g++ -g -std=c++11 -fmax-errors=3 ${PROGNAME}.tab.c lex.yy.c -lfl -o ${PROGNAME}
 
 ${PROGNAME}.tab.c ${PROGNAME}.tab.h: ${PROGNAME}.y ${PROGNAME}.h
 	bison -d -v ${PROGNAME}.y
