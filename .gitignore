@@ -3,3 +3,5 @@
 **/quack
 **/parser
 **/lex.yy.*
+hw4/quack.tab*
+hw4/quack.output
