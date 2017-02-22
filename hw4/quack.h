@@ -435,6 +435,7 @@ public:
         string right_type_eval = right->type_check(s);
 
         // bool check1 = check that left_type_eval is consistent with declared type left_type?
+        //   left_type_eval should be a subclass of declared left_type
         // TODO
         bool check1 = true;
         if(!check1){
@@ -443,6 +444,7 @@ public:
         }
 
         // bool check2 = check that left_type_eval is consistent with right_type_eval?
+        //   actually, i don't think we have to do this
         // TODO
         bool check2 = true;
         if(!check2){

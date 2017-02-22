@@ -88,7 +88,7 @@ char* INFILE_NAME;
 %type <conditionals_type>     elifs
 %type <conditional_type>      elif_rule
 %type <expr_type>             l_expr r_expr
-%type <opt_ident_type>        opt_ident
+%type <opt_ident_type>        opt_ident_nothing, opt_ident_obj
 %type <method_type>           method
 %type <methods_type>          methods
 %type <actual_arg_type>       actual_arg_repetition
@@ -220,7 +220,7 @@ statement:
 	;
 
 statement:
-	l_expr opt_ident GETS r_expr SEMICOLON { $$ = new assignment_node($1, $2, $4); }
+	l_expr opt_ident_obj GETS r_expr SEMICOLON { $$ = new assignment_node($1, $2, $4); }
 	;
 
 statement:
@@ -241,12 +241,17 @@ methods:
 	;
 
 method:
-	DEF IDENT LPAREN formal_args RPAREN opt_ident statement_block { $$ = new method_node($2, $6, $4, $7); free($2); free($6); }
+	DEF IDENT LPAREN formal_args RPAREN opt_ident_nothing statement_block { $$ = new method_node($2, $6, $4, $7); free($2); free($6); }
 	;
 
-opt_ident:
+opt_ident_nothing:
 	COLON IDENT { $$ = $2; }  /* note: small memory leak here that I'm struggling to fix! */
 	| /* empty */ { char id[8] = "Nothing"; char* nothing = strdup(id); $$ = nothing; }  /* same as above */
+	;
+
+opt_ident_obj:
+	COLON IDENT { $$ = $2; }  /* note: small memory leak here that I'm struggling to fix! */
+	| /* empty */ { char id[4] = "Obj"; char* obj = strdup(id); $$ = obj; }  /* same as above */
 	;
 
 statement_block:
@@ -444,7 +449,7 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
 	// 	cout << path2[i] << endl;
 	// }
 
-    //note: probably want to just print this to cerr and return a error string so that our type check methods 
+    //note: probably want to just print this to cerr and return a error string so that our type check methods
     //      that call this don't bug out if they hit one of these cases
 	if( !res1 ){
 		return "ERROR! s1 not in class graph: " + s1;
@@ -472,7 +477,7 @@ VTable build_vtable(string c, VTable parent_vt){
 	VTable res = parent_vt;
 	int table_size = res.size();
 	list<class_node *> classes = *(root->classes);
-    
+
     // Crawl through all classes
 	for(list<class_node *>::iterator itr = classes.begin(); itr != classes.end(); ++itr){
 		string class_name = (*itr)->signature->class_name;
@@ -483,8 +488,8 @@ VTable build_vtable(string c, VTable parent_vt){
                 cons_arg_types.push_back((*formal_itr)->value);
             }
             res[0] = make_pair(class_name, cons_arg_types);
-            
-            
+
+
             // Add class methods to its vtable
 			for(list<method_node *>::iterator itr2 = ((*itr)->body->mthds)->begin(); itr2 != ((*itr)->body->mthds)->end(); ++itr2){
                 // Pull out args for current method
@@ -492,11 +497,11 @@ VTable build_vtable(string c, VTable parent_vt){
 				for(list<formal_arg_node *>::iterator itr3 = ((*itr2)->args)->begin(); itr3 != ((*itr2)->args)->end(); ++itr3){
 					arg_types.push_back((*itr3)->value);
 				}
-                
+
                 // Pull out ident for current method
 				string method_name = (*itr2)->name;
 				bool inserted = false;
-                
+
                 // Check superclass vtable to see if method already exists
 				for(int i=1; i < table_size; i++){
 					if(method_name == res[i].first){
@@ -509,14 +514,14 @@ VTable build_vtable(string c, VTable parent_vt){
 				if(!inserted){
 					res.push_back(make_pair(method_name, arg_types));
 				}
-                
+
                 // Also add its return type to the ReturnTypeTable for the class
 				RT_MAP[class_name][method_name] = (*itr2)->return_type;
 			}
-        
+
 		}
 	}
-    
+
 	return res;
 }
 

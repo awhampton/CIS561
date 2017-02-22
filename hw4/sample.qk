@@ -17,7 +17,7 @@ class Robot(n : String) {
     }
 
     def destroy_city2() : Int {
-        return this.destroy_city(1000);
+        return this.destroy_city(1000, 4);
     }
 }
 
