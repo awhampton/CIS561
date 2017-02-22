@@ -44,6 +44,7 @@ public:
 
     virtual string type_check(void) { return "OK"; }
     virtual string type_check(SymTable &s) { return "OK"; }
+    virtual string type_check(SymTable &s, SymTable &t) { return "OK"; }
     virtual string type_check(SymTable &s, string class_name) { return "OK"; }
 };
 
@@ -180,20 +181,18 @@ public:
         return res;
     }
 
-    string type_check(/* symbol table */){
-        string should_be_boolean = expr->type_check(/* symbol table */);
+    string type_check(SymTable &s){
+        string should_be_boolean = expr->type_check(s);
         if(should_be_boolean != "Boolean"){
-            // update the error list
+            // add to error list
+            cerr << "non-boolean condition" << endl;
         }
-
-        // copy symbol table?
 
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->type_check(/* symbol table copy */);
-            // update symbol table copy?
+            (*itr)->type_check(s);
         }
 
-        return "OK";  // probably not every type_check needs to return a string ... better way to do this?
+        return "OK";  // don't think we actually need to return anything
     }
 };
 
@@ -234,21 +233,32 @@ public:
         return res;
     }
 
-    string type_check(/* symbol table */){
-        if_branch->type_check(/* symbol table */);
+    string type_check(SymTable &s){
+
+        // we will accumulate symtables from each branch, then intersect them
+        vector<SymTable> tables;
+
+        // make a copy of the passed-in symtable, typecheck the branch, and save the copy in tables
+        SymTable if_branch_symtable = s;
+        if_branch->type_check(if_branch_symtable);
+        tables.push_back(if_branch_symtable);
 
         for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
-            (*itr)->type_check(/* symbol table */);
+            SymTable elif_branch_symtable = s;
+            (*itr)->type_check(elif_branch_symtable);
+            tables.push_back(elif_branch_symtable);
         }
 
-        // copy symbol table?
-
+        // the 'else' branch is a little goofy because it's just a list of statements here
+        SymTable else_branch_symtable = s;
         for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
-            (*itr)->type_check(/* symbol table copy */);
-            // update symbol table copy?
+            (*itr)->type_check(else_branch_symtable);
         }
+        tables.push_back(else_branch_symtable);
 
         // need some way to intersect the symbol tables that were generated in the branches
+        // this intersection should update the types with the LCA function
+        // s = get_intersection(tables);
 
         return "OK";
     }
@@ -295,8 +305,22 @@ public:
         return res;
     }
 
-    string type_check(/* symbol table */){
-        return wc->type_check(/* symbol table */);
+    string type_check(SymTable &s){
+        // we will get a symtable from the while branch and intersect it with s
+        //   i think this will correctly update both the types and the declarations
+        vector<SymTable> tables;
+        tables.push_back(s);
+
+        // make a copy of the passed-in symtable, typecheck the branch, and save the copy in tables
+        SymTable while_branch_symtable = s;
+        wc->type_check(while_branch_symtable);
+        tables.push_back(while_branch_symtable);
+
+        // need some way to intersect the symbol tables that were generated in the branches
+        // this intersection should update the types with the LCA function
+        // s = get_intersection(tables);
+
+        return "OK";
     }
 };
 

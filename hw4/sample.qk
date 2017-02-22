@@ -10,6 +10,9 @@ class Robot(n : String) {
     // w : String = 2;  // throws error!
     // n : Int = 2;  // throws error!
     n = 2; // this doesn't currently raise an error ... should it?
+
+    b = a;
+
     this.name = "Bozotron";
     this.lastname = n;
     this.age = 42;
