@@ -452,10 +452,12 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
     //note: probably want to just print this to cerr and return a error string so that our type check methods
     //      that call this don't bug out if they hit one of these cases
 	if( !res1 ){
-		return "ERROR! s1 not in class graph: " + s1;
+		cerr << "ERROR! s1 not in class graph: " + s1 << endl;
+        return "*ERROR";
 	}
 	if( !res2 ){
-		return "ERROR! s2 not in class graph: " + s2;
+		cerr << "ERROR! s2 not in class graph: " + s2 << endl;
+        return "*ERROR";
 	}
 
 	// the lca is where the paths differ
@@ -467,6 +469,12 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
 	}
 
 	return path1[idx-1];
+}
+
+
+// returns true if s1 is a subclass of s2
+boolean is_subclass(string s1, string s2, map< string, list<string> > cg){
+    return find_lca(s1, s2, cg) == s2;
 }
 
 
