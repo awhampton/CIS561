@@ -5,7 +5,11 @@
 class Robot(n : String) {
     x = n;
     y = 4;
+    // y : String = 2;  // throws error!
     z = "hi";
+    // w : String = 2;  // throws error!
+    // n : Int = 2;  // throws error!
+    n = 2; // this doesn't currently raise an error ... should it?
     this.name = "Bozotron";
     this.lastname = n;
     this.age = 42;
@@ -17,7 +21,7 @@ class Robot(n : String) {
     }
 
     def destroy_city2() : Int {
-        return this.destroy_city(1000, 4);
+        return this.destroy_city(1000);
     }
 }
 

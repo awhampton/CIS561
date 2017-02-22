@@ -88,7 +88,7 @@ char* INFILE_NAME;
 %type <conditionals_type>     elifs
 %type <conditional_type>      elif_rule
 %type <expr_type>             l_expr r_expr
-%type <opt_ident_type>        opt_ident_nothing, opt_ident_obj
+%type <opt_ident_type>        opt_ident_nothing opt_ident_obj
 %type <method_type>           method
 %type <methods_type>          methods
 %type <actual_arg_type>       actual_arg_repetition

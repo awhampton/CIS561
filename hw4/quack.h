@@ -26,6 +26,7 @@ extern  map<string, map<string, string> > RT_MAP;
 /////////////////////////////////
 bool make_path(string r, string t, vector<string> &path, map< string, list<string> > cg);
 string find_lca(string s1, string s2, map< string, list<string> > cg);
+bool is_subclass(string s1, string s2, map< string, list<string> > cg);
 
 
 /////////////////////////////////
@@ -434,19 +435,16 @@ public:
         string left_type_eval = left->type_check(s);
         string right_type_eval = right->type_check(s);
 
-        // bool check1 = check that left_type_eval is consistent with declared type left_type?
+        // bool check1 = check that declared left_type is consistent with left_type_eval
         //   left_type_eval should be a subclass of declared left_type
-        // TODO
-        bool check1 = true;
+        bool check1 = is_subclass(left_type_eval, left_type, CLASS_GRAPH);
         if(!check1){
             // add to error list
             cout << "assignment node check1 error!" << endl;
         }
 
-        // bool check2 = check that left_type_eval is consistent with right_type_eval?
-        //   actually, i don't think we have to do this
-        // TODO
-        bool check2 = true;
+        // bool check2 = check that declared left_type is consistent with right_type_eval
+        bool check2 = is_subclass(right_type_eval, left_type, CLASS_GRAPH);;
         if(!check2){
             // add to error list
             cout << "assignment node check2 error!" << endl;
