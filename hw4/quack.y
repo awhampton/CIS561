@@ -444,6 +444,8 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
 	// 	cout << path2[i] << endl;
 	// }
 
+    //note: probably want to just print this to cerr and return a error string so that our type check methods 
+    //      that call this don't bug out if they hit one of these cases
 	if( !res1 ){
 		return "ERROR! s1 not in class graph: " + s1;
 	}

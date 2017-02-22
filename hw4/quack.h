@@ -465,7 +465,7 @@ public:
             array<string, 2> sym_val = {left_type, find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)};
             SymTables[((access_node *) left)->expr_type][((access_node *) left)->ident_value] = sym_val;
         }
-
+        
         // return something?
         return "OK";
     }
@@ -726,26 +726,32 @@ public:
     }
 
     string type_check(SymTable &s){
+        // Build list of actual passed constructor arguments
         vector<string> arg_types;
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
             arg_types.push_back((*itr)->type_check(s));
         }
         
-        // check that class constructor call is passing valid args
-        //TODO: want to make sure actual and expected arg list lengths are the same (to avoid out of range access errors)
+        // Make sure actual and expected arg list lengths are the same
         list<string> expected_args = VTABLE_MAP[class_name][0].second;
-        int idx = 0;
+        if(expected_args.size() != arg_types.size()){
+            cerr << "TypeError on constructor call for class " << class_name << ": incorrect number of arguments" << endl;
+            return "*ERROR";
+        }
+        
         // compare each arg type in the received arg list against the expected arguments stored in the constructor definition
+        int idx = 0;
         for(list<string>::iterator arg_itr = expected_args.begin(); arg_itr != expected_args.end(); ++arg_itr){
-            //TODO: instead of direct arg_types arg_itr compare do a LCA comparison because we could also pass subclass arg types
-            if(arg_types[idx] != *arg_itr){
-                //we have an invalid constructor argument type
-                return "*ERROR"; // add to error message here (need to know where in the code we hit this; linenum)
+            // Check if we have an invalid constructor argument type (use LCA since a subclass of an arg is a valid input to that arg)
+            string LCA = find_lca(arg_types[idx], *arg_itr, CLASS_GRAPH);
+            if(LCA != *arg_itr){
+                cerr << "TypeError on constructor call for class " << class_name << ": invalid type for argument " << idx << endl;
+                return "*ERROR"; // TODO: add to error message here (need to know where in the code we hit this; linenum)
             }
             idx++;
         }
         
-        // return the class type?
+        // return the type (which for a class, is its ident)
         return class_name;
     }
 };

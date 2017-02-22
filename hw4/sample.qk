@@ -28,4 +28,5 @@ class SmartRobot(iq: Int) extends Robot {
     // this.iq = 2 * iq;            // Sure, why not
     this.iq = iq;
     // ERROR, failed to define strength
+    z = Robot("4");
 }
