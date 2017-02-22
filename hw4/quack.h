@@ -465,7 +465,7 @@ public:
             array<string, 2> sym_val = {left_type, find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)};
             SymTables[((access_node *) left)->expr_type][((access_node *) left)->ident_value] = sym_val;
         }
-        
+
         // return something?
         return "OK";
     }
@@ -658,7 +658,7 @@ public:
     string type_check(SymTable &s){
         string expr_type = expr->type_check(s);
 
-        list<string> arg_types;
+        vector<string> arg_types;
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
             arg_types.push_back((*itr)->type_check(s));
         }
@@ -687,8 +687,26 @@ public:
             return "*ERROR";
         }
 
-        // check that the arguments are correct
-        // TODO
+        // check that the arguments are correct:
+
+        // Make sure actual and expected arg list lengths are the same
+        list<string> expected_args = vt[idx].second;
+        if(expected_args.size() != arg_types.size()){
+            cerr << "TypeError on method call " << method_name << " for class " << expr_type << ": incorrect number of arguments" << endl;
+            return "*ERROR";
+        }
+
+        // compare each arg type in the received arg list against the expected arguments stored in the constructor definition
+        int idx2 = 0;
+        for(list<string>::iterator arg_itr = expected_args.begin(); arg_itr != expected_args.end(); ++arg_itr){
+            // Check if we have an invalid constructor argument type (use LCA since a subclass of an arg is a valid input to that arg)
+            string LCA = find_lca(arg_types[idx2], *arg_itr, CLASS_GRAPH);
+            if(LCA != *arg_itr){
+                cerr << "TypeError on method call " << method_name << " for class " << expr_type << ": invalid type for argument " << idx << endl;
+                return "*ERROR"; // TODO: add to error message here (need to know where in the code we hit this; linenum)
+            }
+            idx2++;
+        }
 
         // return the return type of the method
         return RT_MAP[expr_type][method_name];
@@ -731,14 +749,14 @@ public:
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
             arg_types.push_back((*itr)->type_check(s));
         }
-        
+
         // Make sure actual and expected arg list lengths are the same
         list<string> expected_args = VTABLE_MAP[class_name][0].second;
         if(expected_args.size() != arg_types.size()){
             cerr << "TypeError on constructor call for class " << class_name << ": incorrect number of arguments" << endl;
             return "*ERROR";
         }
-        
+
         // compare each arg type in the received arg list against the expected arguments stored in the constructor definition
         int idx = 0;
         for(list<string>::iterator arg_itr = expected_args.begin(); arg_itr != expected_args.end(); ++arg_itr){
@@ -750,7 +768,7 @@ public:
             }
             idx++;
         }
-        
+
         // return the type (which for a class, is its ident)
         return class_name;
     }
