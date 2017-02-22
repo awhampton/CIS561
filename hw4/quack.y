@@ -473,7 +473,7 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
 
 
 // returns true if s1 is a subclass of s2
-boolean is_subclass(string s1, string s2, map< string, list<string> > cg){
+bool is_subclass(string s1, string s2, map< string, list<string> > cg){
     return find_lca(s1, s2, cg) == s2;
 }
 
