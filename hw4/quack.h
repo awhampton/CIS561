@@ -19,6 +19,9 @@ extern  unordered_map< string, SymTable > SymTables;
 extern  map<string, list<string> > CLASS_GRAPH;
 extern  map<string, VTable> VTABLE_MAP;
 extern  map<string, map<string, string> > RT_MAP;
+extern  bool print_st;
+extern  bool print_vt;
+extern  vector< pair< int, string > > ERROR_BUFFER;
 
 
 /////////////////////////////////
@@ -694,7 +697,7 @@ public:
         map<string, VTable>::iterator itr_f = VTABLE_MAP.find(expr_type);
         if(itr_f == VTABLE_MAP.end()){
             // if not found, class doesn't exist, so add to the error list
-            cout << "method call error: class doesn't exist" << endl;
+            cout << "method call error: class " << expr_type << " doesn't exist" << endl;
             return "*ERROR";
         }
 
@@ -710,7 +713,7 @@ public:
         // check if we found it
         if(idx >= vt.size()){
             // add to error list
-            cout << "method call error: method doesn't exist" << endl;
+            cout << "method call error: method " << method_name << " doesn't exist in class " << expr_type << endl;
             return "*ERROR";
         }
 
@@ -1148,10 +1151,11 @@ public:
 
     string type_check(list<class_node *>* class_list){
         
-        cerr << "Type checking class " << signature->class_name << endl;
-        cerr << "received symtable from parent:" << endl;
-        print_symtable(SymTables[signature->class_extends]);
-        cerr << endl;
+        if(print_st){
+            cerr << "received symtable from parent:" << endl;
+            print_symtable(SymTables[signature->class_extends]);
+            cerr << endl;
+        }
         
         // add this class to SymTables (so we don't throw an error in the constructor)
         SymTable just_to_initialize_the_map;
@@ -1180,10 +1184,12 @@ public:
         body->type_check(class_symtable_tmp, signature->class_name);
         
         // debug
-        cout << endl;
-        cout << "local symtable for class " << signature->class_name << " in constructor" << endl;
-        print_symtable(class_symtable_tmp);
-        cerr << endl;
+        if(print_st){
+            cout << endl;
+            cout << "local symtable for class " << signature->class_name << " in constructor" << endl;
+            print_symtable(class_symtable_tmp);
+            cerr << endl;
+        }
         
         // run constructor initialization verification on all constructor variables
         for(SymTable::iterator iter = SymTables[signature->class_extends].begin(); iter != SymTables[signature->class_extends].end(); ++iter){
@@ -1256,21 +1262,23 @@ public:
         
         // Begin typecheck of class hierarchy from root
         //TODO: will have to do something for checking stuff that extends a builtin class like Int or String
+        
+        //TODO: need to add Obj's builtin methods to the VTABLE_MAP
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
             if((*itr)->signature->class_extends == "Obj"){
-                cerr << "Found child of Obj: " << (*itr)->signature->class_name << endl;
                 (*itr)->type_check(classes);
-                break;
             }
         }
         
         // debug: print out SymTables
-        cout << endl;
-        cout << "=== SymTables ===" << endl;
-        for(unordered_map<string, SymTable>::iterator itr_o = SymTables.begin(); itr_o != SymTables.end(); ++itr_o){
-            cout << itr_o->first << ":" << endl;
-            print_symtable(itr_o->second);
-            cerr << endl;
+        if(print_st){
+            cout << endl;
+            cout << "=== SymTables ===" << endl;
+            for(unordered_map<string, SymTable>::iterator itr_o = SymTables.begin(); itr_o != SymTables.end(); ++itr_o){
+                cout << itr_o->first << ":" << endl;
+                print_symtable(itr_o->second);
+                cerr << endl;
+            }
         }
 
         // what's a good way to type check the statements in the body of the program?

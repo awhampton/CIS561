@@ -3,7 +3,7 @@ class Foo(){
     this.y = 2;
     this.z = "foo";
     
-    def Bar(){
+    def Bar() {
         x = this.x;
         y = this.y;
         z = this.z;

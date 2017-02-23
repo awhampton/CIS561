@@ -48,6 +48,11 @@ map<string, list<string> > CLASS_GRAPH;
 typedef unordered_map< string, array< string, 2 > > SymTable;
 unordered_map< string, SymTable > SymTables;
 
+// globals for debugging
+bool print_vt = false;
+bool print_st = false;
+vector< pair< int, string > > ERROR_BUFFER;
+
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
 extern "C" int yyparse();
@@ -565,25 +570,36 @@ void build_vtable_map(map<string, list<string> > cg){
 	return;
 }
 
+// print vtable
 void print_vtable(string c){
+    if(!print_vt){
+        return;
+    }
 	VTable vt = VTABLE_MAP[c];
+    cerr << "------------------------------------------------------------------" << endl;
+    cerr << "Method Name:         | Args:" << endl;
+    cerr << "------------------------------------------------------------------" << endl;
 	for(vector< pair< string, list<string> > >::iterator itr = vt.begin(); itr != vt.end(); ++itr){
-		cout << "  " << itr->first << ": ";
+		cerr << setw(20) << itr->first << " | ";
 		for(list<string>::iterator itr2 = (itr->second).begin(); itr2 != (itr->second).end(); ++itr2){
-			cout << *itr2 << "  ";
+			cerr << *itr2 << "  ";
 		}
-		cout << endl;
+        cerr << endl;
 	}
+    cerr << "------------------------------------------------------------------" << endl;
 }
-
 
 // check VTABLE_MAP
 void check_vtable_map(void){
+    if(!print_vt){
+        return;
+    }
 	cout << endl;
-	cout << "CHECKING VTABLE MAP!" << endl;
+	cout << "Checking VTable Map:" << endl;
 	for(set<string>::iterator itr = CLASSES_FOUND.begin(); itr != CLASSES_FOUND.end(); ++itr){
-		cout << *itr << ": " << endl;
+		cerr << "Class " << *itr << ":" << endl;
 		print_vtable(*itr);
+        cerr << endl;
 	}
 }
 
@@ -759,8 +775,11 @@ void populate_builtin_classes(void){
 
 
 void print_symtable(SymTable table){
+    if(!print_st){
+        return;
+    }
     cerr << "------------------------------------------------------------------" << endl;
-    cerr << "Name:                | Formal Type:         | Actual Type:" << endl;
+    cerr << "Symbol Name:         | Formal Type:         | Actual Type:" << endl;
     cerr << "------------------------------------------------------------------" << endl;
     for(SymTable::iterator iter = table.begin(); iter != table.end(); ++iter){
         cerr << setw(20) << iter->first << " | " << setw(20) << iter->second[0] << " | " << setw(20) << iter->second[1] << endl;
@@ -771,21 +790,14 @@ void print_symtable(SymTable table){
 
 // returns a symbol table that contains all the elements that exist in every symbol table in input list
 SymTable get_intersection(vector< SymTable > tables){
-    cerr << "Grabbing Intersection:" << endl;
     
     // Initialize intersection to first table in list
     SymTable intersect = tables[0];
-    cerr << "Symbol Table 0" << endl;
-    print_symtable(intersect);
-    cerr << endl;
     
     // iterate through tables
     //TODO: when it hits the method_name in the symtable it causes an error as method_name obviously isn't a class... need to fix that
     int size = tables.size();
     for(int i = 1; i < size; i++){
-        cerr << "Symbol Table " << i << ":" << endl;
-        print_symtable(tables[i]);
-        cerr << endl;
         // Search every table for each element in intersect
         // If it isn't there remove it from intersect. If it is, set the intersection's type to the LCA of both.
         SymTable tmp_intersect = intersect;
@@ -801,9 +813,6 @@ SymTable get_intersection(vector< SymTable > tables){
         }
         intersect = tmp_intersect;
     }
-    
-    cerr << "Intersection:" << endl;
-    print_symtable(intersect);
     
     // Return the intersection of all symbol tables in the list
     return intersect;
@@ -833,12 +842,38 @@ int main(int argc, char **argv) {
 	FILE *infile;
 	INFILE_NAME = (char *) "stdin";
     if (argc > 1) {
-    	if( !(infile = fopen(argv[1], "r"))){
-  			perror(argv[1]);
-  			exit(1);
+        if (argc > 2) {
+            int fileidx = argc-1;
+            for (int i = 1; i < fileidx; i++){
+                if (strcmp(argv[i], "-s") == 0) {
+                    print_st = true;
+                }
+                if (strcmp(argv[i], "-v") == 0) {
+                    print_vt = true;
+                }
+            }
+     	    if( !(infile = fopen(argv[fileidx], "r"))){
+  		    	perror(argv[fileidx]);
+  		    	exit(1);
+            }
+		    INFILE_NAME = argv[fileidx];
+            yyin = infile;           
         }
-		INFILE_NAME = argv[1];
-        yyin = infile;
+        
+        else if (argc == 2) {
+            if((strcmp(argv[1],"--help") == 0) || (strcmp(argv[1],"-help") == 0) || (strcmp(argv[1], "-h") == 0)){
+                cout << "Valid Flags:" << endl;
+                cout << "-s: Print symbol tables" << endl;
+                cout << "-v: Print virtual method tables" << endl;
+                return 0;
+            }
+    	    if( !(infile = fopen(argv[1], "r"))){
+  		    	perror(argv[1]);
+  		    	exit(1);
+            }
+		    INFILE_NAME = argv[1];
+            yyin = infile;
+        }
     }
 
 	// parse through the input until there is no more:
@@ -900,14 +935,10 @@ int main(int argc, char **argv) {
 
 		// type checking stuff
 		build_vtable_map(CLASS_GRAPH);
-		//check_vtable_map();
+		check_vtable_map();
 		// check_rt_map();
 
 		root->type_check();
-
-
-
-
 
 	}
 	// else print the number of errors on stdout
