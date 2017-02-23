@@ -9,7 +9,7 @@ class Robot(n : String) {
     z = "hi";
     // w : String = 2;  // throws error!
     // n : Int = 2;  // throws error!
-    n = 2; // this doesn't currently raise an error ... should it?
+    // n = 2; // this doesn't currently raise an error ... should it?
 
     b = a;
 
@@ -39,5 +39,5 @@ class SmartRobot(iq: Int) extends Robot {
     // this.iq = 2 * iq;            // Sure, why not
     this.iq = iq;
     // ERROR, failed to define strength
-    z = Robot("4"); 
+    z = Robot("4");
 }

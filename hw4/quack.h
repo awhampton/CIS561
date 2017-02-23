@@ -19,6 +19,7 @@ extern  unordered_map< string, SymTable > SymTables;
 extern  map<string, list<string> > CLASS_GRAPH;
 extern  map<string, VTable> VTABLE_MAP;
 extern  map<string, map<string, string> > RT_MAP;
+extern  bool TYPE_CHECK_AGAIN;
 
 
 /////////////////////////////////
@@ -190,8 +191,15 @@ public:
             cerr << "non-boolean condition" << endl;
         }
 
-        for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->type_check(s);
+        TYPE_CHECK_AGAIN = true;
+        int num_type_checks = 0;
+        while(TYPE_CHECK_AGAIN){
+            TYPE_CHECK_AGAIN = false;
+            num_type_checks++;
+            cout << "type check num: " << num_type_checks << endl;
+            for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+                (*itr)->type_check(s);
+            }
         }
 
         return "OK";  // don't think we actually need to return anything
@@ -253,8 +261,15 @@ public:
 
         // the 'else' branch is a little goofy because it's just a list of statements here
         SymTable else_branch_symtable = s;
-        for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
-            (*itr)->type_check(else_branch_symtable);
+        TYPE_CHECK_AGAIN = true;
+        int num_type_checks = 0;
+        while(TYPE_CHECK_AGAIN){
+            TYPE_CHECK_AGAIN = false;
+            num_type_checks++;
+            cout << "type check num: " << num_type_checks << endl;
+            for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
+                (*itr)->type_check(else_branch_symtable);
+            }
         }
         tables.push_back(else_branch_symtable);
 
@@ -483,11 +498,17 @@ public:
         //   note: right now, if a variable is declared without a type, the declared type (left_type)
         //         defaults to 'Nothing' ... this might not be what we want
         if(left->type_of_expression == "ident"){
+            if(left_type_eval != find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)){
+                TYPE_CHECK_AGAIN = true;
+            }
             array<string, 2> sym_val = {left_type, find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)};
             s[((ident_node *) left)->ident_value] = sym_val;
         }
 
         if(left->type_of_expression == "access"){
+            if(left_type_eval != find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)){
+                TYPE_CHECK_AGAIN = true;
+            }
             array<string, 2> sym_val = {left_type, find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)};
             SymTables[((access_node *) left)->expr_type][((access_node *) left)->ident_value] = sym_val;
         }
@@ -972,8 +993,15 @@ public:
         }
 
         // type check the method's statements
-        for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->type_check(method_symtable);
+        TYPE_CHECK_AGAIN = true;
+        int num_type_checks = 0;
+        while(TYPE_CHECK_AGAIN){
+            TYPE_CHECK_AGAIN = false;
+            num_type_checks++;
+            cout << "type check num: " << num_type_checks << endl;
+            for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+                (*itr)->type_check(method_symtable);
+            }
         }
 
         return "OK";
@@ -1043,8 +1071,15 @@ public:
 
         // these statements are the class constructor
         // we will include "this.x" fields in the symtable stored at SymTables[this_class]
-        for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->type_check(s);
+        TYPE_CHECK_AGAIN = true;
+        int num_type_checks = 0;
+        while(TYPE_CHECK_AGAIN){
+            TYPE_CHECK_AGAIN = false;
+            num_type_checks++;
+            cout << "type check num: " << num_type_checks << endl;
+            for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+                (*itr)->type_check(s);
+            }
         }
 
         // type check the methods ... send them a blank symtable with just the class name in it
@@ -1147,44 +1182,44 @@ public:
     }
 
     string type_check(list<class_node *>* class_list){
-        
+
         cerr << "Type checking class " << signature->class_name << endl;
         cerr << "received symtable from parent:" << endl;
         print_symtable(SymTables[signature->class_extends]);
         cerr << endl;
-        
+
         // add this class to SymTables (so we don't throw an error in the constructor)
         SymTable just_to_initialize_the_map;
         SymTables[signature->class_name] = just_to_initialize_the_map;
-        
+
         // make a temp symtable that is just used for typechecking the constructor definition
         //   note: the string "this" has special meaning in this context, it refers to the class name
         SymTable class_symtable_tmp;
         array<string, 2> sym_val = {signature->class_name, signature->class_name};
         class_symtable_tmp["this"] = sym_val;
-        
+
         // send class_symtable_tmp to the signature to add formal arguments
         //   note: signature->type_check takes a reference for its argument
         signature->type_check(class_symtable_tmp);
-        
+
         // debug
         // for (SymTable::iterator itr = class_symtable_tmp.begin(); itr != class_symtable_tmp.end(); ++itr)
         // {
         //     cout << itr->first << ": " << itr->second[0] << " - " << itr->second[1] << endl;
         // }
-        
+
         // type check the body of the class
         //    note: during this process, we will build a copy of the symtable with only the class
         //          datamembers that is saved to the global SymTables
         //    note: send the class name down for the method symbol tables
         body->type_check(class_symtable_tmp, signature->class_name);
-        
+
         // debug
         cout << endl;
         cout << "local symtable for class " << signature->class_name << " in constructor" << endl;
         print_symtable(class_symtable_tmp);
         cerr << endl;
-        
+
         // run constructor initialization verification on all constructor variables
         for(SymTable::iterator iter = SymTables[signature->class_extends].begin(); iter != SymTables[signature->class_extends].end(); ++iter){
             // didn't find a constructor variable in the class that was expected by its superclass definition
@@ -1193,15 +1228,15 @@ public:
                 cerr << "Error: class " << signature->class_name << " doesn't initialize variable " << iter->first << " declared by its superclass" << endl;
                 //TODO: need to return an error type here maybe?
             }
-            
+
             // found the constructor variable but the type was invalid
             else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
-                cerr << "TypeError: class " << signature->class_name << " initializes inherited variable " 
+                cerr << "TypeError: class " << signature->class_name << " initializes inherited variable "
                      << iter->first << " to invalid type " << iter->second[1] << endl;
                 //TODO: need to return an error type here maybe?
             }
         }
-        
+
         // recurse and check all subclasses, passing our constructor symbol table to them
         for(list<string>::iterator iter = CLASS_GRAPH[signature->class_name].begin(); iter != CLASS_GRAPH[signature->class_name].end(); ++iter){
             for(list<class_node *>::iterator c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter){
@@ -1210,7 +1245,7 @@ public:
                 }
             }
         }
-        
+
         return "OK";
     }
 
@@ -1253,7 +1288,7 @@ public:
     }
 
     string type_check(/* symbol table */){
-        
+
         // Begin typecheck of class hierarchy from root
         //TODO: will have to do something for checking stuff that extends a builtin class like Int or String
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
@@ -1263,7 +1298,7 @@ public:
                 break;
             }
         }
-        
+
         // debug: print out SymTables
         cout << endl;
         cout << "=== SymTables ===" << endl;
