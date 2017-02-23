@@ -810,6 +810,7 @@ SymTable get_intersection(vector< SymTable > tables){
 }
 
 
+
 //TODO: need the following:
 //  - Something to hold all our class symtables
 //  - Something to hold all method symtables (perhaps map from class ident to method symtable)
