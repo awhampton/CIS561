@@ -27,6 +27,8 @@ extern  map<string, map<string, string> > RT_MAP;
 bool make_path(string r, string t, vector<string> &path, map< string, list<string> > cg);
 string find_lca(string s1, string s2, map< string, list<string> > cg);
 bool is_subclass(string s1, string s2, map< string, list<string> > cg);
+SymTable get_intersection(vector< SymTable > tables);
+void print_symtable(SymTable table);
 
 
 /////////////////////////////////
@@ -258,7 +260,7 @@ public:
 
         // need some way to intersect the symbol tables that were generated in the branches
         // this intersection should update the types with the LCA function
-        // s = get_intersection(tables);
+        s = get_intersection(tables);
 
         return "OK";
     }

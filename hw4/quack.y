@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <list>
@@ -754,6 +755,58 @@ void populate_builtin_classes(void){
 	BUILTIN_CLASSES.insert("Int");
 	BUILTIN_CLASSES.insert("Boolean");
 	BUILTIN_CLASSES.insert("Nothing");
+}
+
+
+void print_symtable(SymTable table){
+    cerr << "------------------------------------------------------------------" << endl;
+    cerr << "Name:                | Formal Type:         | Actual Type:" << endl;
+    cerr << "------------------------------------------------------------------" << endl;
+    for(SymTable::iterator iter = table.begin(); iter != table.end(); ++iter){
+        cerr << setw(20) << iter->first << " | " << setw(20) << iter->second[0] << " | " << setw(20) << iter->second[1] << endl;
+    }
+    cerr << "------------------------------------------------------------------" << endl;
+}
+
+
+// returns a symbol table that contains all the elements that exist in every symbol table in input list
+SymTable get_intersection(vector< SymTable > tables){
+    cerr << "Grabbing Intersection:" << endl;
+    
+    // Initialize intersection to first table in list
+    SymTable intersect = tables[0];
+    cerr << "Symbol Table 0" << endl;
+    print_symtable(intersect);
+    cerr << endl;
+    
+    // iterate through tables
+    //TODO: when it hits the method_name in the symtable it causes an error as method_name obviously isn't a class... need to fix that
+    int size = tables.size();
+    for(int i = 1; i < size; i++){
+        cerr << "Symbol Table " << i << ":" << endl;
+        print_symtable(tables[i]);
+        cerr << endl;
+        // Search every table for each element in intersect
+        // If it isn't there remove it from intersect. If it is, set the intersection's type to the LCA of both.
+        SymTable tmp_intersect = intersect;
+        for(SymTable::iterator iter = intersect.begin(); iter != intersect.end(); ++iter){
+            // didn't find the element, remove it from intersect
+            if(tables[i].find(iter->first) == tables[i].end()){
+                tmp_intersect.erase(iter->first);
+            }
+            // found it, update its type to the LCA of intersect type and currtable type
+            else{
+                tmp_intersect[iter->first][1] = find_lca(tmp_intersect[iter->first][1], tables[i][iter->first][1], CLASS_GRAPH);
+            }
+        }
+        intersect = tmp_intersect;
+    }
+    
+    cerr << "Intersection:" << endl;
+    print_symtable(intersect);
+    
+    // Return the intersection of all symbol tables in the list
+    return intersect;
 }
 
 
