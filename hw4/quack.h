@@ -1146,9 +1146,12 @@ public:
         return res;
     }
 
-    string type_check(SymTable s, list<class_node *>* class_list){
+    string type_check(list<class_node *>* class_list){
         
         cerr << "Type checking class " << signature->class_name << endl;
+        cerr << "received symtable from parent:" << endl;
+        print_symtable(SymTables[signature->class_extends]);
+        cerr << endl;
         
         // add this class to SymTables (so we don't throw an error in the constructor)
         SymTable just_to_initialize_the_map;
@@ -1182,15 +1185,31 @@ public:
         print_symtable(class_symtable_tmp);
         cerr << endl;
         
+        // run constructor initialization verification on all constructor variables
+        for(SymTable::iterator iter = SymTables[signature->class_extends].begin(); iter != SymTables[signature->class_extends].end(); ++iter){
+            // didn't find a constructor variable in the class that was expected by its superclass definition
+            SymTable::iterator s_itr = SymTables[signature->class_name].find(iter->first);
+            if(s_itr == SymTables[signature->class_name].end()){
+                cerr << "Error: class " << signature->class_name << " doesn't initialize variable " << iter->first << " declared by its superclass" << endl;
+                //TODO: need to return an error type here maybe?
+            }
+            
+            // found the constructor variable but the type was invalid
+            else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
+                cerr << "TypeError: class " << signature->class_name << " initializes inherited variable " 
+                     << iter->first << " to invalid type " << iter->second[1] << endl;
+                //TODO: need to return an error type here maybe?
+            }
+        }
+        
         // recurse and check all subclasses, passing our constructor symbol table to them
         for(list<string>::iterator iter = CLASS_GRAPH[signature->class_name].begin(); iter != CLASS_GRAPH[signature->class_name].end(); ++iter){
             for(list<class_node *>::iterator c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter){
                 if((*c_iter)->signature->class_name == (*iter)){
-                    (*c_iter)->type_check(class_symtable_tmp, class_list);
+                    (*c_iter)->type_check(class_list);
                 }
             }
         }
-        //TODO: implement constructor initialization verification using symtable s
         
         return "OK";
     }
@@ -1240,8 +1259,7 @@ public:
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
             if((*itr)->signature->class_extends == "Obj"){
                 cerr << "Found child of Obj: " << (*itr)->signature->class_name << endl;
-                SymTable init_symtable;
-                (*itr)->type_check(init_symtable, classes);
+                (*itr)->type_check(classes);
                 break;
             }
         }
