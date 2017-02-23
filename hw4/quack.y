@@ -47,6 +47,7 @@ map<string, map<string, string> > RT_MAP;
 map<string, list<string> > CLASS_GRAPH;
 typedef unordered_map< string, array< string, 2 > > SymTable;
 unordered_map< string, SymTable > SymTables;
+bool TYPE_CHECK_AGAIN;
 
 // globals for debugging
 bool print_vt = false;
@@ -791,9 +792,14 @@ void print_symtable(SymTable table){
 // returns a symbol table that contains all the elements that exist in every symbol table in input list
 SymTable get_intersection(vector< SymTable > tables){
     
+    cerr << "Grabbing Intersection:" << endl;
+
     // Initialize intersection to first table in list
     SymTable intersect = tables[0];
-    
+    cerr << "Symbol Table 0" << endl;
+    print_symtable(intersect);
+    cerr << endl;
+
     // iterate through tables
     //TODO: when it hits the method_name in the symtable it causes an error as method_name obviously isn't a class... need to fix that
     int size = tables.size();
@@ -813,7 +819,12 @@ SymTable get_intersection(vector< SymTable > tables){
         }
         intersect = tmp_intersect;
     }
-    
+
+    if(print_st){
+        cerr << "Intersection:" << endl;
+        print_symtable(intersect);
+    }
+
     // Return the intersection of all symbol tables in the list
     return intersect;
 }
