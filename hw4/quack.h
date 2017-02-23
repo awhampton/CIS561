@@ -1234,16 +1234,14 @@ public:
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
             (*itr)->type_check();
         }
-
+        
         // debug: print out SymTables
         cout << endl;
         cout << "=== SymTables ===" << endl;
         for(unordered_map<string, SymTable>::iterator itr_o = SymTables.begin(); itr_o != SymTables.end(); ++itr_o){
-            cout << itr_o->first << endl;
-            for (SymTable::iterator itr = (itr_o->second).begin(); itr != (itr_o->second).end(); ++itr)
-            {
-                cout << "  " << itr->first << ": " << itr->second[0] << " - " << itr->second[1] << endl;
-            }
+            cout << itr_o->first << ":" << endl;
+            print_symtable(itr_o->second);
+            cerr << endl;
         }
 
         // what's a good way to type check the statements in the body of the program?
