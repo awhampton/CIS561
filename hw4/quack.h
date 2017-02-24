@@ -635,6 +635,12 @@ public:
             LOG.insert("Error", line_number, msg);
         }
 
+        // also check that the return type isn't *ERROR
+        if(return_type == "*ERROR"){
+            string msg = "return type error";
+            LOG.insert("Error", line_number, msg);
+        }
+
         return "OK";
     }
 };
@@ -788,6 +794,12 @@ public:
                 LOG.insert("TypeError", line_number, msg);
                 return "*ERROR";
             }
+            // the argument should also not have the error type
+            if(arg_types[idx2] == "*ERROR"){
+                string msg = "type of argument " + to_string(idx) + " in call of class " + expr_type + " method " + method_name + " is invalid";
+                LOG.insert("TypeError", line_number, msg);
+                return "*ERROR";
+            }
             idx2++;
         }
 
@@ -848,6 +860,12 @@ public:
             // Check if we have an invalid constructor argument type (use LCA since a subclass of an arg is a valid input to that arg)
             string LCA = find_lca(arg_types[idx], *arg_itr, CLASS_GRAPH);
             if(LCA != *arg_itr){
+                string msg = "type of argument " + to_string(idx) + " in call of class " + class_name + " constructor is invalid";
+                LOG.insert("TypeError", line_number, msg);
+                return "*ERROR";
+            }
+            // the argument should also not have the error type
+            if(arg_types[idx] == "*ERROR"){
                 string msg = "type of argument " + to_string(idx) + " in call of class " + class_name + " constructor is invalid";
                 LOG.insert("TypeError", line_number, msg);
                 return "*ERROR";
