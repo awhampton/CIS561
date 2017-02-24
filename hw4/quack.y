@@ -51,7 +51,7 @@ unordered_map< string, SymTable > SymTables;
 bool TYPE_CHECK_AGAIN;
 
 // globals for debugging
-DEBUG_STREAM LOG(0);
+DEBUG_STREAM LOG(5);
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -492,9 +492,9 @@ VTable build_vtable(string c, VTable parent_vt){
     // Initialize variables
 	VTable res = parent_vt;
 	int table_size = res.size();
-	list<class_node *> classes = *(root->classes);
 
     // Crawl through all classes
+    list<class_node *> classes = *(root->classes);
 	for(list<class_node *>::iterator itr = classes.begin(); itr != classes.end(); ++itr){
 		string class_name = (*itr)->signature->class_name;
 		if(class_name == c){
@@ -536,6 +536,62 @@ VTable build_vtable(string c, VTable parent_vt){
 			}
 
 		}
+
+        // if the class is String, update it with builtin methods
+        if(c == "String"){
+            list<string> str_constructor_types;
+            res[0] = make_pair("String", str_constructor_types);
+
+            list<string> str_plus_types;
+        	str_plus_types.push_back("String");
+        	res.push_back(make_pair("PLUS", str_plus_types));
+
+        	RT_MAP["String"]["PLUS"] = "String";
+        }
+
+        // if the class is Int, update it with builtin methods
+        if(c == "Int"){
+
+            list<string> int_constructor_types;
+            res[0] = make_pair("Int", int_constructor_types);
+
+            list<string> int_relation_types;
+        	int_relation_types.push_back("Int");
+
+        	res.push_back(make_pair("PLUS", int_relation_types));
+            res.push_back(make_pair("MINUS", int_relation_types));
+            res.push_back(make_pair("TIMES", int_relation_types));
+            res.push_back(make_pair("DIVIDE", int_relation_types));
+
+            res.push_back(make_pair("ATMOST", int_relation_types));
+            res.push_back(make_pair("ATLEAST", int_relation_types));
+            res.push_back(make_pair("LESS", int_relation_types));
+            res.push_back(make_pair("MORE", int_relation_types));
+
+        	RT_MAP["Int"]["PLUS"] = "Int";
+            RT_MAP["Int"]["MINUS"] = "Int";
+            RT_MAP["Int"]["TIMES"] = "Int";
+            RT_MAP["Int"]["DIVIDE"] = "Int";
+
+            RT_MAP["Int"]["ATMOST"] = "Boolean";
+            RT_MAP["Int"]["ATLEAST"] = "Boolean";
+            RT_MAP["Int"]["LESS"] = "Boolean";
+            RT_MAP["Int"]["MORE"] = "Boolean";
+        }
+
+        // if the class is Boolean, update it with builtin methods
+        if(c == "Boolean"){
+
+            list<string> bool_constructor_types;
+            res[0] = make_pair("Boolean", bool_constructor_types);
+        }
+
+        // if the class is Nothing, update it with builtin methods
+        if(c == "Nothing"){
+
+            list<string> nothing_constructor_types;
+            res[0] = make_pair("Nothing", nothing_constructor_types);
+        }
 	}
 
 	return res;
@@ -552,6 +608,8 @@ void build_vtable_map_recursive(map<string, list<string> > cg, string r, VTable 
 }
 
 void build_vtable_map(map<string, list<string> > cg){
+
+    // create the Obj vtable and update return types
 	VTable obj_vtable;
 	list<string> obj_equals_types;
 	obj_equals_types.push_back("Obj");
@@ -566,6 +624,7 @@ void build_vtable_map(map<string, list<string> > cg){
 	RT_MAP["Obj"]["EQUALS"] = "Boolean";
 	RT_MAP["Obj"]["PRINT"] = "Nothing";
 	RT_MAP["Obj"]["STR"] = "String";
+
 	for(list<string>::iterator itr = cg["Obj"].begin(); itr != cg["Obj"].end(); ++itr){
 		build_vtable_map_recursive(cg, *itr, obj_vtable, "Obj");
 	}
@@ -848,18 +907,19 @@ SymTable get_intersection(vector< SymTable > tables){
 
 
 int main(int argc, char **argv) {
-    
+
 	// populate the builtin class set
 	populate_builtin_classes();
-    
+
     // initialize logging
-    LOG = DEBUG_STREAM(1);
     LOG.enable("SyntaxError");
     LOG.enable("ClassError");
     LOG.enable("TypeError");
     LOG.enable("Error");
     LOG.enable("Debug");
-    
+    // LOG.output_st();
+    // LOG.output_vt();
+
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
 	INFILE_NAME = (char *) "stdin";
@@ -881,7 +941,7 @@ int main(int argc, char **argv) {
 		    INFILE_NAME = argv[fileidx];
             yyin = infile;
         }
-    
+
         else if (argc == 2) {
             if((strcmp(argv[1],"--help") == 0) || (strcmp(argv[1],"-help") == 0) || (strcmp(argv[1], "-h") == 0)){
                 cout << "Valid Flags:" << endl;
@@ -897,7 +957,7 @@ int main(int argc, char **argv) {
             yyin = infile;
         }
     }
-    
+
 	// parse through the input until there is no more:
 	do {
 		yyparse();
@@ -905,10 +965,10 @@ int main(int argc, char **argv) {
 
 	// if everything is OK continue processing with AST
 	if(num_errors == 0){
-    
+
 		// make the class hierarchy graph
 		CLASS_GRAPH = build_class_graph(root);
-    
+
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(CLASS_GRAPH, "Obj");
 		if(class_res == 0){
@@ -933,10 +993,10 @@ int main(int argc, char **argv) {
 			string msg = "class " + MULTIPLE_SUBCLASS + " defined multiple times";
             LOG.insert("ClassError", -1, msg);
 		}
-    
+
 		// check that constructor calls are valid
 		get_constructor_names(root);  // stored in global CONSTRUCTOR_CALLS
-    
+
 		set<string> missing;
 		set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
 		if(!missing.empty()){
@@ -949,24 +1009,24 @@ int main(int argc, char **argv) {
 		else{
 			// Constructor calls good
 		}
-    
+
 		// test the lca function
 		// crawl_class_graph(CLASS_GRAPH, "Obj");
 		// string lca = find_lca("C2", "C4", CLASS_GRAPH);
 		// cout << "LCA: " << lca << endl;
-    
+
 		// type checking stuff
 		build_vtable_map(CLASS_GRAPH);
 		check_vtable_map();
 		// check_rt_map();
-    
+
 		root->type_check();
-    
+
 	}
-    
+
     // dump the logs if we haven't already
     LOG.print_logs();
-    
+
 	// delete the root of the AST (which should delete the entire thing)
 	if(root != NULL){
 		delete root;

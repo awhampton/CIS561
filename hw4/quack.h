@@ -748,6 +748,13 @@ public:
             arg_types.push_back((*itr)->type_check(s));
         }
 
+        // can't call a method on an uninitialized variable
+        if(expr_type == "*ERROR"){
+            string msg = "method call on undeclared variable";
+            LOG.insert("TypeError", line_number, msg);
+            return "*ERROR";
+        }
+
         // first, try to find expr_type in VTABLE_MAP
         map<string, VTable>::iterator itr_f = VTABLE_MAP.find(expr_type);
         if(itr_f == VTABLE_MAP.end()){
