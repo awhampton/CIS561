@@ -524,7 +524,7 @@ public:
         bool check3 = right_type_eval != "*ERROR";
         if(!check3){
             // add to error list
-            string msg = "undeclared variable";
+            string msg = "undeclared variable or method";
             LOG.insert("TypeError", line_number, msg);
         }
 
