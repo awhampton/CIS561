@@ -1269,7 +1269,7 @@ public:
 
             // found the constructor variable but the type was invalid
             else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
-                string msg = "class " + signature->class_name + " initializes inherited variable " + iter->first + " to invalid type " + iter->second[1];
+                string msg = "class " + signature->class_name + " initializes inherited variable " + iter->first + " to invalid type " + s_itr->second[1];
                 LOG.insert("TypeError", signature->line_number, msg);
                 //TODO: need to return an error type here maybe?
             }
@@ -1348,9 +1348,23 @@ public:
             }
         }
 
-        // what's a good way to type check the statements in the body of the program?
-        for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->type_check(/* symbol table */);
+        // make a blank symbol table for the local variables in the body of the program
+        SymTable main_locals;
+
+        // for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+        //     (*itr)->type_check(/* symbol table */);
+        // }
+
+        TYPE_CHECK_AGAIN = true;
+        int num_type_checks = 0;
+        while(TYPE_CHECK_AGAIN){
+            TYPE_CHECK_AGAIN = false;
+            num_type_checks++;
+            string msg = "type check main num: " + to_string(num_type_checks);
+            LOG.insert("Debug", -1, msg);
+            for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+                (*itr)->type_check(main_locals);
+            }
         }
 
         return "OK";
