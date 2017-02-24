@@ -536,68 +536,69 @@ VTable build_vtable(string c, VTable parent_vt){
 			}
 
 		}
-
-        // if the class is String, update it with builtin methods
-        if(c == "String"){
-            list<string> str_constructor_types;
-            res[0] = make_pair("String", str_constructor_types);
-
-            list<string> str_plus_types;
-        	str_plus_types.push_back("String");
-        	res.push_back(make_pair("PLUS", str_plus_types));
-
-        	RT_MAP["String"]["PLUS"] = "String";
-        }
-
-        // if the class is Int, update it with builtin methods
-        if(c == "Int"){
-
-            list<string> int_constructor_types;
-            res[0] = make_pair("Int", int_constructor_types);
-
-            list<string> int_relation_types;
-        	int_relation_types.push_back("Int");
-
-        	res.push_back(make_pair("PLUS", int_relation_types));
-            res.push_back(make_pair("MINUS", int_relation_types));
-            res.push_back(make_pair("TIMES", int_relation_types));
-            res.push_back(make_pair("DIVIDE", int_relation_types));
-
-            res.push_back(make_pair("ATMOST", int_relation_types));
-            res.push_back(make_pair("ATLEAST", int_relation_types));
-            res.push_back(make_pair("LESS", int_relation_types));
-            res.push_back(make_pair("MORE", int_relation_types));
-
-        	RT_MAP["Int"]["PLUS"] = "Int";
-            RT_MAP["Int"]["MINUS"] = "Int";
-            RT_MAP["Int"]["TIMES"] = "Int";
-            RT_MAP["Int"]["DIVIDE"] = "Int";
-
-            RT_MAP["Int"]["ATMOST"] = "Boolean";
-            RT_MAP["Int"]["ATLEAST"] = "Boolean";
-            RT_MAP["Int"]["LESS"] = "Boolean";
-            RT_MAP["Int"]["MORE"] = "Boolean";
-        }
-
-        // if the class is Boolean, update it with builtin methods
-        if(c == "Boolean"){
-
-            list<string> bool_constructor_types;
-            res[0] = make_pair("Boolean", bool_constructor_types);
-        }
-
-        // if the class is Nothing, update it with builtin methods
-        if(c == "Nothing"){
-
-            list<string> nothing_constructor_types;
-            res[0] = make_pair("Nothing", nothing_constructor_types);
-        }
 	}
+
+    // if the class is String, update it with builtin methods
+    if(c == "String"){
+        list<string> str_constructor_types;
+        res[0] = make_pair("String", str_constructor_types);
+
+        list<string> str_plus_types;
+    	str_plus_types.push_back("String");
+    	res.push_back(make_pair("PLUS", str_plus_types));
+
+    	RT_MAP["String"]["PLUS"] = "String";
+    }
+
+    // if the class is Int, update it with builtin methods
+    if(c == "Int"){
+
+        list<string> int_constructor_types;
+        res[0] = make_pair("Int", int_constructor_types);
+
+        list<string> int_relation_types;
+    	int_relation_types.push_back("Int");
+
+    	res.push_back(make_pair("PLUS", int_relation_types));
+        res.push_back(make_pair("MINUS", int_relation_types));
+        res.push_back(make_pair("TIMES", int_relation_types));
+        res.push_back(make_pair("DIVIDE", int_relation_types));
+
+        res.push_back(make_pair("ATMOST", int_relation_types));
+        res.push_back(make_pair("ATLEAST", int_relation_types));
+        res.push_back(make_pair("LESS", int_relation_types));
+        res.push_back(make_pair("MORE", int_relation_types));
+
+    	RT_MAP["Int"]["PLUS"] = "Int";
+        RT_MAP["Int"]["MINUS"] = "Int";
+        RT_MAP["Int"]["TIMES"] = "Int";
+        RT_MAP["Int"]["DIVIDE"] = "Int";
+
+        RT_MAP["Int"]["ATMOST"] = "Boolean";
+        RT_MAP["Int"]["ATLEAST"] = "Boolean";
+        RT_MAP["Int"]["LESS"] = "Boolean";
+        RT_MAP["Int"]["MORE"] = "Boolean";
+    }
+
+    // if the class is Boolean, update it with builtin methods
+    if(c == "Boolean"){
+
+        list<string> bool_constructor_types;
+        res[0] = make_pair("Boolean", bool_constructor_types);
+    }
+
+    // if the class is Nothing, update it with builtin methods
+    if(c == "Nothing"){
+
+        list<string> nothing_constructor_types;
+        res[0] = make_pair("Nothing", nothing_constructor_types);
+    }
 
 	return res;
 }
 
 void build_vtable_map_recursive(map<string, list<string> > cg, string r, VTable parent_vt, string parent){
+	// cout << "building table for " << r << " from parent " << parent << endl;
 	RT_MAP[r] = RT_MAP[parent];
 	VTable r_vtable = build_vtable(r, parent_vt);
 	VTABLE_MAP[r] = r_vtable;
@@ -917,8 +918,6 @@ int main(int argc, char **argv) {
     LOG.enable("TypeError");
     LOG.enable("Error");
     LOG.enable("Debug");
-    // LOG.output_st();
-    // LOG.output_vt();
 
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
@@ -1018,7 +1017,7 @@ int main(int argc, char **argv) {
 		// type checking stuff
 		build_vtable_map(CLASS_GRAPH);
 		check_vtable_map();
-		// check_rt_map();
+		check_rt_map();
 
 		root->type_check();
 
