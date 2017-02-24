@@ -26,6 +26,7 @@
 #include <unordered_map>
 #include <vector>
 #include "quack.h"
+#include "log.h"
 
 using namespace std;
 
@@ -50,9 +51,7 @@ unordered_map< string, SymTable > SymTables;
 bool TYPE_CHECK_AGAIN;
 
 // globals for debugging
-bool print_vt = false;
-bool print_st = false;
-vector< pair< int, string > > ERROR_BUFFER;
+DEBUG_STREAM LOG(0);
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -459,11 +458,11 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
     //note: probably want to just print this to cerr and return a error string so that our type check methods
     //      that call this don't bug out if they hit one of these cases
 	if( !res1 ){
-		cerr << "ERROR! s1 not in class graph: " + s1 << endl;
+		LOG.insert("Error", -1, "ERROR! s1 not in class graph: " + s1);
         return "*ERROR";
 	}
 	if( !res2 ){
-		cerr << "ERROR! s2 not in class graph: " + s2 << endl;
+		LOG.insert("Error", -1, "ERROR! s2 not in class graph: " + s2);
         return "*ERROR";
 	}
 
@@ -573,7 +572,7 @@ void build_vtable_map(map<string, list<string> > cg){
 
 // print vtable
 void print_vtable(string c){
-    if(!print_vt){
+    if(!LOG.print_vt){
         return;
     }
 	VTable vt = VTABLE_MAP[c];
@@ -592,7 +591,7 @@ void print_vtable(string c){
 
 // check VTABLE_MAP
 void check_vtable_map(void){
-    if(!print_vt){
+    if(!LOG.print_vt){
         return;
     }
 	cout << endl;
@@ -776,7 +775,7 @@ void populate_builtin_classes(void){
 
 
 void print_symtable(SymTable table){
-    if(!print_st){
+    if(!LOG.print_st){
         return;
     }
     cerr << "------------------------------------------------------------------" << endl;
@@ -791,14 +790,16 @@ void print_symtable(SymTable table){
 
 // returns a symbol table that contains all the elements that exist in every symbol table in input list
 SymTable get_intersection(vector< SymTable > tables){
-    
-    cerr << "Grabbing Intersection:" << endl;
 
     // Initialize intersection to first table in list
     SymTable intersect = tables[0];
-    cerr << "Symbol Table 0" << endl;
-    print_symtable(intersect);
-    cerr << endl;
+    
+    if (LOG.print_st){
+        cerr << "Grabbing Intersection:" << endl;
+        cerr << "Symbol Table 0" << endl;
+        print_symtable(intersect);
+        cerr << endl;
+    }
 
     // iterate through tables
     //TODO: when it hits the method_name in the symtable it causes an error as method_name obviously isn't a class... need to fix that
@@ -820,7 +821,7 @@ SymTable get_intersection(vector< SymTable > tables){
         intersect = tmp_intersect;
     }
 
-    if(print_st){
+    if(LOG.print_st){
         cerr << "Intersection:" << endl;
         print_symtable(intersect);
     }
@@ -848,7 +849,15 @@ int main(int argc, char **argv) {
 
 	// populate the builtin class set
 	populate_builtin_classes();
-
+    
+    // initialize logging
+    LOG = DEBUG_STREAM(5);
+    LOG.enable("SyntaxError");
+    LOG.enable("ClassError");
+    LOG.enable("TypeError");
+    LOG.enable("Error");
+    LOG.enable("Debug");
+    
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
 	INFILE_NAME = (char *) "stdin";
@@ -857,10 +866,10 @@ int main(int argc, char **argv) {
             int fileidx = argc-1;
             for (int i = 1; i < fileidx; i++){
                 if (strcmp(argv[i], "-s") == 0) {
-                    print_st = true;
+                    LOG.output_st();
                 }
                 if (strcmp(argv[i], "-v") == 0) {
-                    print_vt = true;
+                    LOG.output_vt();
                 }
             }
      	    if( !(infile = fopen(argv[fileidx], "r"))){
@@ -894,49 +903,49 @@ int main(int argc, char **argv) {
 
 	// if everything is OK continue processing with AST
 	if(num_errors == 0){
-		cout << "Finished parse with no errors" << endl;
-
+        
 		// make the class hierarchy graph
 		CLASS_GRAPH = build_class_graph(root);
 
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(CLASS_GRAPH, "Obj");
 		if(class_res == 0){
-			cout << "Class structure good" << endl;
+			// Class structure good
 		}
+        //TODO: need to have the line numbers for the following ClassErrors
 		else if(class_res == 1){
-			cout << "cycle detected in class structure!" << endl;
-			cerr << "  (" << CLASS_CYCLE_SUPERCLASS << " -> " << CLASS_CYCLE_SUBCLASS << " is on the cycle)" << endl;
+            string msg = "circular dependancy - " + CLASS_CYCLE_SUBCLASS + " extends " + CLASS_CYCLE_SUBCLASS + " which extends it or one of its descendants";
+            LOG.insert("ClassError", -1, msg);
 		}
 		else if(class_res == 2){
 			set<string> class_extends = get_class_extends(root);
 			set<string> missing;
 			set_difference(class_extends.begin(), class_extends.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
-			cout << "class definition missing or unreachable from Obj!" << endl;
-			cerr << "the following classes are undefined or unreachable: " << endl;
+			string msg = "class undefined or not a descendent of Obj\nthe following classes are undefined or non-descendants:\n";
 			for(set<string>::iterator itr = missing.begin(); itr != missing.end(); ++itr){
-				cerr << "  " << *itr << endl;
+				msg += "  " + *itr + "\n";
 			}
+            LOG.insert("ClassError", -1, msg);
 		}
 		else if(class_res == 3){
-			cout << "multiple inheritance! (or class defined twice?)" << endl;
-			cerr << "  (" << MULTIPLE_SUBCLASS << " inherits or is defined twice)" << endl;
+			string msg = "class " + MULTIPLE_SUBCLASS + " defined multiple times";
+            LOG.insert("ClassError", -1, msg);
 		}
 
 		// check that constructor calls are valid
 		get_constructor_names(root);  // stored in global CONSTRUCTOR_CALLS
-
+        
 		set<string> missing;
 		set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
 		if(!missing.empty()){
-			cout << "class definition missing!" << endl;
-			cerr << "tried to construct the following undefined classes: " << endl;
+            string msg = "class definition missing\ntried to construct the following undefined classes:\n";
 			for(set<string>::iterator itr = missing.begin(); itr != missing.end(); ++itr){
-				cerr << "  " << *itr << endl;
+				msg += "  " + *itr + "\n";
 			}
+            LOG.insert("ClassError", -1, msg);
 		}
 		else{
-			cout << "Constructor calls good" << endl;
+			// Constructor calls good
 		}
 
 		// test the lca function
@@ -952,11 +961,10 @@ int main(int argc, char **argv) {
 		root->type_check();
 
 	}
-	// else print the number of errors on stdout
-	else{
-		cout << "Found " << num_errors << " parse errors!" << endl;
-	}
-
+    
+    // dump the logs if we haven't already
+    LOG.print_logs();
+    
 	// delete the root of the AST (which should delete the entire thing)
 	if(root != NULL){
 		delete root;

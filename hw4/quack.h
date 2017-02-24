@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <array>
 #include <vector>
+#include "log.h"
 
 
 using namespace std;
@@ -19,8 +20,7 @@ extern  unordered_map< string, SymTable > SymTables;
 extern  map<string, list<string> > CLASS_GRAPH;
 extern  map<string, VTable> VTABLE_MAP;
 extern  map<string, map<string, string> > RT_MAP;
-extern  bool print_st;
-extern  bool print_vt;
+extern  DEBUG_STREAM LOG;
 extern  vector< pair< int, string > > ERROR_BUFFER;
 extern  bool TYPE_CHECK_AGAIN;
 
@@ -191,7 +191,7 @@ public:
         string should_be_boolean = expr->type_check(s);
         if(should_be_boolean != "Boolean"){
             // add to error list
-            cerr << "non-boolean condition" << endl;
+            LOG.insert("TypeError", -2, "non-boolean condition");
         }
 
         TYPE_CHECK_AGAIN = true;
@@ -199,7 +199,8 @@ public:
         while(TYPE_CHECK_AGAIN){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
-            cout << "type check num: " << num_type_checks << endl;
+            string msg = "type check num: " + to_string(num_type_checks);
+            LOG.insert("Debug", -2, msg);
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(s);
             }
@@ -269,7 +270,8 @@ public:
         while(TYPE_CHECK_AGAIN){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
-            cout << "type check num: " << num_type_checks << endl;
+            string msg = "type check num: " + to_string(num_type_checks);
+            LOG.insert("Debug", -2, msg);
             for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
                 (*itr)->type_check(else_branch_symtable);
             }
@@ -424,11 +426,12 @@ public:
     string type_check(SymTable &s){
         expr_type = expr->type_check(s);
 
-        // try to find the type of ident_vlaue in the symbol table for class expr_type
+        // try to find the type of ident_value in the symbol table for class expr_type
         unordered_map<string, SymTable>::iterator itr_f = SymTables.find(expr_type);
         if(itr_f == SymTables.end()){
             // if not found, class doesn't exist, so add to the error list
-            cout << "access node type error" << endl;
+            string msg = "access node type error";
+            LOG.insert("Error", -2, msg);
             return "*ERROR";
         }
 
@@ -484,14 +487,16 @@ public:
         bool check1 = is_subclass(left_type_eval, left_type, CLASS_GRAPH);
         if(!check1){
             // add to error list
-            cout << "assignment node check1 error!" << endl;
+            string msg = "assignment node check1 error!";
+            LOG.insert("Error", -2, msg);
         }
 
         // bool check2 = check that declared left_type is consistent with right_type_eval
         bool check2 = is_subclass(right_type_eval, left_type, CLASS_GRAPH);;
         if(!check2){
             // add to error list
-            cout << "assignment node check2 error!" << endl;
+            string msg = "assignment node check2 error!";
+            LOG.insert("Error", -2, msg);
         }
 
         // update the symtable
@@ -600,7 +605,8 @@ public:
         bool check = is_subclass(return_type, RT_MAP[ s["this"][1] ][ s["$METHOD_NAME"][1] ], CLASS_GRAPH);
         if(!check){
             // add to error list
-            cout << "return type error" << endl;
+            string msg = "return type error";
+            LOG.insert("Error", -2, msg);
         }
 
         return "OK";
@@ -718,7 +724,8 @@ public:
         map<string, VTable>::iterator itr_f = VTABLE_MAP.find(expr_type);
         if(itr_f == VTABLE_MAP.end()){
             // if not found, class doesn't exist, so add to the error list
-            cout << "method call error: class " << expr_type << " doesn't exist" << endl;
+            string msg = "class " + expr_type + " doesn't exist";
+            LOG.insert("TypeError", -2, msg);
             return "*ERROR";
         }
 
@@ -734,7 +741,8 @@ public:
         // check if we found it
         if(idx >= vt.size()){
             // add to error list
-            cout << "method call error: method " << method_name << " doesn't exist in class " << expr_type << endl;
+            string msg = method_name + " is not a method of class " + expr_type;
+            LOG.insert("TypeError", -2, msg);
             return "*ERROR";
         }
 
@@ -743,7 +751,8 @@ public:
         // Make sure actual and expected arg list lengths are the same
         list<string> expected_args = vt[idx].second;
         if(expected_args.size() != arg_types.size()){
-            cerr << "TypeError on method call " << method_name << " for class " << expr_type << ": incorrect number of arguments" << endl;
+            string msg = "incorrect number of arguments for call of class " + expr_type + " method " + method_name;
+            LOG.insert("TypeError", -2, msg);
             return "*ERROR";
         }
 
@@ -753,8 +762,9 @@ public:
             // Check if we have an invalid constructor argument type (use LCA since a subclass of an arg is a valid input to that arg)
             string LCA = find_lca(arg_types[idx2], *arg_itr, CLASS_GRAPH);
             if(LCA != *arg_itr){
-                cerr << "TypeError on method call " << method_name << " for class " << expr_type << ": invalid type for argument " << idx << endl;
-                return "*ERROR"; // TODO: add to error message here (need to know where in the code we hit this; linenum)
+                string msg = "type of argument " + to_string(idx) + " in call of class " + expr_type + " method " + method_name + " is invalid";
+                LOG.insert("TypeError", -2, msg);
+                return "*ERROR";
             }
             idx2++;
         }
@@ -804,7 +814,8 @@ public:
         // Make sure actual and expected arg list lengths are the same
         list<string> expected_args = VTABLE_MAP[class_name][0].second;
         if(expected_args.size() != arg_types.size()){
-            cerr << "TypeError on constructor call for class " << class_name << ": incorrect number of arguments" << endl;
+            string msg = "incorrect number of arguments for call of class " + class_name + " constructor";
+            LOG.insert("TypeError", -2, msg);
             return "*ERROR";
         }
 
@@ -814,8 +825,9 @@ public:
             // Check if we have an invalid constructor argument type (use LCA since a subclass of an arg is a valid input to that arg)
             string LCA = find_lca(arg_types[idx], *arg_itr, CLASS_GRAPH);
             if(LCA != *arg_itr){
-                cerr << "TypeError on constructor call for class " << class_name << ": invalid type for argument " << idx << endl;
-                return "*ERROR"; // TODO: add to error message here (need to know where in the code we hit this; linenum)
+                string msg = "type of argument " + to_string(idx) + " in call of class " + class_name + " constructor is invalid";
+                LOG.insert("TypeError", -2, msg);
+                return "*ERROR";
             }
             idx++;
         }
@@ -1001,7 +1013,8 @@ public:
         while(TYPE_CHECK_AGAIN){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
-            cout << "type check num: " << num_type_checks << endl;
+            string msg = "type check num: " + to_string(num_type_checks);
+            LOG.insert("Debug", -2, msg);
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(method_symtable);
             }
@@ -1079,7 +1092,8 @@ public:
         while(TYPE_CHECK_AGAIN){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
-            cout << "type check num: " << num_type_checks << endl;
+            string msg = "type check num: " + to_string(num_type_checks);
+            LOG.insert("Debug", -2, msg);
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(s);
             }
@@ -1186,7 +1200,7 @@ public:
 
     string type_check(list<class_node *>* class_list){
         
-        if(print_st){
+        if(LOG.print_st){
             cerr << "received symtable from parent:" << endl;
             print_symtable(SymTables[signature->class_extends]);
             cerr << endl;
@@ -1217,9 +1231,9 @@ public:
         //          datamembers that is saved to the global SymTables
         //    note: send the class name down for the method symbol tables
         body->type_check(class_symtable_tmp, signature->class_name);
-
+        
         // debug
-        if(print_st){
+        if(LOG.print_st){
             cout << endl;
             cout << "local symtable for class " << signature->class_name << " in constructor" << endl;
             print_symtable(class_symtable_tmp);
@@ -1231,18 +1245,19 @@ public:
             // didn't find a constructor variable in the class that was expected by its superclass definition
             SymTable::iterator s_itr = SymTables[signature->class_name].find(iter->first);
             if(s_itr == SymTables[signature->class_name].end()){
-                cerr << "Error: class " << signature->class_name << " doesn't initialize variable " << iter->first << " declared by its superclass" << endl;
+                string msg = "class " + signature->class_name + " doesn't initialize variable " + iter->first + " declared by its superclass";
+                LOG.insert("ClassError", -2, msg);
                 //TODO: need to return an error type here maybe?
             }
-
+            
             // found the constructor variable but the type was invalid
             else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
-                cerr << "TypeError: class " << signature->class_name << " initializes inherited variable "
-                     << iter->first << " to invalid type " << iter->second[1] << endl;
+                string msg = "class " + signature->class_name + " initializes inherited variable " + iter->first + " to invalid type " + iter->second[1];
+                LOG.insert("TypeError", -2, msg);
                 //TODO: need to return an error type here maybe?
             }
         }
-
+        
         // recurse and check all subclasses, passing our constructor symbol table to them
         for(list<string>::iterator iter = CLASS_GRAPH[signature->class_name].begin(); iter != CLASS_GRAPH[signature->class_name].end(); ++iter){
             for(list<class_node *>::iterator c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter){
@@ -1251,10 +1266,10 @@ public:
                 }
             }
         }
-
+        
         return "OK";
     }
-
+    
 };
 
 
@@ -1306,7 +1321,7 @@ public:
         }
 
         // debug: print out SymTables
-        if(print_st){
+        if(LOG.print_st){
             cout << endl;
             cout << "=== SymTables ===" << endl;
             for(unordered_map<string, SymTable>::iterator itr_o = SymTables.begin(); itr_o != SymTables.end(); ++itr_o){

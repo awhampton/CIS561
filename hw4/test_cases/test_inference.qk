@@ -1,0 +1,11 @@
+class Foo() {}
+
+class Bar() {}
+
+class A(val : Foo) extends Foo {
+}
+
+class B() {
+    this.val = Foo();
+    this.val = A(Foo());
+}
