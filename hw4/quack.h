@@ -1,13 +1,14 @@
 #ifndef QUACK_H
 #define QUACK_H
 
+#include <array>
 #include <iostream>
-#include <stdlib.h>
-#include <string>
 #include <list>
 #include <map>
+#include <set>
+#include <stdlib.h>
+#include <string>
 #include <unordered_map>
-#include <array>
 #include <vector>
 #include "log.h"
 
@@ -23,7 +24,7 @@ extern  map<string, map<string, string> > RT_MAP;
 extern  DEBUG_STREAM LOG;
 extern  vector< pair< int, string > > ERROR_BUFFER;
 extern  bool TYPE_CHECK_AGAIN;
-
+extern  set<string> BUILTIN_CLASSES;
 
 /////////////////////////////////
 // helper functions
@@ -1353,11 +1354,8 @@ public:
     string type_check(/* symbol table */){
 
         // Begin typecheck of class hierarchy from root
-        //TODO: will have to do something for checking stuff that extends a builtin class like Int or String
-
-        //TODO: need to add Obj's builtin methods to the VTABLE_MAP
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
-            if((*itr)->signature->class_extends == "Obj"){
+            if(BUILTIN_CLASSES.find((*itr)->signature->class_extends) != BUILTIN_CLASSES.end()){
                 (*itr)->type_check(classes);
             }
         }

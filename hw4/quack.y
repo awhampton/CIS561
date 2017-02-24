@@ -678,14 +678,18 @@ void check_vtable_map(void){
 
 // check RT_MAP
 void check_rt_map(void){
-	cout << endl;
-	cout << "CHECKING RETURN TYPE MAP!" << endl;
+	cerr << "Checking Return Type Map:" << endl;
 	for(set<string>::iterator itr = CLASSES_FOUND.begin(); itr != CLASSES_FOUND.end(); ++itr){
 		map<string, string> rtm = RT_MAP[*itr];
-		cout << *itr << ":" << endl;
+		cerr << *itr << ":" << endl;
+        cerr << "-------------------------------------------" << endl;
+        cerr << "Method Name:         | Return Type:" << endl;
+        cerr << "-------------------------------------------" << endl;
 		for(map<string, string>::iterator itr2 = rtm.begin(); itr2 != rtm.end(); ++itr2){
-			cout << "  " << (*itr2).first << ": " << (*itr2).second << endl;
+			cerr << setw(20) << (*itr2).first << " | " << (*itr2).second << endl;
 		}
+        cerr << "-------------------------------------------" << endl;
+        cerr << endl;
 	}
 }
 
@@ -1028,7 +1032,7 @@ int main(int argc, char **argv) {
 		// type checking stuff
 		build_vtable_map(CLASS_GRAPH);
 		check_vtable_map();
-		check_rt_map();
+		//check_rt_map();
 
 		root->type_check();
 
