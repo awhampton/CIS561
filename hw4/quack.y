@@ -70,6 +70,8 @@ char* INFILE_NAME;
 	int   ival;
 	char *sval;
 	char  cval;
+    string_with_linenum swln;
+    int_with_linenum iwln;
 	char                     *opt_ident_type;
 	method_node              *method_type;
 	list<method_node *>      *methods_type;
@@ -115,21 +117,21 @@ char* INFILE_NAME;
 %token CLASS
 %token DEF
 %token EXTENDS
-%token IF
-%token ELIF
-%token ELSE
-%token WHILE
-%token RETURN
+%token <ival> IF
+%token <ival> ELIF
+%token <ival> ELSE
+%token <ival> WHILE
+%token <ival> RETURN
 
-%token LESS
-%token MORE
-%token ATLEAST
-%token ATMOST
-%token EQUALS
+%token <ival> LESS
+%token <ival> MORE
+%token <ival> ATLEAST
+%token <ival> ATMOST
+%token <ival> EQUALS
 
-%token AND
-%token OR
-%token NOT
+%token <ival> AND
+%token <ival> OR
+%token <ival> NOT
 
 %token LPAREN
 %token RPAREN
@@ -137,18 +139,18 @@ char* INFILE_NAME;
 %token RBRACE
 %token COLON
 %token SEMICOLON
-%token GETS
+%token <ival> GETS
 %token COMMA
 %token PERIOD
 
-%token PLUS
-%token MINUS
-%token TIMES
-%token DIVIDE
+%token <ival> PLUS
+%token <ival> MINUS
+%token <ival> TIMES
+%token <ival> DIVIDE
 
-%token <sval> IDENT
-%token <ival> INT_LIT
-%token <sval> STRING_LIT
+%token <swln> IDENT
+%token <iwln> INT_LIT
+%token <swln> STRING_LIT
 
 // precedence rules
 %left AND OR
@@ -181,11 +183,11 @@ class_signature:
 	;
 
 class_sig_extends:
-    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { $$ = new class_signature_node($2, $7, $4); free($2); free($7); }
+    CLASS IDENT LPAREN formal_args RPAREN EXTENDS IDENT { $$ = new class_signature_node($2.s, $7.s, $4, $2.ln); free($2.s); free($7.s); }
 	;
 
 class_sig_no_extends:
-    CLASS IDENT LPAREN formal_args RPAREN { $$ = new class_signature_node($2, $4); free($2); }
+    CLASS IDENT LPAREN formal_args RPAREN { $$ = new class_signature_node($2.s, $4, $2.ln); free($2.s); }
 	;
 
 formal_args:
@@ -194,7 +196,7 @@ formal_args:
 	;
 
 formal_arg:
-	IDENT COLON IDENT formal_arg_repetitions { $4->push_front( new formal_arg_node($1, $3) ); $$ = $4; free($1); free($3); }
+	IDENT COLON IDENT formal_arg_repetitions { $4->push_front( new formal_arg_node($1.s, $3.s, $1.ln) ); $$ = $4; free($1.s); free($3.s); }
 	;
 
 formal_arg_repetitions:
@@ -204,7 +206,7 @@ formal_arg_repetitions:
 	;
 
 formal_arg_repetition:
-	COMMA IDENT COLON IDENT { $$ = new formal_arg_node($2, $4); free($2); free($4); }
+	COMMA IDENT COLON IDENT { $$ = new formal_arg_node($2.s, $4.s, $2.ln); free($2.s); free($4.s); }
 	;
 
 class_body:
@@ -218,15 +220,15 @@ statements:
 	;
 
 statement:
-	IF r_expr statement_block elifs opt_else { $$ = new if_elifs_else_node(new condition_node($2,$3), $4, $5); }
+	IF r_expr statement_block elifs opt_else { $$ = new if_elifs_else_node(new condition_node($2, $3, $1), $4, $5); }
 	;
 
 statement:
-	WHILE r_expr statement_block { $$ = new while_node(new while_condition_node($2, $3)); }
+	WHILE r_expr statement_block { $$ = new while_node(new while_condition_node($2, $3, $1)); }
 	;
 
 statement:
-	l_expr opt_ident_obj GETS r_expr SEMICOLON { $$ = new assignment_node($1, $2, $4); }
+	l_expr opt_ident_obj GETS r_expr SEMICOLON { $$ = new assignment_node($1, $2, $4, $3); }
 	;
 
 statement:
@@ -234,11 +236,11 @@ statement:
 	;
 
 statement:
-	RETURN r_expr SEMICOLON { $$ = new return_node($2); }
+	RETURN r_expr SEMICOLON { $$ = new return_node($2, $1); }
 	;
 
 statement:
-	RETURN SEMICOLON { $$ = new return_node(); }
+	RETURN SEMICOLON { $$ = new return_node($1); }
 	;
 
 methods:
@@ -247,16 +249,16 @@ methods:
 	;
 
 method:
-	DEF IDENT LPAREN formal_args RPAREN opt_ident_nothing statement_block { $$ = new method_node($2, $6, $4, $7); free($2); free($6); }
+	DEF IDENT LPAREN formal_args RPAREN opt_ident_nothing statement_block { $$ = new method_node($2.s, $6, $4, $7, $2.ln); free($2.s); }
 	;
 
 opt_ident_nothing:
-	COLON IDENT { $$ = $2; }  /* note: small memory leak here that I'm struggling to fix! */
+	COLON IDENT { $$ = $2.s; }  /* note: small memory leak here that I'm struggling to fix! */
 	| /* empty */ { char id[8] = "Nothing"; char* nothing = strdup(id); $$ = nothing; }  /* same as above */
 	;
 
 opt_ident_obj:
-	COLON IDENT { $$ = $2; }  /* note: small memory leak here that I'm struggling to fix! */
+	COLON IDENT { $$ = $2.s; }  /* note: small memory leak here that I'm struggling to fix! */
 	| /* empty */ { char id[4] = "Obj"; char* obj = strdup(id); $$ = obj; }  /* same as above */
 	;
 
@@ -270,7 +272,7 @@ elifs:
 	;
 
 elif_rule:
-	ELIF r_expr statement_block { $$ = new condition_node($2, $3); }
+	ELIF r_expr statement_block { $$ = new condition_node($2, $3, $1); }
 	;
 
 opt_else:
@@ -283,19 +285,19 @@ else_rule:
 	;
 
 l_expr:
-	IDENT { $$ = new ident_node($1); free($1); }
+	IDENT { $$ = new ident_node($1.s, $1.ln); free($1.s); }
 	;
 
 l_expr:
-	r_expr PERIOD IDENT { $$ = new access_node($1, $3); free($3); }
+	r_expr PERIOD IDENT { $$ = new access_node($1, $3.s, $3.ln); free($3.s); }
 	;
 
 r_expr:
-	STRING_LIT { $$ = new strlit_node($1); free($1); }
+	STRING_LIT { $$ = new strlit_node($1.s, $1.ln); free($1.s); }
 	;
 
 r_expr:
-	INT_LIT { $$ = new intlit_node($1); }
+	INT_LIT { $$ = new intlit_node($1.n, $1.ln); }
 	;
 
 r_expr:
@@ -303,23 +305,23 @@ r_expr:
 	;
 
 r_expr:
-	r_expr PLUS r_expr { $$ = new method_call_node($1, "PLUS", $3); }
+	r_expr PLUS r_expr { $$ = new method_call_node($1, "PLUS", $3, $2); }
 	;
 
 r_expr:
-	r_expr MINUS r_expr { $$ = new method_call_node($1, "MINUS", $3); }
+	r_expr MINUS r_expr { $$ = new method_call_node($1, "MINUS", $3, $2); }
 	;
 
 r_expr:
-	MINUS r_expr %prec NEG { $$ = new method_call_node(new intlit_node(0), "MINUS", $2); }
+	MINUS r_expr %prec NEG { $$ = new method_call_node(new intlit_node(0, -2), "MINUS", $2, $1); }
 	;
 
 r_expr:
-	r_expr TIMES r_expr { $$ = new method_call_node($1, "TIMES", $3); }
+	r_expr TIMES r_expr { $$ = new method_call_node($1, "TIMES", $3, $2); }
 	;
 
 r_expr:
-	r_expr DIVIDE r_expr { $$ = new method_call_node($1, "DIVIDE", $3); }
+	r_expr DIVIDE r_expr { $$ = new method_call_node($1, "DIVIDE", $3, $2); }
 	;
 
 r_expr:
@@ -327,43 +329,43 @@ r_expr:
 	;
 
 r_expr:
-	r_expr EQUALS r_expr { $$ = new method_call_node($1, "EQUALS", $3); }
+	r_expr EQUALS r_expr { $$ = new method_call_node($1, "EQUALS", $3, $2); }
 	;
 
 r_expr:
-	r_expr ATMOST r_expr { $$ = new method_call_node($1, "ATMOST", $3); }
+	r_expr ATMOST r_expr { $$ = new method_call_node($1, "ATMOST", $3, $2); }
 	;
 
 r_expr:
-	r_expr LESS r_expr { $$ = new method_call_node($1, "LESS", $3); }
+	r_expr LESS r_expr { $$ = new method_call_node($1, "LESS", $3, $2); }
 	;
 
 r_expr:
-	r_expr ATLEAST r_expr { $$ = new method_call_node($1, "ATLEAST", $3); }
+	r_expr ATLEAST r_expr { $$ = new method_call_node($1, "ATLEAST", $3, $2); }
 	;
 
 r_expr:
-	r_expr MORE r_expr { $$ = new method_call_node($1, "MORE", $3); }
+	r_expr MORE r_expr { $$ = new method_call_node($1, "MORE", $3, $2); }
 	;
 
 r_expr:
-	r_expr AND r_expr { $$ = new and_node($1, $3); }
+	r_expr AND r_expr { $$ = new and_node($1, $3, $2); }
 	;
 
 r_expr:
-	r_expr OR r_expr { $$ = new or_node($1, $3); }
+	r_expr OR r_expr { $$ = new or_node($1, $3, $2); }
 	;
 
 r_expr:
-	NOT r_expr { $$ = new not_node($2); }
+	NOT r_expr { $$ = new not_node($2, $1); }
 	;
 
 r_expr:
-	r_expr PERIOD IDENT LPAREN actual_args RPAREN { $$ = new method_call_node($1, $3, $5); free($3); }
+	r_expr PERIOD IDENT LPAREN actual_args RPAREN { $$ = new method_call_node($1, $3.s, $5, $3.ln); free($3.s); }
 	;
 
 r_expr:
-	IDENT LPAREN actual_args RPAREN { $$ = new class_instantiation_node($1, $3); free($1); }
+	IDENT LPAREN actual_args RPAREN { $$ = new class_instantiation_node($1.s, $3, $1.ln); free($1.s); }
 	;
 
 actual_args:
@@ -793,7 +795,7 @@ SymTable get_intersection(vector< SymTable > tables){
 
     // Initialize intersection to first table in list
     SymTable intersect = tables[0];
-    
+
     if (LOG.print_st){
         cerr << "Grabbing Intersection:" << endl;
         cerr << "Symbol Table 0" << endl;
@@ -849,7 +851,7 @@ int main(int argc, char **argv) {
 
 	// populate the builtin class set
 	populate_builtin_classes();
-    
+
     // initialize logging
     LOG = DEBUG_STREAM(5);
     LOG.enable("SyntaxError");
@@ -857,7 +859,7 @@ int main(int argc, char **argv) {
     LOG.enable("TypeError");
     LOG.enable("Error");
     LOG.enable("Debug");
-    
+
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
 	INFILE_NAME = (char *) "stdin";
@@ -877,9 +879,9 @@ int main(int argc, char **argv) {
   		    	exit(1);
             }
 		    INFILE_NAME = argv[fileidx];
-            yyin = infile;           
+            yyin = infile;
         }
-        
+
         else if (argc == 2) {
             if((strcmp(argv[1],"--help") == 0) || (strcmp(argv[1],"-help") == 0) || (strcmp(argv[1], "-h") == 0)){
                 cout << "Valid Flags:" << endl;
@@ -903,7 +905,7 @@ int main(int argc, char **argv) {
 
 	// if everything is OK continue processing with AST
 	if(num_errors == 0){
-        
+
 		// make the class hierarchy graph
 		CLASS_GRAPH = build_class_graph(root);
 
@@ -934,7 +936,7 @@ int main(int argc, char **argv) {
 
 		// check that constructor calls are valid
 		get_constructor_names(root);  // stored in global CONSTRUCTOR_CALLS
-        
+
 		set<string> missing;
 		set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
 		if(!missing.empty()){
@@ -961,10 +963,10 @@ int main(int argc, char **argv) {
 		root->type_check();
 
 	}
-    
+
     // dump the logs if we haven't already
     LOG.print_logs();
-    
+
 	// delete the root of the AST (which should delete the entire thing)
 	if(root != NULL){
 		delete root;

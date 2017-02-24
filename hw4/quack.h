@@ -36,6 +36,20 @@ void print_symtable(SymTable table);
 
 
 /////////////////////////////////
+// token structs
+/////////////////////////////////
+struct string_with_linenum {
+    char *s;
+    int   ln;
+};
+
+struct int_with_linenum {
+    int  n;
+    int  ln;
+};
+
+
+/////////////////////////////////
 // AST node classes
 /////////////////////////////////
 
@@ -43,6 +57,7 @@ void print_symtable(SymTable table);
 class node {
 public:
     string type_of_node;
+    int    line_number;
 
     virtual ~node() {};
     virtual void speak() = 0;
@@ -125,10 +140,11 @@ public:
     string name;
     string value;  // this is the declared type
 
-    formal_arg_node(string n, string v){
+    formal_arg_node(string n, string v, int ln){
         type_of_node = "formal_arg";
         name = n;
         value = v;
+        line_number = ln;
     }
 
     virtual ~formal_arg_node(){}
@@ -160,10 +176,11 @@ public:
     expr_node *expr;
     list<statement_node *>  *stmts;
 
-    condition_node(expr_node *e, list<statement_node *> *s){
+    condition_node(expr_node *e, list<statement_node *> *s, int ln){
         type_of_node = "condition";
         expr = e;
         stmts = s;
+        line_number = ln;
     }
 
     virtual ~condition_node(){
@@ -191,7 +208,7 @@ public:
         string should_be_boolean = expr->type_check(s);
         if(should_be_boolean != "Boolean"){
             // add to error list
-            LOG.insert("TypeError", -2, "non-boolean condition");
+            LOG.insert("TypeError", line_number, "non-boolean condition");
         }
 
         TYPE_CHECK_AGAIN = true;
@@ -292,8 +309,8 @@ public:
 class while_condition_node : public condition_node {
 public:
 
-    while_condition_node(expr_node *e, list<statement_node *> *s)
-    : condition_node(e, s){
+    while_condition_node(expr_node *e, list<statement_node *> *s, int ln)
+    : condition_node(e, s, ln){
         type_of_node = "while_condition";
     }
 
@@ -352,10 +369,11 @@ class ident_node : public expr_node {
 public:
     string ident_value;
 
-    ident_node(string s){
+    ident_node(string s, int ln){
         ident_value = s;
         type_of_node = "expr";
         type_of_expression = "ident";
+        line_number = ln;
     }
 
     virtual ~ident_node(){}
@@ -398,12 +416,13 @@ public:
     string      ident_value;
     string      expr_type;  // after we type check the expr, store the result here
 
-    access_node(expr_node *e, string s){
+    access_node(expr_node *e, string s, int ln){
         expr = e;
         ident_value = s;
         expr_type = "*ERROR";
         type_of_node = "expr";
         type_of_expression = "access";
+        line_number = ln;
     }
 
     virtual ~access_node(){
@@ -431,7 +450,7 @@ public:
         if(itr_f == SymTables.end()){
             // if not found, class doesn't exist, so add to the error list
             string msg = "access node type error";
-            LOG.insert("Error", -2, msg);
+            LOG.insert("Error", line_number, msg);
             return "*ERROR";
         }
 
@@ -458,12 +477,13 @@ public:
     expr_node *right;
     string left_type;
 
-    assignment_node(expr_node *l, string lt, expr_node *r){
+    assignment_node(expr_node *l, string lt, expr_node *r, int ln){
         left = l;
         right = r;
         left_type = lt;
         type_of_node = "statement";
         type_of_statement = "assignment";
+        line_number = ln;
     }
 
     virtual ~assignment_node(){
@@ -487,16 +507,24 @@ public:
         bool check1 = is_subclass(left_type_eval, left_type, CLASS_GRAPH);
         if(!check1){
             // add to error list
-            string msg = "assignment node check1 error!";
-            LOG.insert("Error", -2, msg);
+            string msg = "assignment not consistent with declared type";
+            LOG.insert("TypeError", line_number, msg);
         }
 
         // bool check2 = check that declared left_type is consistent with right_type_eval
-        bool check2 = is_subclass(right_type_eval, left_type, CLASS_GRAPH);;
+        bool check2 = is_subclass(right_type_eval, left_type, CLASS_GRAPH);
         if(!check2){
             // add to error list
-            string msg = "assignment node check2 error!";
-            LOG.insert("Error", -2, msg);
+            string msg = "assignment not consistent with declared type";
+            LOG.insert("TypeError", line_number, msg);
+        }
+
+        // bool check3 = the right side should not evaluate to type *ERROR
+        bool check3 = right_type_eval != "*ERROR";
+        if(!check3){
+            // add to error list
+            string msg = "undeclared variable";
+            LOG.insert("TypeError", line_number, msg);
         }
 
         // update the symtable
@@ -548,10 +576,6 @@ public:
         return res;
     }
 
-    // string type_check(/* symbol table */){
-    //  return expr->type_check(/* symbol table */);
-    // }
-
     string type_check(SymTable &s){
         return expr->type_check(s);
     }
@@ -565,20 +589,22 @@ public:
     bool has_return_expr;
     string return_type;
 
-    return_node(expr_node *e){
+    return_node(expr_node *e, int ln){
         expr = e;
         has_return_expr = true;
         return_type = "*ERROR";
         type_of_node = "statement";
         type_of_statement = "return";
+        line_number = ln;
     }
 
-    return_node(){
+    return_node(int ln){
         expr = NULL;
         has_return_expr = false;
         return_type = "Nothing";
         type_of_node = "statement";
         type_of_statement = "return";
+        line_number = ln;
     }
 
     virtual ~return_node(){
@@ -606,7 +632,7 @@ public:
         if(!check){
             // add to error list
             string msg = "return type error";
-            LOG.insert("Error", -2, msg);
+            LOG.insert("Error", line_number, msg);
         }
 
         return "OK";
@@ -619,10 +645,11 @@ class strlit_node : public expr_node {
 public:
     string strlit_value;
 
-    strlit_node(string s){
+    strlit_node(string s, int ln){
         strlit_value = s;
         type_of_node = "expr";
         type_of_expression = "string_lit";
+        line_number = ln;
     }
 
     virtual ~strlit_node(){}
@@ -631,10 +658,6 @@ public:
         list<node *> res;
         return res;
     }
-
-    // string type_check(/* symbol table */){
-    //  return "String";
-    // }
 
     string type_check(SymTable &s){
         return "String";
@@ -647,10 +670,11 @@ class intlit_node : public expr_node {
 public:
     int intlit_value;
 
-    intlit_node(int n){
+    intlit_node(int n, int ln){
         intlit_value = n;
         type_of_node = "expr";
         type_of_expression = "int_lit";
+        line_number = ln;
     }
 
     virtual ~intlit_node(){}
@@ -659,10 +683,6 @@ public:
         list<node *> res;
         return res;
     }
-
-    // string type_check(/* symbol table */){
-    //  return "Int";
-    // }
 
     string type_check(SymTable &s){
         return "Int";
@@ -678,21 +698,23 @@ public:
     string                    method_name;
     list<actual_arg_node *>  *args;
 
-    method_call_node(expr_node *e, string s, list<actual_arg_node *> *a){
+    method_call_node(expr_node *e, string s, list<actual_arg_node *> *a, int ln){
         expr = e;
         method_name = s;
         args = a;
         type_of_node = "expr";
         type_of_expression = "method_call";
+        line_number = ln;
     }
 
-    method_call_node(expr_node *e, string s, expr_node *o){
+    method_call_node(expr_node *e, string s, expr_node *o, int ln){
         expr = e;
         method_name = s;
         args = new list<actual_arg_node *>();
         args->push_back(new actual_arg_node(o));
         type_of_node = "expr";
         type_of_expression = "method_call";
+        line_number = ln;
     }
 
     virtual ~method_call_node(){
@@ -725,7 +747,7 @@ public:
         if(itr_f == VTABLE_MAP.end()){
             // if not found, class doesn't exist, so add to the error list
             string msg = "class " + expr_type + " doesn't exist";
-            LOG.insert("TypeError", -2, msg);
+            LOG.insert("TypeError", line_number, msg);
             return "*ERROR";
         }
 
@@ -742,7 +764,7 @@ public:
         if(idx >= vt.size()){
             // add to error list
             string msg = method_name + " is not a method of class " + expr_type;
-            LOG.insert("TypeError", -2, msg);
+            LOG.insert("TypeError", line_number, msg);
             return "*ERROR";
         }
 
@@ -752,7 +774,7 @@ public:
         list<string> expected_args = vt[idx].second;
         if(expected_args.size() != arg_types.size()){
             string msg = "incorrect number of arguments for call of class " + expr_type + " method " + method_name;
-            LOG.insert("TypeError", -2, msg);
+            LOG.insert("TypeError", line_number, msg);
             return "*ERROR";
         }
 
@@ -763,7 +785,7 @@ public:
             string LCA = find_lca(arg_types[idx2], *arg_itr, CLASS_GRAPH);
             if(LCA != *arg_itr){
                 string msg = "type of argument " + to_string(idx) + " in call of class " + expr_type + " method " + method_name + " is invalid";
-                LOG.insert("TypeError", -2, msg);
+                LOG.insert("TypeError", line_number, msg);
                 return "*ERROR";
             }
             idx2++;
@@ -781,11 +803,12 @@ public:
     string                    class_name;
     list<actual_arg_node *>  *args;
 
-    class_instantiation_node(string s, list<actual_arg_node *> *a){
+    class_instantiation_node(string s, list<actual_arg_node *> *a, int ln){
         class_name = s;
         args = a;
         type_of_node = "expr";
         type_of_expression = "class_instantiation";
+        line_number = ln;
     }
 
     virtual ~class_instantiation_node(){
@@ -815,7 +838,7 @@ public:
         list<string> expected_args = VTABLE_MAP[class_name][0].second;
         if(expected_args.size() != arg_types.size()){
             string msg = "incorrect number of arguments for call of class " + class_name + " constructor";
-            LOG.insert("TypeError", -2, msg);
+            LOG.insert("TypeError", line_number, msg);
             return "*ERROR";
         }
 
@@ -826,7 +849,7 @@ public:
             string LCA = find_lca(arg_types[idx], *arg_itr, CLASS_GRAPH);
             if(LCA != *arg_itr){
                 string msg = "type of argument " + to_string(idx) + " in call of class " + class_name + " constructor is invalid";
-                LOG.insert("TypeError", -2, msg);
+                LOG.insert("TypeError", line_number, msg);
                 return "*ERROR";
             }
             idx++;
@@ -844,11 +867,12 @@ public:
     expr_node  *left;
     expr_node  *right;
 
-    and_node(expr_node *l, expr_node *r){
+    and_node(expr_node *l, expr_node *r, int ln){
         left = l;
         right = r;
         type_of_node = "expr";
         type_of_expression = "and";
+        line_number = ln;
     }
 
     virtual ~and_node(){
@@ -866,12 +890,16 @@ public:
     string type_check(SymTable &s){
         string left_type = left->type_check(s);
         if(left_type != "Boolean"){
-            /* add to error list */
+            string msg = "left type of AND is not boolean";
+            LOG.insert("TypeError", line_number, msg);
+            return "*ERROR";
         }
 
         string right_type = right->type_check(s);
         if(right_type != "Boolean"){
-            /* add to error list */
+            string msg = "right type of AND is not boolean";
+            LOG.insert("TypeError", line_number, msg);
+            return "*ERROR";
         }
 
         return "Boolean";
@@ -885,11 +913,12 @@ public:
     expr_node  *left;
     expr_node  *right;
 
-    or_node(expr_node *l, expr_node *r){
+    or_node(expr_node *l, expr_node *r, int ln){
         left = l;
         right = r;
         type_of_node = "expr";
         type_of_expression = "or";
+        line_number = ln;
     }
 
     virtual ~or_node(){
@@ -907,12 +936,16 @@ public:
     string type_check(SymTable &s){
         string left_type = left->type_check(s);
         if(left_type != "Boolean"){
-            /* add to error list */
+            string msg = "left type of OR is not boolean";
+            LOG.insert("TypeError", line_number, msg);
+            return "*ERROR";
         }
 
         string right_type = right->type_check(s);
         if(right_type != "Boolean"){
-            /* add to error list */
+            string msg = "right type of OR is not boolean";
+            LOG.insert("TypeError", line_number, msg);
+            return "*ERROR";
         }
 
         return "Boolean";
@@ -925,10 +958,11 @@ class not_node : public expr_node {
 public:
     expr_node  *expr;
 
-    not_node(expr_node *e){
+    not_node(expr_node *e, int ln){
         expr = e;
         type_of_node = "expr";
         type_of_expression = "not";
+        line_number = ln;
     }
 
     virtual ~not_node(){
@@ -944,7 +978,9 @@ public:
     string type_check(SymTable &s){
         string expr_type = expr->type_check(s);
         if(expr_type != "Boolean"){
-            /* add to error list */
+            string msg = "type of NOT is not boolean";
+            LOG.insert("TypeError", line_number, msg);
+            return "*ERROR";
         }
 
         return "Boolean";
@@ -961,12 +997,13 @@ public:
     list<formal_arg_node *> *args;
     list<statement_node *>  *stmts;
 
-    method_node(string n, string rt, list<formal_arg_node *> *a, list<statement_node *> *s){
+    method_node(string n, string rt, list<formal_arg_node *> *a, list<statement_node *> *s, int ln){
         type_of_node = "method";
         name = n;
         return_type = rt;
         args = a;
         stmts = s;
+        line_number = ln;
     }
 
     virtual ~method_node(){
@@ -1061,28 +1098,6 @@ public:
         return res;
     }
 
-    // string type_check(SymTable* super){
-    //  bool hasChanged = true;
-    //  //TODO: validate that superclass constructors are initialized in the subclass
-    //  //      note: when performing this check we check that the type they are initialized to is
-    //  //            a subtype of the type they were set as in the superclass
-    //  list<statement_node *> statements = *(body->stmts);
-    //  while(hasChanged){
-    //      hasChanged = false;
-    //      for (list<statement_node *>::iterator itr = statements.begin(); itr != statements.end(); ++itr){
-    //          // if its an assignment statement, check if its in the symtable, if not add it (infer type based on value assigned to it)
-    //          // if its in the symtable use LCA on its inferred type and stored type to update type to new value
-    //          // in both these cases set hasChanged to true
-    //
-    //          // for now, if it's not an assignment statement just check if it calls a method at any point and check the vtable to confirm that the method exists
-    //      }
-    //  }
-    //
-    //  // TODO: if we haven't broken anything by this point, descend into the class methods and typecheck each of them
-    //
-    //  return "OK";
-    // }
-
     string type_check(SymTable &s, string class_name){
 
         // these statements are the class constructor
@@ -1122,18 +1137,20 @@ public:
     string class_extends;
     list<formal_arg_node *> *args;
 
-    class_signature_node(string cn, string ce, list<formal_arg_node *> *a){
+    class_signature_node(string cn, string ce, list<formal_arg_node *> *a, int ln){
         type_of_node = "class_signature";
         class_name = cn;
         class_extends = ce;
         args = a;
+        line_number = ln;
     }
 
-    class_signature_node(string cn, list<formal_arg_node *> *a){
+    class_signature_node(string cn, list<formal_arg_node *> *a, int ln){
         type_of_node = "class_signature";
         class_name = cn;
         class_extends = "Obj";
         args = a;
+        line_number = ln;
     }
 
     virtual ~class_signature_node(){
@@ -1199,13 +1216,13 @@ public:
     }
 
     string type_check(list<class_node *>* class_list){
-        
+
         if(LOG.print_st){
             cerr << "received symtable from parent:" << endl;
             print_symtable(SymTables[signature->class_extends]);
             cerr << endl;
         }
-        
+
         // add this class to SymTables (so we don't throw an error in the constructor)
         SymTable just_to_initialize_the_map;
         SymTables[signature->class_name] = just_to_initialize_the_map;
@@ -1231,7 +1248,7 @@ public:
         //          datamembers that is saved to the global SymTables
         //    note: send the class name down for the method symbol tables
         body->type_check(class_symtable_tmp, signature->class_name);
-        
+
         // debug
         if(LOG.print_st){
             cout << endl;
@@ -1239,25 +1256,25 @@ public:
             print_symtable(class_symtable_tmp);
             cerr << endl;
         }
-        
+
         // run constructor initialization verification on all constructor variables
         for(SymTable::iterator iter = SymTables[signature->class_extends].begin(); iter != SymTables[signature->class_extends].end(); ++iter){
             // didn't find a constructor variable in the class that was expected by its superclass definition
             SymTable::iterator s_itr = SymTables[signature->class_name].find(iter->first);
             if(s_itr == SymTables[signature->class_name].end()){
                 string msg = "class " + signature->class_name + " doesn't initialize variable " + iter->first + " declared by its superclass";
-                LOG.insert("ClassError", -2, msg);
+                LOG.insert("ClassError", signature->line_number, msg);
                 //TODO: need to return an error type here maybe?
             }
-            
+
             // found the constructor variable but the type was invalid
             else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
                 string msg = "class " + signature->class_name + " initializes inherited variable " + iter->first + " to invalid type " + iter->second[1];
-                LOG.insert("TypeError", -2, msg);
+                LOG.insert("TypeError", signature->line_number, msg);
                 //TODO: need to return an error type here maybe?
             }
         }
-        
+
         // recurse and check all subclasses, passing our constructor symbol table to them
         for(list<string>::iterator iter = CLASS_GRAPH[signature->class_name].begin(); iter != CLASS_GRAPH[signature->class_name].end(); ++iter){
             for(list<class_node *>::iterator c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter){
@@ -1266,10 +1283,10 @@ public:
                 }
             }
         }
-        
+
         return "OK";
     }
-    
+
 };
 
 
@@ -1312,7 +1329,7 @@ public:
 
         // Begin typecheck of class hierarchy from root
         //TODO: will have to do something for checking stuff that extends a builtin class like Int or String
-        
+
         //TODO: need to add Obj's builtin methods to the VTABLE_MAP
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
             if((*itr)->signature->class_extends == "Obj"){

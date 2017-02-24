@@ -37,6 +37,7 @@ void yyerror (const char *msg) {
         fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
     }
 }
+
 %}
 
 %option yylineno
@@ -52,36 +53,36 @@ void yyerror (const char *msg) {
 \}                                         { return RBRACE; }
 :                                          { return COLON; }
 ;                                          { return SEMICOLON; }
-=                                          { return GETS; }
+=                                          { yylval.ival = yylineno; return GETS; }
 ,                                          { return COMMA; }
 \.                                         { return PERIOD; }
 class                                      { return CLASS; }
 def                                        { return DEF; }
 extends                                    { return EXTENDS; }
-if                                         { return IF; }
-elif                                       { return ELIF; }
-else                                       { return ELSE; }
-while                                      { return WHILE; }
-return                                     { return RETURN; }
-and                                        { return AND; }
-or                                         { return OR; }
-not                                        { return NOT; }
-\<=                                        { return ATMOST; }
-==                                         { return EQUALS; }
-\>=                                        { return ATLEAST; }
-\<                                         { return LESS; }
-\>                                         { return MORE; }
-\+                                         { return PLUS; }
-\-                                         { return MINUS; }
-\*                                         { return TIMES; }
-\/                                         { return DIVIDE; }
+if                                         { yylval.ival = yylineno; return IF; }
+elif                                       { yylval.ival = yylineno; return ELIF; }
+else                                       { yylval.ival = yylineno; return ELSE; }
+while                                      { yylval.ival = yylineno; return WHILE; }
+return                                     { yylval.ival = yylineno; return RETURN; }
+and                                        { yylval.ival = yylineno; return AND; }
+or                                         { yylval.ival = yylineno; return OR; }
+not                                        { yylval.ival = yylineno; return NOT; }
+\<=                                        { yylval.ival = yylineno; return ATMOST; }
+==                                         { yylval.ival = yylineno; return EQUALS; }
+\>=                                        { yylval.ival = yylineno; return ATLEAST; }
+\<                                         { yylval.ival = yylineno; return LESS; }
+\>                                         { yylval.ival = yylineno; return MORE; }
+\+                                         { yylval.ival = yylineno; return PLUS; }
+\-                                         { yylval.ival = yylineno; return MINUS; }
+\*                                         { yylval.ival = yylineno; return TIMES; }
+\/                                         { yylval.ival = yylineno; return DIVIDE; }
 
-[a-zA-Z_][a-zA-Z0-9_]*                     { yylval.sval = strdup(yytext); return IDENT; }
-[0-9]+                                     { yylval.ival = atoi(yytext);   return INT_LIT; }
-\"(([\\][0btnrf\"\\])|[^\"\\\n])*\"        { yylval.sval = strdup(yytext); return STRING_LIT; }
-\"(([\\].)|[^\"\\\n])*\"                   { yyerror("invalid string literal"); yylval.sval = strdup(yytext); return STRING_LIT; }
-\"(([\\][.])|[^\"\\\n])*\n                 { yyerror("forgot to close string literal?"); yylval.sval = strdup(yytext); return STRING_LIT; }
-\"\"\"(.?.?[^\"])*\"\"\"                   { yylval.sval = strdup(yytext); return STRING_LIT; }
+[a-zA-Z_][a-zA-Z0-9_]*                     { struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return IDENT; }
+[0-9]+                                     { struct int_with_linenum t; t.n = atoi(yytext); t.ln = yylineno; yylval.iwln = t; return INT_LIT; }
+\"(([\\][0btnrf\"\\])|[^\"\\\n])*\"        { struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
+\"(([\\].)|[^\"\\\n])*\"                   { yyerror("invalid string literal"); struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
+\"(([\\][.])|[^\"\\\n])*\n                 { yyerror("forgot to close string literal?"); struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
+\"\"\"(.?.?[^\"])*\"\"\"                   { struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
 
 \n                                         { }
 

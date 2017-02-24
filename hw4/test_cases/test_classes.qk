@@ -27,7 +27,7 @@ class Robot(n : String) {
         return this.destroy_city(1000);
     }
 
-    def test_method() : Obj{
+    def test_method() : String{
         return 7;
     }
 }
