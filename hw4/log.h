@@ -64,11 +64,12 @@ class DEBUG_STREAM {
         string line = "";
         if (lineNum != -1){
             line += "[line " + to_string(lineNum) + "] ";
-        }
+        } 
         
         if(options[type] == true){
             if(num_errors == 0){
                 print_logs();
+                cerr << "Suppressing additional errors" << endl;
                 exit(0);
             }
             

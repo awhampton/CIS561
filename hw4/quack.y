@@ -848,18 +848,18 @@ SymTable get_intersection(vector< SymTable > tables){
 
 
 int main(int argc, char **argv) {
-
+    
 	// populate the builtin class set
 	populate_builtin_classes();
-
+    
     // initialize logging
-    LOG = DEBUG_STREAM(5);
+    LOG = DEBUG_STREAM(1);
     LOG.enable("SyntaxError");
     LOG.enable("ClassError");
     LOG.enable("TypeError");
     LOG.enable("Error");
     LOG.enable("Debug");
-
+    
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
 	INFILE_NAME = (char *) "stdin";
@@ -881,7 +881,7 @@ int main(int argc, char **argv) {
 		    INFILE_NAME = argv[fileidx];
             yyin = infile;
         }
-
+    
         else if (argc == 2) {
             if((strcmp(argv[1],"--help") == 0) || (strcmp(argv[1],"-help") == 0) || (strcmp(argv[1], "-h") == 0)){
                 cout << "Valid Flags:" << endl;
@@ -897,7 +897,7 @@ int main(int argc, char **argv) {
             yyin = infile;
         }
     }
-
+    
 	// parse through the input until there is no more:
 	do {
 		yyparse();
@@ -905,10 +905,10 @@ int main(int argc, char **argv) {
 
 	// if everything is OK continue processing with AST
 	if(num_errors == 0){
-
+    
 		// make the class hierarchy graph
 		CLASS_GRAPH = build_class_graph(root);
-
+    
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(CLASS_GRAPH, "Obj");
 		if(class_res == 0){
@@ -933,10 +933,10 @@ int main(int argc, char **argv) {
 			string msg = "class " + MULTIPLE_SUBCLASS + " defined multiple times";
             LOG.insert("ClassError", -1, msg);
 		}
-
+    
 		// check that constructor calls are valid
 		get_constructor_names(root);  // stored in global CONSTRUCTOR_CALLS
-
+    
 		set<string> missing;
 		set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
 		if(!missing.empty()){
@@ -949,24 +949,24 @@ int main(int argc, char **argv) {
 		else{
 			// Constructor calls good
 		}
-
+    
 		// test the lca function
 		// crawl_class_graph(CLASS_GRAPH, "Obj");
 		// string lca = find_lca("C2", "C4", CLASS_GRAPH);
 		// cout << "LCA: " << lca << endl;
-
+    
 		// type checking stuff
 		build_vtable_map(CLASS_GRAPH);
 		check_vtable_map();
 		// check_rt_map();
-
+    
 		root->type_check();
-
+    
 	}
-
+    
     // dump the logs if we haven't already
     LOG.print_logs();
-
+    
 	// delete the root of the AST (which should delete the entire thing)
 	if(root != NULL){
 		delete root;

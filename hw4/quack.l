@@ -9,33 +9,22 @@
 %{
 #include <cstdio>
 #include <iostream>
+#include <string>
 #include "quack.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #include "quack.tab.h"
+#include "log.h"
 
 extern char *INFILE_NAME;
+extern DEBUG_STREAM LOG;
 
 int num_errors = 0;
-int ERROR_LIMIT = 10;
-void yyerror (const char *msg) {
+void yyerror (const char *errmsg) {
+    
     num_errors++;
-    if(num_errors > ERROR_LIMIT){
-        /* do nothing */
-    }
-    else if(num_errors == ERROR_LIMIT){
-        fprintf(stderr, "\n");
-        fprintf(stderr, "PARSE ERROR %d\n", num_errors);
-        fprintf(stderr, "File: %s\n", INFILE_NAME);
-        fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
-        fprintf(stderr, "Too many errors! Suppressing message ...\n");
-    }
-    else{
-        fprintf(stderr, "\n");
-        fprintf(stderr, "PARSE ERROR %d\n", num_errors);
-        fprintf(stderr, "File: %s\n", INFILE_NAME);
-        fprintf(stderr, "Near line %d: %s ('%s')\n", yylineno, msg, yytext);
-    }
+    string msg = string(errmsg) + " ('" + string(yytext) + "')";
+    LOG.insert("SyntaxError", yylineno, msg);
 }
 
 %}
@@ -81,7 +70,7 @@ not                                        { yylval.ival = yylineno; return NOT;
 [0-9]+                                     { struct int_with_linenum t; t.n = atoi(yytext); t.ln = yylineno; yylval.iwln = t; return INT_LIT; }
 \"(([\\][0btnrf\"\\])|[^\"\\\n])*\"        { struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
 \"(([\\].)|[^\"\\\n])*\"                   { yyerror("invalid string literal"); struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
-\"(([\\][.])|[^\"\\\n])*\n                 { yyerror("forgot to close string literal?"); struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
+\"(([\\][.])|[^\"\\\n])*\n                 { yyerror("forgot to close string literal"); struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
 \"\"\"(.?.?[^\"])*\"\"\"                   { struct string_with_linenum t; t.s = strdup(yytext); t.ln = yylineno; yylval.swln = t; return STRING_LIT; }
 
 \n                                         { }
