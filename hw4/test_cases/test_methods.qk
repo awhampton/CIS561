@@ -1,0 +1,48 @@
+class animal() {
+    this.name = "animal";
+    this.sound = "";
+    
+    def speak() : String {
+        return this.sound;
+    }
+}
+
+class dog() extends animal {
+    this.name = "dog";
+    this.sound = "bark";
+    
+    def speak() : String {
+        return this.sound + " " + this.sound;
+    }
+}
+
+class cat() extends animal {
+    this.name = "cat";
+    this.sound = "meow";
+    
+    def action() : String {
+        return this.name + " knocks a vase off a table";
+    }
+}
+
+class badfeline() extends cat {
+    this.name = "badcat";
+    this.sound = "*evil laughter*";
+    
+    // everything below should cause issues
+    def speak() : Int {
+        return -1;
+    }
+    
+    def action() : String {
+        return this.name + " is greedy";
+    }
+    
+    def action() : String {
+        return this.name + " is very greedy";
+    }
+    
+    def action(unused : Int) : String {
+        return this.name + " is also tricky";
+    }
+}
