@@ -505,7 +505,6 @@ VTable build_vtable(string c, VTable parent_vt){
             }
             res[0] = make_pair(class_name, cons_arg_types);
 
-
             // Add class methods to its vtable
 			for(list<method_node *>::iterator itr2 = ((*itr)->body->mthds)->begin(); itr2 != ((*itr)->body->mthds)->end(); ++itr2){
                 // Pull out args for current method
@@ -541,11 +540,11 @@ VTable build_vtable(string c, VTable parent_vt){
         if(c == "String"){
             list<string> str_constructor_types;
             res[0] = make_pair("String", str_constructor_types);
-
+            
             list<string> str_plus_types;
         	str_plus_types.push_back("String");
         	res.push_back(make_pair("PLUS", str_plus_types));
-
+            
         	RT_MAP["String"]["PLUS"] = "String";
         }
 
@@ -840,7 +839,7 @@ void print_symtable(SymTable table){
         return;
     }
     cerr << "------------------------------------------------------------------" << endl;
-    cerr << "Symbol Name:         | Formal Type:         | Actual Type:" << endl;
+    cerr << "Symbol Name:         | Static Type:         | Dynamic Type:" << endl;
     cerr << "------------------------------------------------------------------" << endl;
     for(SymTable::iterator iter = table.begin(); iter != table.end(); ++iter){
         cerr << setw(20) << iter->first << " | " << setw(20) << iter->second[0] << " | " << setw(20) << iter->second[1] << endl;
