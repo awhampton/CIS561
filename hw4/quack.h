@@ -200,7 +200,7 @@ public:
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
-            LOG.insert("Debug", -2, msg);
+            LOG.insert("Debug", -1, msg);
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(s);
             }
@@ -271,7 +271,7 @@ public:
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
-            LOG.insert("Debug", -2, msg);
+            LOG.insert("Debug", -1, msg);
             for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
                 (*itr)->type_check(else_branch_symtable);
             }
@@ -1014,7 +1014,7 @@ public:
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
-            LOG.insert("Debug", -2, msg);
+            LOG.insert("Debug", -1, msg);
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(method_symtable);
             }
@@ -1093,7 +1093,7 @@ public:
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
-            LOG.insert("Debug", -2, msg);
+            LOG.insert("Debug", -1, msg);
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(s);
             }

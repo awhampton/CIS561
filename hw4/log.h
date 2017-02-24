@@ -63,7 +63,7 @@ class DEBUG_STREAM {
         
         string line = "";
         if (lineNum != -1){
-            line += "(line " + to_string(lineNum) + ")";
+            line += "[line " + to_string(lineNum) + "] ";
         }
         
         if(options[type] == true){
@@ -72,7 +72,7 @@ class DEBUG_STREAM {
                 exit(0);
             }
             
-            string debug_msg = type + " " + line + ": " + msg;
+            string debug_msg = line + type + ": " + msg;
             DEBUG_BUFFER.push_back(debug_msg);
             
             // Don't want to count debug messages as errors against our error limit
