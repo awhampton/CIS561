@@ -1,6 +1,17 @@
 #!/bin/bash
 
-for filename in samples/*.qk; do
+if [ $# -ne 1 ]; then
+    echo "please specify a test directory"
+    exit
+fi
+
+if [ ! -d "$1" ]; then
+    echo "invalid test directory"
+    exit
+fi
+
+make
+for filename in ${1}/*.qk; do
 	echo
 	echo $(basename $filename .qk)
 	./quack $filename

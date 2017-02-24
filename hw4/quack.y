@@ -67,11 +67,11 @@ char* INFILE_NAME;
 
 // the union
 %union {
-	int   ival;
-	char *sval;
-	char  cval;
-    string_with_linenum swln;
-    int_with_linenum iwln;
+	int                     ival;
+	char                    *sval;
+	char                    cval;
+    string_with_linenum     swln;
+    int_with_linenum        iwln;
 	char                     *opt_ident_type;
 	method_node              *method_type;
 	list<method_node *>      *methods_type;
@@ -932,7 +932,7 @@ int main(int argc, char **argv) {
     LOG.enable("ClassError");
     LOG.enable("TypeError");
     LOG.enable("Error");
-    LOG.enable("Debug");
+    //LOG.enable("Debug");
 
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
