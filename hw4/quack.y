@@ -460,11 +460,11 @@ string find_lca(string s1, string s2, map< string, list<string> > cg){
     //note: probably want to just print this to cerr and return a error string so that our type check methods
     //      that call this don't bug out if they hit one of these cases
 	if( !res1 ){
-		LOG.insert("Error", -1, "ERROR! s1 not in class graph: " + s1);
+		LOG.insert("Debug", -1, "Warning! s1 not in class graph: " + s1);
         return "*ERROR";
 	}
 	if( !res2 ){
-		LOG.insert("Error", -1, "ERROR! s2 not in class graph: " + s2);
+		LOG.insert("Debug", -1, "Warning! s2 not in class graph: " + s2);
         return "*ERROR";
 	}
 

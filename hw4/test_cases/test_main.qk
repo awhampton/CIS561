@@ -50,4 +50,4 @@ my_smart_robot = SmartRobot(my_int);
 
 b = a;
 
-another_robot = Robot(my_typo);  // note: this should throw an error ... it currently does not!
+another_robot = Robot(my_typo);
