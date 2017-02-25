@@ -1,0 +1,23 @@
+class A() {}
+class B() extends A {}
+class C() extends B {}
+
+w = C();
+x = A();
+y = A();
+
+if(1 == 1){
+    x = B();
+}
+elif(1 < 1){
+    w = B();
+}
+else{
+    w = C();
+    z = A();
+}
+
+res1 : B = x;
+res2 : C = w;
+res3 : B = w;
+res3 : A = z;
