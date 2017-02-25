@@ -848,6 +848,7 @@ public:
     }
 
     string type_check(SymTable &s){
+
         // Build list of actual passed constructor arguments
         vector<string> arg_types;
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
@@ -1374,10 +1375,6 @@ public:
         // make a blank symbol table for the local variables in the body of the program
         SymTable main_locals;
 
-        // for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-        //     (*itr)->type_check(/* symbol table */);
-        // }
-
         TYPE_CHECK_AGAIN = true;
         int num_type_checks = 0;
         while(TYPE_CHECK_AGAIN){
@@ -1385,8 +1382,15 @@ public:
             num_type_checks++;
             string msg = "type check main num: " + to_string(num_type_checks);
             LOG.insert("Debug", -1, msg);
+
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(main_locals);
+            }
+
+            if(LOG.print_st){
+                cout << endl;
+                cout << "local symtable for program main during iteration " << num_type_checks << ":" << endl;
+                print_symtable(main_locals);
             }
         }
 

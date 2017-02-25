@@ -541,11 +541,11 @@ VTable build_vtable(string c, VTable parent_vt){
         if(c == "String"){
             list<string> str_constructor_types;
             res[0] = make_pair("String", str_constructor_types);
-            
+
             list<string> str_plus_types;
         	str_plus_types.push_back("String");
         	res.push_back(make_pair("PLUS", str_plus_types));
-            
+
         	RT_MAP["String"]["PLUS"] = "String";
         }
 
@@ -932,7 +932,7 @@ int main(int argc, char **argv) {
     LOG.enable("ClassError");
     LOG.enable("TypeError");
     LOG.enable("Error");
-    //LOG.enable("Debug");
+    // LOG.enable("Debug");
 
 	// see if there is a file, otherwise take input from stdin
 	FILE *infile;
@@ -1032,7 +1032,7 @@ int main(int argc, char **argv) {
 		// type checking stuff
 		build_vtable_map(CLASS_GRAPH);
 		check_vtable_map();
-		//check_rt_map();
+		// check_rt_map();
 
 		root->type_check();
 
