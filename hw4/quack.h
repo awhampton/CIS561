@@ -82,7 +82,6 @@ public:
 
     virtual ~expr_node() {};
     virtual list<node *> get_children() = 0;
-    // virtual string type_check(/* symbol table */) = 0;
 };
 
 // statements node
@@ -97,7 +96,6 @@ public:
 
     virtual ~statement_node() {};
     virtual list<node *> get_children() = 0;
-    // virtual string type_check(/* symbol table */) = 0;
 };
 
 
@@ -129,9 +127,6 @@ public:
         return expr->type_check(s);
     }
 
-    string type_check(void){
-        return expr->type_check();
-    }
 };
 
 
@@ -162,6 +157,13 @@ public:
     string type_check(SymTable &s){
 
         // check for duplicate first! if detected, add to error list
+        SymTable::iterator itr_f = s.find(name);
+        if(itr_f != s.end()){
+            // add to error list
+            string msg = "formal argument " + name + " given more than once";
+            LOG.insert("TypeError", line_number, msg);
+            return "*ERROR";
+        }
 
         array<string, 2> sym_val = {value, value};
         s[name] = sym_val;
@@ -1141,6 +1143,22 @@ public:
             }
         }
 
+        // check if any methods are defined twice
+        // (note: this is not a great way to do this ... there's probably something better!)
+        for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
+            string mn = (*itr)->name;
+            int ctr = 0;
+            for(list<method_node *>::iterator itr2 = mthds->begin(); itr2 != mthds->end(); ++itr2){
+                if((*itr2)->name == mn){
+                    ctr++;
+                }
+            }
+            if(ctr > 1){
+                string msg = "method " + mn + " is defined more than once in class " + class_name;
+                LOG.insert("TypeError", (*itr)->line_number, msg);
+            }
+        }
+
         // type check the methods ... send them a blank symtable with just the class name in it
         // each method will make a copy of this symtable to start
         SymTable method_symtable_template;
@@ -1291,14 +1309,50 @@ public:
             if(s_itr == SymTables[signature->class_name].end()){
                 string msg = "class " + signature->class_name + " doesn't initialize variable " + iter->first + " declared by its superclass";
                 LOG.insert("ClassError", signature->line_number, msg);
-                //TODO: need to return an error type here maybe?
             }
 
             // found the constructor variable but the type was invalid
             else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
                 string msg = "class " + signature->class_name + " initializes inherited variable " + iter->first + " to invalid type " + s_itr->second[1];
                 LOG.insert("TypeError", signature->line_number, msg);
-                //TODO: need to return an error type here maybe?
+            }
+        }
+
+        // check that for each method that is an override of the superclass: the formal args
+        // are given supertypes; the return type is a subtype
+        for(list<method_node *>::iterator itr = body->mthds->begin(); itr != body->mthds->end(); ++itr){
+            VTable super_class_vtable = VTABLE_MAP[signature->class_extends];
+            for(VTable::iterator itr2 = super_class_vtable.begin(); itr2 != super_class_vtable.end(); ++itr2){
+                if( (*itr2).first == (*itr)->name ){
+                    // check arguments
+                    int n_args_this = (*((*itr)->args)).size();
+                    int n_args_super = ((*itr2).second).size();
+                    // cout << (*itr)->name << " " << n_args_this << " " << n_args_super << endl;
+                    if( n_args_this != n_args_super ){
+                        string msg = "method override has wrong number of arguments";
+                        LOG.insert("TypeError", (*itr)->line_number, msg);
+                    }
+                    else{
+                        list<string>::iterator itr3 = ((*itr2).second).begin();
+                        list<formal_arg_node *>::iterator itr4 = (*((*itr)->args)).begin();
+                        for(int i = 0; i < n_args_this; i++){
+                            bool check_arg = is_subclass(*itr3, (*itr4)->value, CLASS_GRAPH);
+                            if(!check_arg){
+                                string msg = "invalid type on formal argument of method override";
+                                LOG.insert("TypeError", (*itr)->line_number, msg);
+                            }
+                            ++itr3;
+                            ++itr4;
+                        }
+                    }
+
+                    // check return type
+                    bool check_rt = is_subclass((*itr)->return_type, RT_MAP[signature->class_extends][(*itr)->name], CLASS_GRAPH);
+                    if(!check_rt){
+                        string msg = "invalid return type on method override";
+                        LOG.insert("TypeError", (*itr)->line_number, msg);
+                    }
+                }
             }
         }
 

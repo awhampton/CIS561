@@ -51,7 +51,7 @@ unordered_map< string, SymTable > SymTables;
 bool TYPE_CHECK_AGAIN;
 
 // globals for debugging
-DEBUG_STREAM LOG(5);
+DEBUG_STREAM LOG(6);
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -313,7 +313,7 @@ r_expr:
 	;
 
 r_expr:
-	MINUS r_expr %prec NEG { $$ = new method_call_node(new intlit_node(0, -2), "MINUS", $2, $1); }
+	MINUS r_expr %prec NEG { $$ = new method_call_node(new intlit_node(0, $1), "MINUS", $2, $1); }
 	;
 
 r_expr:
