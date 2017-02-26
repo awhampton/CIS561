@@ -1,0 +1,14 @@
+class A() {
+    this.x = 4;
+}
+
+class B() extends A {
+    this.x = 5;
+    a = A();
+    a.error = 6;  // this should throw an error
+}
+
+class C() {
+    a = A();
+    y = a.x;  // this should throw an error
+}
