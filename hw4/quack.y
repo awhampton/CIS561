@@ -50,9 +50,10 @@ map<string, list<string> > CLASS_GRAPH;
 typedef unordered_map< string, array< string, 2 > > SymTable;
 unordered_map< string, SymTable > SymTables;
 bool TYPE_CHECK_AGAIN;
+bool BREAK_LOOP;
 
 // globals for debugging
-DEBUG_STREAM LOG(6);
+DEBUG_STREAM LOG(15);
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();

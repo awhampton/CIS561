@@ -24,6 +24,7 @@ extern  map<string, map<string, string> > RT_MAP;
 extern  DEBUG_STREAM LOG;
 extern  vector< pair< int, string > > ERROR_BUFFER;
 extern  bool TYPE_CHECK_AGAIN;
+extern  bool BREAK_LOOP;
 extern  set<string> BUILTIN_CLASSES;
 extern  unordered_map< string, string > BUILTIN_VALUES;
 
@@ -164,6 +165,7 @@ public:
             // add to error list
             string msg = "formal argument " + name + " given more than once";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -217,8 +219,9 @@ public:
         }
 
         TYPE_CHECK_AGAIN = true;
+        BREAK_LOOP = false;
         int num_type_checks = 0;
-        while(TYPE_CHECK_AGAIN){
+        while(TYPE_CHECK_AGAIN && !BREAK_LOOP){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
@@ -288,8 +291,9 @@ public:
         // the 'else' branch is a little goofy because it's just a list of statements here
         SymTable else_branch_symtable = s;
         TYPE_CHECK_AGAIN = true;
+        BREAK_LOOP = false;
         int num_type_checks = 0;
-        while(TYPE_CHECK_AGAIN){
+        while(TYPE_CHECK_AGAIN && !BREAK_LOOP){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
@@ -387,11 +391,11 @@ public:
         list<node *> res;
         return res;
     }
-    
+
     string get_name(void){
         return ident_value;
     }
-    
+
     // string type_check(/* symbol table */){
     //  // return symbol_table.get_actual_type(ident_value);
     //  //   if ident_value is not found in the symbol table, add to the error list
@@ -401,12 +405,12 @@ public:
     string type_check(SymTable &s){
         // return symbol_table.get_actual_type(ident_value);
         //   if ident_value is not found in the symbol table, add to the error list
-        
+
         // first see if the ident is a builtin instance like true or none
         if(BUILTIN_VALUES.find(ident_value) != BUILTIN_VALUES.end()){
             return BUILTIN_VALUES[ident_value];
         }
-        
+
         // try to find ident_value in the symbol table
         SymTable::iterator itr_f = s.find(ident_value);
         if(itr_f == s.end()){
@@ -448,11 +452,11 @@ public:
         res.push_back(expr);
         return res;
     }
-    
+
     string get_name(void){
         return expr->get_name() + "." + ident_value;
     }
-    
+
     // string type_check(/* symbol table */){
     //  expr_type = expr->type_check(/* symbol table */);
     //
@@ -461,13 +465,32 @@ public:
     // }
 
     string type_check(SymTable &s){
+
+        // we should never have a class member access in the main section
+        if(s["this"][0] == "*TOP"){
+            string msg = "access error -- data members are private";
+            LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
+            return "*ERROR";
+        }
+
+        // resolve the type of the expression
         expr_type = expr->type_check(s);
+
+        // if expr_type is not a supertype of the current class, it's a type error
+        bool check_access = is_subclass(s["this"][0], expr_type, CLASS_GRAPH);
+        if(!check_access){
+            string msg = "access error -- data members are private";
+            LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
+            return "*ERROR";
+        }
 
         // try to find the type of ident_value in the symbol table for class expr_type
         unordered_map<string, SymTable>::iterator itr_f = SymTables.find(expr_type);
         if(itr_f == SymTables.end()){
             // if not found, class doesn't exist, so add to the error list
-            string msg = "access node type error";
+            string msg = "access type error";
             LOG.insert("Error", line_number, msg);
             return "*ERROR";
         }
@@ -476,9 +499,13 @@ public:
         SymTable::iterator itr_f2 = SymTables[expr_type].find(ident_value);
         if(itr_f2 == SymTables[expr_type].end()){
             // if not found, class member ident_value doesn't exist, so add it to the table!
-            //    note: I think this is OK, but we might end up not wanting to do this :)
-            array<string, 2> sym_val = {"*ERROR", "*ERROR"};
-            SymTables[expr_type][ident_value] = sym_val;
+            //    note: only do this if it corresponds to a "this" access
+            //    note: there is a potential problem here if we can construct an instance of
+            //          a class in itself and try to access its data members
+            if(expr_type == s["this"][0]){
+                array<string, 2> sym_val = {"*ERROR", "*ERROR"};
+                SymTables[expr_type][ident_value] = sym_val;
+            }
             return "*ERROR";
         }
 
@@ -519,7 +546,7 @@ public:
     string type_check(SymTable &s){
         string left_type_eval = left->type_check(s);
         string right_type_eval = right->type_check(s);
-        
+
         // bool check1 = check that declared left_type is consistent with left_type_eval
         //   left_type_eval should be a subclass of declared left_type
         bool check1 = is_subclass(left_type_eval, left_type, CLASS_GRAPH);
@@ -563,8 +590,22 @@ public:
             if(left_type_eval != find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)){
                 TYPE_CHECK_AGAIN = true;
             }
-            array<string, 2> sym_val = {left_type, find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)};
-            SymTables[((access_node *) left)->expr_type][((access_node *) left)->ident_value] = sym_val;
+
+            // check if the access is to another class than "this"
+            if( ((access_node *) left)->expr_type != s["this"][0] ){
+                SymTable::iterator itr_f = SymTables[((access_node *) left)->expr_type].find(((access_node *) left)->ident_value);
+                // if we try to access a data member that doesn't exist, throw an error
+                if(itr_f == SymTables[((access_node *) left)->expr_type].end()){
+                    string msg = "undeclared variable or method at '" + left->get_name() + "'";
+                    LOG.insert("TypeError", line_number, msg);
+                    return "*ERROR";
+                }
+            }
+            else{
+                // otherwise, add it to SymTables
+                array<string, 2> sym_val = {left_type, find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)};
+                SymTables[((access_node *) left)->expr_type][((access_node *) left)->ident_value] = sym_val;
+            }
         }
 
         // return something?
@@ -692,11 +733,11 @@ public:
         list<node *> res;
         return res;
     }
-    
+
     string get_name(void){
         return strlit_value;
     }
-    
+
     string type_check(SymTable &s){
         return "String";
     }
@@ -721,11 +762,11 @@ public:
         list<node *> res;
         return res;
     }
-    
+
     string get_name(void){
         return to_string(intlit_value);
     }
-    
+
     string type_check(SymTable &s){
         return "Int";
     }
@@ -769,7 +810,7 @@ public:
 
     string get_name(void){
         string name = method_name;
-        
+
         // Catch and resugar special methods
         unordered_map< string, string > SYNSUG;
         SYNSUG["PLUS"]      = "+";
@@ -781,11 +822,11 @@ public:
         SYNSUG["LESS"]      = "<";
         SYNSUG["ATLEAST"]   = ">=";
         SYNSUG["MORE"]      = ">";
-        
+
         if(SYNSUG.find(name) != SYNSUG.end()){
             return expr->get_name() + " " + SYNSUG[name] + " " + (*(args->begin()))->expr->get_name();
         }
-        
+
         return expr->get_name() + "." + method_name + "(...)";
     }
 
@@ -810,6 +851,7 @@ public:
         if(expr_type == "*ERROR"){
             string msg = "method call on undeclared variable";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -819,6 +861,7 @@ public:
             // if not found, class doesn't exist, so add to the error list
             string msg = "class " + expr_type + " doesn't exist";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -836,6 +879,7 @@ public:
             // add to error list
             string msg = method_name + " is not a method of class " + expr_type;
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -846,6 +890,7 @@ public:
         if(expected_args.size() != arg_types.size()){
             string msg = "incorrect number of arguments for call of class " + expr_type + " method " + method_name;
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -857,12 +902,14 @@ public:
             if(LCA != *arg_itr){
                 string msg = "type of argument " + to_string(idx) + " in call of class " + expr_type + " method " + method_name + " is invalid";
                 LOG.insert("TypeError", line_number, msg);
+                BREAK_LOOP = true;
                 return "*ERROR";
             }
             // the argument should also not have the error type
             if(arg_types[idx2] == "*ERROR"){
                 string msg = "type of argument " + to_string(idx) + " in call of class " + expr_type + " method " + method_name + " is invalid";
                 LOG.insert("TypeError", line_number, msg);
+                BREAK_LOOP = true;
                 return "*ERROR";
             }
             idx2++;
@@ -916,11 +963,22 @@ public:
             arg_types.push_back((*itr)->type_check(s));
         }
 
+        // check that class is actually in the VTABLE_MAP
+        map<string, VTable>::iterator itr_f = VTABLE_MAP.find(class_name);
+        if(itr_f == VTABLE_MAP.end()){
+            // add to error list
+            string msg = "tried to instantiate undefined class " + class_name;
+            LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
+            return "*ERROR";
+        }
+
         // Make sure actual and expected arg list lengths are the same
         list<string> expected_args = VTABLE_MAP[class_name][0].second;
         if(expected_args.size() != arg_types.size()){
             string msg = "incorrect number of arguments for call of class " + class_name + " constructor";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -932,12 +990,14 @@ public:
             if(LCA != *arg_itr){
                 string msg = "type of argument " + to_string(idx) + " in call of class " + class_name + " constructor is invalid";
                 LOG.insert("TypeError", line_number, msg);
+                BREAK_LOOP = true;
                 return "*ERROR";
             }
             // the argument should also not have the error type
             if(arg_types[idx] == "*ERROR"){
                 string msg = "type of argument " + to_string(idx) + " in call of class " + class_name + " constructor is invalid";
                 LOG.insert("TypeError", line_number, msg);
+                BREAK_LOOP = true;
                 return "*ERROR";
             }
             idx++;
@@ -984,6 +1044,7 @@ public:
         if(left_type != "Boolean"){
             string msg = "left type of AND is not boolean";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -991,6 +1052,7 @@ public:
         if(right_type != "Boolean"){
             string msg = "right type of AND is not boolean";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -1034,6 +1096,7 @@ public:
         if(left_type != "Boolean"){
             string msg = "left type of OR is not boolean";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -1041,6 +1104,7 @@ public:
         if(right_type != "Boolean"){
             string msg = "right type of OR is not boolean";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -1080,6 +1144,7 @@ public:
         if(expr_type != "Boolean"){
             string msg = "type of NOT is not boolean";
             LOG.insert("TypeError", line_number, msg);
+            BREAK_LOOP = true;
             return "*ERROR";
         }
 
@@ -1146,8 +1211,9 @@ public:
 
         // type check the method's statements
         TYPE_CHECK_AGAIN = true;
+        BREAK_LOOP = false;
         int num_type_checks = 0;
-        while(TYPE_CHECK_AGAIN){
+        while(TYPE_CHECK_AGAIN && !BREAK_LOOP){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
@@ -1203,14 +1269,21 @@ public:
         // these statements are the class constructor
         // we will include "this.x" fields in the symtable stored at SymTables[this_class]
         TYPE_CHECK_AGAIN = true;
+        BREAK_LOOP = false;
         int num_type_checks = 0;
-        while(TYPE_CHECK_AGAIN){
+        while(TYPE_CHECK_AGAIN && !BREAK_LOOP){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check num: " + to_string(num_type_checks);
             LOG.insert("Debug", -1, msg);
             for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
                 (*itr)->type_check(s);
+            }
+
+            if(LOG.print_st){
+                cout << endl;
+                cout << "local symtable for class " << class_name << " during iteration " << num_type_checks << ":" << endl;
+                print_symtable(s);
             }
         }
 
@@ -1353,12 +1426,6 @@ public:
         //   note: signature->type_check takes a reference for its argument
         signature->type_check(class_symtable_tmp);
 
-        // debug
-        // for (SymTable::iterator itr = class_symtable_tmp.begin(); itr != class_symtable_tmp.end(); ++itr)
-        // {
-        //     cout << itr->first << ": " << itr->second[0] << " - " << itr->second[1] << endl;
-        // }
-
         // type check the body of the class
         //    note: during this process, we will build a copy of the symtable with only the class
         //          datamembers that is saved to the global SymTables
@@ -1498,11 +1565,18 @@ public:
         }
 
         // make a blank symbol table for the local variables in the body of the program
+        //   note: we don't want to be able to access any data members directly in this
+        //         section ... I think setting "this" to refer to some error code is
+        //         the only way to accomplish it ... this means you can't use "this"
+        //         as the name of a local variable in the main program section
         SymTable main_locals;
+        array<string, 2> sym_val = {"*TOP", "*TOP"};
+        main_locals["this"] = sym_val;
 
         TYPE_CHECK_AGAIN = true;
+        BREAK_LOOP = false;
         int num_type_checks = 0;
-        while(TYPE_CHECK_AGAIN){
+        while(TYPE_CHECK_AGAIN && !BREAK_LOOP){
             TYPE_CHECK_AGAIN = false;
             num_type_checks++;
             string msg = "type check main num: " + to_string(num_type_checks);
