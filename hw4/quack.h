@@ -651,7 +651,11 @@ public:
             // add to error list
             string msg = "return error - ";
             if(has_return_expr){
-                msg += "invalid return type at '" + expr->get_name() + "'";
+                string name = expr->get_name();
+                int maxlen = 50;
+                if(name.size() > maxlen)
+                    name.resize(maxlen);
+                msg += "invalid return type at '" + name + "'";
             }
             else{
                 msg += "invalid return";
@@ -764,6 +768,24 @@ public:
     }
 
     string get_name(void){
+        string name = method_name;
+        
+        // Catch and resugar special methods
+        unordered_map< string, string > SYNSUG;
+        SYNSUG["PLUS"]      = "+";
+        SYNSUG["MINUS"]     = "-";
+        SYNSUG["TIMES"]     = "*";
+        SYNSUG["DIVIDE"]    = "/";
+        SYNSUG["EQUALS"]    = "==";
+        SYNSUG["ATMOST"]    = "<=";
+        SYNSUG["LESS"]      = "<";
+        SYNSUG["ATLEAST"]   = ">=";
+        SYNSUG["MORE"]      = ">";
+        
+        if(SYNSUG.find(name) != SYNSUG.end()){
+            return expr->get_name() + " " + SYNSUG[name] + " " + (*(args->begin()))->expr->get_name();
+        }
+        
         return expr->get_name() + "." + method_name + "(...)";
     }
 
