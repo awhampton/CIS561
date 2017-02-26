@@ -38,6 +38,7 @@ string CLASS_CYCLE_SUPERCLASS;
 string CLASS_CYCLE_SUBCLASS;
 string MULTIPLE_SUBCLASS;
 set<string> BUILTIN_CLASSES;
+unordered_map< string, string > BUILTIN_VALUES;
 set<string> CLASSES_FOUND;
 set<string> CONSTRUCTOR_CALLS;
 
@@ -851,6 +852,14 @@ void populate_builtin_classes(void){
 }
 
 
+// populate the builtin values set
+void populate_builtin_values(void){
+    BUILTIN_VALUES["true"] = "Boolean";
+    BUILTIN_VALUES["false"] = "Boolean";
+    BUILTIN_VALUES["none"] = "Nothing";
+}
+
+
 void print_symtable(SymTable table){
     if(!LOG.print_st){
         return;
@@ -924,8 +933,9 @@ SymTable get_intersection(vector< SymTable > tables){
 
 int main(int argc, char **argv) {
 
-	// populate the builtin class set
+	// populate the builtin classes and builtin values
 	populate_builtin_classes();
+    populate_builtin_values();
 
     // initialize logging
     LOG.enable("SyntaxError");

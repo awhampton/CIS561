@@ -11,7 +11,7 @@ class Robot(n : String) {
     // n : Int = 2;  // throws error!
     n = 2; // this doesn't currently raise an error ... should it?
 
-    b = a;
+    b = a; // this should throw an error (a isn't declared)
 
     this.name = "Bozotron";
     this.lastname = n;
@@ -28,7 +28,7 @@ class Robot(n : String) {
     }
 
     def test_method() : String{
-        return 7;
+        return 7; // this should throw a return type error
     }
 }
 

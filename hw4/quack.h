@@ -25,6 +25,7 @@ extern  DEBUG_STREAM LOG;
 extern  vector< pair< int, string > > ERROR_BUFFER;
 extern  bool TYPE_CHECK_AGAIN;
 extern  set<string> BUILTIN_CLASSES;
+extern  unordered_map< string, string > BUILTIN_VALUES;
 
 /////////////////////////////////
 // helper functions
@@ -82,6 +83,7 @@ public:
 
     virtual ~expr_node() {};
     virtual list<node *> get_children() = 0;
+    virtual string get_name() = 0;
 };
 
 // statements node
@@ -385,7 +387,11 @@ public:
         list<node *> res;
         return res;
     }
-
+    
+    string get_name(void){
+        return ident_value;
+    }
+    
     // string type_check(/* symbol table */){
     //  // return symbol_table.get_actual_type(ident_value);
     //  //   if ident_value is not found in the symbol table, add to the error list
@@ -395,7 +401,12 @@ public:
     string type_check(SymTable &s){
         // return symbol_table.get_actual_type(ident_value);
         //   if ident_value is not found in the symbol table, add to the error list
-
+        
+        // first see if the ident is a builtin instance like true or none
+        if(BUILTIN_VALUES.find(ident_value) != BUILTIN_VALUES.end()){
+            return BUILTIN_VALUES[ident_value];
+        }
+        
         // try to find ident_value in the symbol table
         SymTable::iterator itr_f = s.find(ident_value);
         if(itr_f == s.end()){
@@ -437,7 +448,11 @@ public:
         res.push_back(expr);
         return res;
     }
-
+    
+    string get_name(void){
+        return expr->get_name() + "." + ident_value;
+    }
+    
     // string type_check(/* symbol table */){
     //  expr_type = expr->type_check(/* symbol table */);
     //
@@ -504,13 +519,13 @@ public:
     string type_check(SymTable &s){
         string left_type_eval = left->type_check(s);
         string right_type_eval = right->type_check(s);
-
+        
         // bool check1 = check that declared left_type is consistent with left_type_eval
         //   left_type_eval should be a subclass of declared left_type
         bool check1 = is_subclass(left_type_eval, left_type, CLASS_GRAPH);
         if(!check1){
             // add to error list
-            string msg = "assignment not consistent with declared type";
+            string msg = "assignment to " + left->get_name() + " of " + right->get_name() + " not consistent with declared type '" + left_type + "'";
             LOG.insert("TypeError", line_number, msg);
         }
 
@@ -518,7 +533,7 @@ public:
         bool check2 = is_subclass(right_type_eval, left_type, CLASS_GRAPH);
         if(!check2){
             // add to error list
-            string msg = "assignment not consistent with declared type";
+            string msg = "assignment to " + left->get_name() + " of " + right->get_name() + " not consistent with declared type '" + left_type + "'";
             LOG.insert("TypeError", line_number, msg);
         }
 
@@ -526,7 +541,7 @@ public:
         bool check3 = right_type_eval != "*ERROR";
         if(!check3){
             // add to error list
-            string msg = "undeclared variable or method";
+            string msg = "undeclared variable or method at '" + right->get_name() + "'";
             LOG.insert("TypeError", line_number, msg);
         }
 
@@ -634,7 +649,13 @@ public:
         bool check = is_subclass(return_type, RT_MAP[ s["this"][1] ][ s["$METHOD_NAME"][1] ], CLASS_GRAPH);
         if(!check){
             // add to error list
-            string msg = "return type error";
+            string msg = "return error - ";
+            if(has_return_expr){
+                msg += "invalid return type at '" + expr->get_name() + "'";
+            }
+            else{
+                msg += "invalid return";
+            }
             LOG.insert("Error", line_number, msg);
         }
 
@@ -667,7 +688,11 @@ public:
         list<node *> res;
         return res;
     }
-
+    
+    string get_name(void){
+        return strlit_value;
+    }
+    
     string type_check(SymTable &s){
         return "String";
     }
@@ -692,7 +717,11 @@ public:
         list<node *> res;
         return res;
     }
-
+    
+    string get_name(void){
+        return to_string(intlit_value);
+    }
+    
     string type_check(SymTable &s){
         return "Int";
     }
@@ -732,6 +761,10 @@ public:
             delete (*itr);
         }
         delete args;
+    }
+
+    string get_name(void){
+        return expr->get_name() + "." + method_name + "(...)";
     }
 
     list<node *> get_children(){
@@ -849,6 +882,10 @@ public:
         return res;
     }
 
+    string get_name(void){
+        return class_name + "(...)";
+    }
+
     string type_check(SymTable &s){
 
         // Build list of actual passed constructor arguments
@@ -916,6 +953,10 @@ public:
         return res;
     }
 
+    string get_name(void){
+        return left->get_name() + " and " + right->get_name();
+    }
+
     string type_check(SymTable &s){
         string left_type = left->type_check(s);
         if(left_type != "Boolean"){
@@ -962,6 +1003,10 @@ public:
         return res;
     }
 
+    string get_name(void){
+        return left->get_name() + " or " + right->get_name();
+    }
+
     string type_check(SymTable &s){
         string left_type = left->type_check(s);
         if(left_type != "Boolean"){
@@ -1002,6 +1047,10 @@ public:
         list<node *> res;
         res.push_back(expr);
         return res;
+    }
+
+    string get_name(void){
+        return "not " + expr->get_name();
     }
 
     string type_check(SymTable &s){
