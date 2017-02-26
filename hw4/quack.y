@@ -538,18 +538,6 @@ VTable build_vtable(string c, VTable parent_vt){
 		}
 	}
 
-        // if the class is String, update it with builtin methods
-        if(c == "String"){
-            list<string> str_constructor_types;
-            res[0] = make_pair("String", str_constructor_types);
-
-            list<string> str_plus_types;
-        	str_plus_types.push_back("String");
-        	res.push_back(make_pair("PLUS", str_plus_types));
-
-        	RT_MAP["String"]["PLUS"] = "String";
-        }
-
     // if the class is String, update it with builtin methods
     if(c == "String"){
         list<string> str_constructor_types;
