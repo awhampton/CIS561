@@ -67,7 +67,7 @@ class DEBUG_STREAM {
         }
 
         if(options[type] == true){
-            if(num_errors == 0){
+            if(num_errors == DEBUG_BUFFER.size()){
                 print_logs();
                 cerr << "Suppressing additional errors" << endl;
                 exit(0);
@@ -78,7 +78,7 @@ class DEBUG_STREAM {
 
             // Don't want to count debug messages as errors against our error limit
             if(type != "Debug"){
-                num_errors--;
+                /* num_errors--; */
             }
         }
     }
