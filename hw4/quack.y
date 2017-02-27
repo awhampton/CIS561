@@ -53,7 +53,7 @@ bool TYPE_CHECK_AGAIN;
 bool BREAK_LOOP;
 
 // globals for debugging
-DEBUG_STREAM LOG(5);
+DEBUG_STREAM LOG(10);
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();

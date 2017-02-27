@@ -1215,6 +1215,21 @@ public:
 
     string type_check(SymTable &s){
 
+        // if the method has a return type other than 'Nothing', check that it actually
+        // has a return statement
+        if(return_type != "Nothing"){
+            bool found_return_node = false;
+            for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+                if( (*itr)->type_of_statement == "return" ){
+                    found_return_node = true;
+                }
+            }
+            if(!found_return_node){
+                string msg = "method " + name + " does not have a return statement";
+                LOG.insert("TypeError", line_number, msg);
+            }
+        }
+
         // make a symtable local to just this method
         SymTable method_symtable = s;
 

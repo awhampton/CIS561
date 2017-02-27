@@ -50,16 +50,25 @@ class badfeline() extends cat {
     }
 
     def eat() : Int {
-        return 12345;
+        return -12345;
     }
 
     def drink(how_much : Obj) {
         return;
     }
 
+    def no_return_needed() : Nothing {
+        x = "this method doesn't need a return statement";
+    }
+
     // everything below should cause issues
+    def missing_return() : Int {
+        x = 4;
+        // return x;
+    }
+
     def speak() : Int {
-        return -1;  // note: I have a funny hack for unary minus ... see quack.y line ~315
+        return -1;
     }
 
     def action() : String {
