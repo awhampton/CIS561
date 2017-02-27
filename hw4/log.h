@@ -2,7 +2,7 @@
 #define LOG_H
 
 #include <iostream>
-#include <list>
+#include <set>
 #include <string>
 #include <unordered_map>
 
@@ -11,7 +11,7 @@ using namespace std;
 class DEBUG_STREAM {
 
     int num_errors = 0;
-    list<string> DEBUG_BUFFER;
+    set<string> DEBUG_BUFFER;
     unordered_map< string, bool > options;
     DEBUG_STREAM();
 
@@ -49,7 +49,7 @@ class DEBUG_STREAM {
 
     // Dump debug buffer to output stream
     void print_logs(void){
-        for(list<string>::iterator iter = DEBUG_BUFFER.begin(); iter != DEBUG_BUFFER.end(); ++iter){
+        for(set<string>::iterator iter = DEBUG_BUFFER.begin(); iter != DEBUG_BUFFER.end(); ++iter){
             cerr << (*iter) << endl;
         }
     }
@@ -74,7 +74,7 @@ class DEBUG_STREAM {
             }
 
             string debug_msg = line + type + ": " + msg;
-            DEBUG_BUFFER.push_back(debug_msg);
+            DEBUG_BUFFER.insert(debug_msg);
 
             // Don't want to count debug messages as errors against our error limit
             if(type != "Debug"){

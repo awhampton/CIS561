@@ -34,11 +34,10 @@ class Robot(n : String) {
 
 
 class SmartRobot(iq: Int) extends Robot {
-    this.name = "Einsteinitron";  // OK, compatible
+    this.name = "Einsteinitron";  
     this.lastname = "asdf";
-    this.age = 48;     // ERROR, not an Int
-    // this.iq = 2 * iq;            // Sure, why not
-    this.iq = iq;
+    this.age = 48;                  // ERROR, not an Int
+    this.iq = 2 * iq;            
     this.strength = iq;
     z = Robot("4");
 }

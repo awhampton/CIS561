@@ -53,7 +53,7 @@ bool TYPE_CHECK_AGAIN;
 bool BREAK_LOOP;
 
 // globals for debugging
-DEBUG_STREAM LOG(15);
+DEBUG_STREAM LOG(5);
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -1013,10 +1013,12 @@ int main(int argc, char **argv) {
 		set<string> missing;
 		set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
 		if(!missing.empty()){
-            string msg = "class definition missing\ntried to construct the following undefined classes:\n";
-			for(set<string>::iterator itr = missing.begin(); itr != missing.end(); ++itr){
-				msg += "  " + *itr + "\n";
-			}
+            string msg = "class definition missing, tried to construct the following undefined classes: " + *missing.begin();
+            if(missing.size() > 1){
+			    for(set<string>::iterator itr = next(missing.begin(),1); itr != missing.end(); ++itr){
+			    	msg += ", " + *itr;
+			    }
+            }
             LOG.insert("ClassError", -1, msg);
 		}
 		else{

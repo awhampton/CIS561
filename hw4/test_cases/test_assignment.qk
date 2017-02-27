@@ -17,7 +17,12 @@ class B() extends A {
 
     e = C();
     e.n = 3;       // this should throw an error
-
+    
+    f = Z();       // should also fail
+    g = Z();       // this too
+    h = Y();       // you know we'd stop failing if you'd stop doing this to me
+                   //   Sincerely,
+                   //   The Compiler
 }
 
 class C() {
