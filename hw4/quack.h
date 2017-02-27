@@ -367,16 +367,23 @@ public:
         // we will get a symtable from the while branch and intersect it with s
         //   i think this will correctly update both the types and the declarations
         vector<SymTable> tables;
+        vector<SymTable> tables_dm;
         tables.push_back(s);
+
+        // make a copy of the data members symtable
+        SymTable dm_copy = SymTables[s["this"][0]];
+        tables_dm.push_back(dm_copy);
 
         // make a copy of the passed-in symtable, typecheck the branch, and save the copy in tables
         SymTable while_branch_symtable = s;
         wc->type_check(while_branch_symtable);
         tables.push_back(while_branch_symtable);
+        tables_dm.push_back(SymTables[s["this"][0]]);
 
         // need some way to intersect the symbol tables that were generated in the branches
         // this intersection should update the types with the LCA function
-        // s = get_intersection(tables);
+        s = get_intersection(tables);
+        SymTables[s["this"][0]] = get_intersection(tables_dm);
 
         return "OK";
     }
