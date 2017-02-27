@@ -364,6 +364,7 @@ public:
     }
 
     string type_check(SymTable &s){
+
         // we will get a symtable from the while branch and intersect it with s
         //   i think this will correctly update both the types and the declarations
         vector<SymTable> tables;
@@ -704,7 +705,7 @@ public:
 
         // is this the right place to check that the return type matches the declared type? probably!
         //   note: does the return type just have to be a subclass of the declared type? i think so!
-        bool check = is_subclass(return_type, RT_MAP[ s["this"][1] ][ s["$METHOD_NAME"][1] ], CLASS_GRAPH);
+        bool check = is_subclass(return_type, RT_MAP[ s["this"][0] ][ s["$METHOD_NAME"][0] ], CLASS_GRAPH);
         if(!check){
             // add to error list
             string msg = "return error - ";
