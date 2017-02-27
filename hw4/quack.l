@@ -1,5 +1,6 @@
 /*
-*  CIS 561: HW 3
+*  CIS 561: HW 4
+*  Garrett Morrison
 *  Andrew Hampton
 *
 *  I used the following tutorial as a starting point: http://aquamentus.com/flex_bison.html
@@ -21,7 +22,7 @@ extern DEBUG_STREAM LOG;
 
 int num_errors = 0;
 void yyerror (const char *errmsg) {
-    
+
     num_errors++;
     string msg = string(errmsg) + " ('" + string(yytext) + "')";
     LOG.insert("SyntaxError", yylineno, msg);
