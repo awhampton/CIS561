@@ -276,20 +276,28 @@ public:
 
         // we will accumulate symtables from each branch, then intersect them
         vector<SymTable> tables;
+        vector<SymTable> tables_dm;
+
+        // make a copy of the data members symtable
+        SymTable dm_copy = SymTables[s["this"][0]];
 
         // make a copy of the passed-in symtable, typecheck the branch, and save the copy in tables
         SymTable if_branch_symtable = s;
         if_branch->type_check(if_branch_symtable);
         tables.push_back(if_branch_symtable);
+        tables_dm.push_back(SymTables[s["this"][0]]);
 
         for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
+            SymTables[s["this"][0]] = dm_copy;  // reset the data member symtable
             SymTable elif_branch_symtable = s;
             (*itr)->type_check(elif_branch_symtable);
             tables.push_back(elif_branch_symtable);
+            tables_dm.push_back(SymTables[s["this"][0]]);
         }
 
         // the 'else' branch is a little goofy because it's just a list of statements here
         SymTable else_branch_symtable = s;
+        SymTables[s["this"][0]] = dm_copy;
         TYPE_CHECK_AGAIN = true;
         BREAK_LOOP = false;
         int num_type_checks = 0;
@@ -303,10 +311,12 @@ public:
             }
         }
         tables.push_back(else_branch_symtable);
+        tables_dm.push_back(SymTables[s["this"][0]]);
 
         // need some way to intersect the symbol tables that were generated in the branches
         // this intersection should update the types with the LCA function
         s = get_intersection(tables);
+        SymTables[s["this"][0]] = get_intersection(tables_dm);
 
         return "OK";
     }
