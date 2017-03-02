@@ -986,8 +986,37 @@ int main(int argc, char **argv) {
 		// check that the class graph is a tree with one connected component
 		int class_res = check_class_graph(CLASS_GRAPH, "Obj");
 		if(class_res == 0){
-			// Class structure good
-		}
+			// class structure is good, next check that constructor calls are valid
+            get_constructor_names(root);  // stored in global CONSTRUCTOR_CALLS
+
+            set<string> missing;
+            set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
+            if(!missing.empty()){
+                string msg = "class definition missing, tried to construct the following undefined classes: " + *missing.begin();
+                if(missing.size() > 1){
+                    for(set<string>::iterator itr = next(missing.begin(),1); itr != missing.end(); ++itr){
+                        msg += ", " + *itr;
+                    }
+                }
+                LOG.insert("ClassError", -1, msg);
+            }
+            else{
+                // class structure and constructor calls ok: proceed with type checking
+
+                // test the lca function
+                // crawl_class_graph(CLASS_GRAPH, "Obj");
+                // string lca = find_lca("C2", "C4", CLASS_GRAPH);
+                // cout << "LCA: " << lca << endl;
+
+                // type checking stuff
+                build_vtable_map(CLASS_GRAPH);
+                check_vtable_map();
+                // check_rt_map();
+
+                root->type_check();
+            }
+
+        }
         //TODO: need to have the line numbers for the following ClassErrors
 		else if(class_res == 1){
             string msg = "circular dependancy - " + CLASS_CYCLE_SUBCLASS + " extends " + CLASS_CYCLE_SUBCLASS + " which extends it or one of its descendants";
@@ -1007,36 +1036,6 @@ int main(int argc, char **argv) {
 			string msg = "class " + MULTIPLE_SUBCLASS + " defined multiple times";
             LOG.insert("ClassError", -1, msg);
 		}
-
-		// check that constructor calls are valid
-		get_constructor_names(root);  // stored in global CONSTRUCTOR_CALLS
-
-		set<string> missing;
-		set_difference(CONSTRUCTOR_CALLS.begin(), CONSTRUCTOR_CALLS.end(), CLASSES_FOUND.begin(), CLASSES_FOUND.end(), inserter(missing, missing.end()));
-		if(!missing.empty()){
-            string msg = "class definition missing, tried to construct the following undefined classes: " + *missing.begin();
-            if(missing.size() > 1){
-			    for(set<string>::iterator itr = next(missing.begin(),1); itr != missing.end(); ++itr){
-			    	msg += ", " + *itr;
-			    }
-            }
-            LOG.insert("ClassError", -1, msg);
-		}
-		else{
-			// Constructor calls good
-		}
-
-		// test the lca function
-		// crawl_class_graph(CLASS_GRAPH, "Obj");
-		// string lca = find_lca("C2", "C4", CLASS_GRAPH);
-		// cout << "LCA: " << lca << endl;
-
-		// type checking stuff
-		build_vtable_map(CLASS_GRAPH);
-		check_vtable_map();
-		// check_rt_map();
-
-		root->type_check();
 
 	}
 
