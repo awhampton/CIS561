@@ -1,0 +1,21 @@
+class Turtle() {
+    this.floor = Turtle(); //Turtles all the way down
+    
+    def PLUS(other : Turtle) : Turtle {
+        return Turtle();
+    }
+    
+    //def PRINT() : String {
+    //    return "Turtle";
+    //}
+}
+
+World = "";
+Atuin = Turtle();
+
+if(Atuin == Turtle()){
+    World = "Flat";
+}
+
+TwoAtuins = Atuin + Atuin;
+//World = World + Atuin.PRINT();  // might be nice to have working overloads
