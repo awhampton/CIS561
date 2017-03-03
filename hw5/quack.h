@@ -70,6 +70,7 @@ public:
     virtual string type_check(SymTable &s) { return "OK"; }
     virtual string type_check(SymTable &s, SymTable &t) { return "OK"; }
     virtual string type_check(SymTable &s, string class_name) { return "OK"; }
+    virtual void emit_ir_code(void) = 0;
 };
 
 // expression node
@@ -85,6 +86,10 @@ public:
     virtual ~expr_node() {};
     virtual list<node *> get_children() = 0;
     virtual string get_name() = 0;
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 // statements node
@@ -99,6 +104,10 @@ public:
 
     virtual ~statement_node() {};
     virtual list<node *> get_children() = 0;
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -129,7 +138,10 @@ public:
     string type_check(SymTable &s){
         return expr->type_check(s);
     }
-
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -173,6 +185,10 @@ public:
         s[name] = sym_val;
 
         return "OK";
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -232,6 +248,10 @@ public:
         }
 
         return "OK";  // don't think we actually need to return anything
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -320,6 +340,10 @@ public:
 
         return "OK";
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -338,7 +362,10 @@ public:
     void speak(void){
         cout << "while condition node" << endl;
     }
-
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -387,6 +414,10 @@ public:
         SymTables[s["this"][0]] = get_intersection(tables_dm);
 
         return "OK";
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -440,6 +471,10 @@ public:
 
         // else it's found, and we can return the type
         return s[ident_value][1];
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -529,6 +564,10 @@ public:
 
         // else, we can return the type
         return SymTables[expr_type][ident_value][1];
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -629,6 +668,10 @@ public:
         // return something?
         return "OK";
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -655,6 +698,10 @@ public:
 
     string type_check(SymTable &s){
         return expr->type_check(s);
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -730,6 +777,10 @@ public:
 
         return "OK";
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -787,6 +838,10 @@ public:
 
     string type_check(SymTable &s){
         return "Int";
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -936,6 +991,10 @@ public:
         // return the return type of the method
         return RT_MAP[expr_type][method_name];
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -1024,6 +1083,10 @@ public:
         // return the type (which for a class, is its ident)
         return class_name;
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -1075,6 +1138,10 @@ public:
         }
 
         return "Boolean";
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -1128,6 +1195,10 @@ public:
 
         return "Boolean";
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -1167,6 +1238,10 @@ public:
         }
 
         return "Boolean";
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -1258,6 +1333,10 @@ public:
 
         return "OK";
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 };
 
 
@@ -1348,6 +1427,10 @@ public:
         // is there something better to return?
         return "OK";
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 
 };
 
@@ -1403,6 +1486,10 @@ public:
         }
 
         return "OK";
+    }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
     }
 };
 
@@ -1538,6 +1625,10 @@ public:
 
         return "OK";
     }
+    
+    void emit_ir_code(void){
+        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    }
 
 };
 
@@ -1627,6 +1718,16 @@ public:
         }
 
         return "OK";
+    }
+    
+    // Serves as our hook for walking the AST
+    void emit_ir_code(void){
+        // Setup the builtin stuff
+        // TODO: BUILTIN CLASSES
+        // TODO: BUILTIN VALUES
+        // note: we will probably want some kind of global element that we can access for our shared stack frame stuff
+        
+        // Do an inorder traversal of the tree and call emit_ir_code() at each step to generate the necessary intermediate LLVM code
     }
 };
 

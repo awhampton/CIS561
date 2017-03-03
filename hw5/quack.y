@@ -1038,6 +1038,9 @@ int main(int argc, char **argv) {
 		}
 
 	}
+    
+    // generate LLVM
+    root->emit_ir_code();
 
     // dump the logs if we haven't already
     LOG.print_logs();
