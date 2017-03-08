@@ -665,6 +665,9 @@ public:
 
     string emit_ir_code(void){
         // note: this isn't totally correct ... just testing
+        // I think that all of the variable declarations should be made at once (this would maybe require
+        // hanging onto all the local symtables ... or just using the declared type and a lot of
+        // casting with methods) then assignments shouldn't include a declaration
         C.push_back("obj_" + left_type + " " + left->emit_ir_code() + " = " + right->emit_ir_code() + ";");
         return "OK";
     }
