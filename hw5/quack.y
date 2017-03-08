@@ -56,6 +56,9 @@ bool BREAK_LOOP;
 // globals for debugging
 DEBUG_STREAM LOG(10);
 
+// globals for code generation
+vector<string> C;
+
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
 extern "C" int yyparse();
@@ -1014,6 +1017,17 @@ int main(int argc, char **argv) {
                 // check_rt_map();
 
                 root->type_check();
+
+				// TODO: check if no errors from type checking
+
+				// if no errors, generate code
+				root->emit_ir_code();
+
+				// generate C code file (for now, just print to stdout)
+				for(vector<string>::iterator itr = C.begin(); itr != C.end(); ++itr){
+					cout << *itr << endl;
+				}
+
             }
 
         }
@@ -1038,7 +1052,7 @@ int main(int argc, char **argv) {
 		}
 
 	}
-    
+
     // generate LLVM
     root->emit_ir_code();
 
