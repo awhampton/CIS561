@@ -151,11 +151,11 @@ obj_Boolean new_Boolean(  ) {
 /* Boolean:STRING */
 obj_String Boolean_method_STRING(obj_Boolean this_in) {
   if (this_in == lit_true) {
-    return str_literal("true");
+    return str_literal(strdup("true"));
   } else if (this_in == lit_false) {
-    return str_literal("false");
+    return str_literal(strdup("false"));
   } else {
-    return str_literal("!!!BOGUS BOOLEAN");
+    return str_literal(strdup("!!!BOGUS BOOLEAN"));
   }
 }
 
@@ -205,7 +205,7 @@ obj_Nothing new_Nothing(  ) {
 
 /* Boolean:STRING */
 obj_String Nothing_method_STRING(obj_Nothing this_in) {
-    return str_literal("<nothing>");
+    return str_literal(strdup("<nothing>"));
 }
 
 /* Inherit Obj:EQUAL, since we have only one
