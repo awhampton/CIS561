@@ -40,6 +40,8 @@ bool is_subclass(string s1, string s2, map< string, list<string> > cg);
 SymTable get_intersection(vector< SymTable > tables);
 void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
+void struct_variable_declarations(string class_name);
+void method_declarations(string class_name);
 
 
 /////////////////////////////////
@@ -74,7 +76,7 @@ public:
     virtual string type_check(SymTable &s) { return "OK"; }
     virtual string type_check(SymTable &s, SymTable &t) { return "OK"; }
     virtual string type_check(SymTable &s, string class_name) { return "OK"; }
-    virtual string emit_ir_code(void) { return "OK"; }
+    virtual string emit_ir_code(string class_name, string method_name) { return "OK"; }
 };
 
 // expression node
@@ -91,7 +93,7 @@ public:
     virtual list<node *> get_children() = 0;
     virtual string get_name() = 0;
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -110,7 +112,7 @@ public:
     virtual ~statement_node() {};
     virtual list<node *> get_children() = 0;
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -145,7 +147,7 @@ public:
         return expr->type_check(s);
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -194,7 +196,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -258,7 +260,7 @@ public:
         return "OK";  // don't think we actually need to return anything
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -350,7 +352,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -423,7 +425,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -475,7 +477,7 @@ public:
         return s[ident_value][1];
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         return ident_value;
     }
 };
@@ -561,7 +563,7 @@ public:
         return SymTables[expr_type][ident_value][1];
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -665,12 +667,23 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // note: this isn't totally correct ... just testing
         // I think that all of the variable declarations should be made at once (this would maybe require
         // hanging onto all the local symtables ... or just using the declared type and a lot of
         // casting with methods) then assignments shouldn't include a declaration
-        C.push_back(left->emit_ir_code() + " = " + right->emit_ir_code() + ";");
+        string left_side = left->emit_ir_code(class_name, method_name);
+        string right_side = right->emit_ir_code(class_name, method_name);
+        SymTable s;
+        if(left->type_of_expression == "ident"){
+            s = LOCAL_SYMTABLES[class_name][method_name];
+        }
+        if(left->type_of_expression == "access"){
+            s = SymTables[((access_node *) left)->expr_type];
+        }
+
+        string cast = "(obj_" + s[left_side][0] + ")";
+        C.push_back(left_side + " = " + cast + " " + right->emit_ir_code(class_name, method_name) + ";");
         return "OK";
     }
 };
@@ -701,7 +714,7 @@ public:
         return expr->type_check(s);
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -780,7 +793,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -814,7 +827,7 @@ public:
         return "String";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         return "str_literal(" + strlit_value + ")";
     }
 };
@@ -847,7 +860,7 @@ public:
         return "Int";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         return "int_literal(" + to_string(intlit_value) + ")";
     }
 };
@@ -999,7 +1012,7 @@ public:
         return RT_MAP[expr_type][method_name];
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1092,7 +1105,7 @@ public:
         return class_name;
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1149,7 +1162,7 @@ public:
         return "Boolean";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1206,7 +1219,7 @@ public:
         return "Boolean";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1251,7 +1264,7 @@ public:
         return "Boolean";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1346,7 +1359,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1441,7 +1454,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1502,7 +1515,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "OK";
     }
@@ -1641,8 +1654,31 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(void){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+    string emit_ir_code(string class_name, string method_name){
+
+        // generate struct for the class
+        C.push_back("struct class_" + class_name + "_struct;");
+        C.push_back("typedef struct class_" + class_name + "_struct *class_" + class_name + ";");
+        C.push_back("");
+        C.push_back("typedef struct obj_" + class_name + "_struct {");
+        C.push_back("class_" + class_name + " clazz;");
+        struct_variable_declarations(class_name);
+        C.push_back("} *obj_" + class_name + ";");
+        C.push_back("");
+        C.push_back("struct class_" + class_name + "_struct the_class_" + class_name + "_struct;");
+        C.push_back("");
+
+        // generate the method table
+        C.push_back("struct class_" + class_name + "_struct {");
+        method_declarations(class_name);
+        C.push_back("};");
+        C.push_back("");
+
+        // instantiate the class struct
+        C.push_back("class_" + class_name + " the_class_" + class_name + " = &class_" + class_name + "_struct;");
+        C.push_back("");
+
+
         return "OK";
     }
 
@@ -1739,26 +1775,31 @@ public:
     }
 
     // Serves as our hook for walking the AST
-    string emit_ir_code(void){
+    string emit_ir_code(string class_name, string method_name){
         // Setup the builtin stuff
         // TODO: BUILTIN CLASSES
         // TODO: BUILTIN VALUES
         // note: we will probably want some kind of global element that we can access for our shared stack frame stuff
 
-        // Do an inorder traversal of the tree and call emit_ir_code() at each step to generate the necessary intermediate LLVM code
+        // Do an inorder traversal of the tree and call emit_ir_code(class_name, method_name) at each step to generate the necessary intermediate C code
         C.push_back("#include <stdio.h>");
         C.push_back("#include <stdlib.h>");
         C.push_back("#include <Builtins.h>");
+        C.push_back("");
 
         // call emit_ir_code on the classes in the right order
-        // TODO
+        for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
+            if(BUILTIN_CLASSES.find((*itr)->signature->class_extends) != BUILTIN_CLASSES.end()){
+                (*itr)->emit_ir_code((*itr)->signature->class_name, "*CLASS");
+            }
+        }
 
         // call emit_ir_code on the statements
         C.push_back("");
         C.push_back("int main(void){");
         local_variable_declarations("*MAIN", "*MAIN");
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->emit_ir_code();
+            (*itr)->emit_ir_code("*MAIN", "*MAIN");
         }
         C.push_back("}");
 

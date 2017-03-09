@@ -411,6 +411,47 @@ void local_variable_declarations(string class_name, string method_name){
     }
 }
 
+void struct_variable_declarations(string class_name){
+    SymTable struct_symtable = SymTables[class_name];
+    for(SymTable::iterator itr = struct_symtable.begin(); itr != struct_symtable.end(); ++itr){
+        if(itr->second[1][0] != '*'){
+            C.push_back("obj_" + itr->second[1] + " " + itr->first + ";");
+        }
+    }
+}
+
+void method_declarations(string class_name){
+    VTable v = VTABLE_MAP[class_name];
+    list<string> con_args = v[0].second;
+    string con_arg_string = "(";
+    int con_arg_count = 0;
+    for(list<string>::iterator itr2 = con_args.begin(); itr2 != con_args.end(); ++itr2){
+        con_arg_string = con_arg_string + " obj_" + *itr2 + ",";
+        con_arg_count++;
+    }
+    if(con_arg_count > 0){
+        con_arg_string.pop_back();
+    }
+    con_arg_string = con_arg_string + " )";
+    C.push_back("obj_" + class_name + " (*" + "constructor" + ") " + con_arg_string + ";");
+    for(VTable::iterator itr = v.begin() + 1; itr != v.end(); ++itr){
+        string method_name = itr->first;
+        list<string> args = itr->second;
+        string arg_string = "(";
+        int arg_count = 0;
+        for(list<string>::iterator itr2 = args.begin(); itr2 != args.end(); ++itr2){
+            arg_string = arg_string + " obj_" + *itr2 + ",";
+            arg_count++;
+        }
+        if(arg_count > 0){
+            arg_string.pop_back();
+        }
+        arg_string = arg_string + " )";
+        string return_type = RT_MAP[class_name][method_name];
+        C.push_back("obj_" + return_type + " (*" + method_name + ") " + arg_string + ";");
+    }
+}
+
 
 // LCA functions
 
@@ -1034,7 +1075,7 @@ int main(int argc, char **argv) {
 				// TODO: check if no errors from type checking
 
 				// if no errors, generate code
-				root->emit_ir_code();
+				root->emit_ir_code("*ROOT", "*ROOT");
 
 				// generate C code file (for now, just print to stdout)
 				for(vector<string>::iterator itr = C.begin(); itr != C.end(); ++itr){
@@ -1065,9 +1106,6 @@ int main(int argc, char **argv) {
 		}
 
 	}
-
-    // generate LLVM
-    root->emit_ir_code();
 
     // dump the logs if we haven't already
     LOG.print_logs();

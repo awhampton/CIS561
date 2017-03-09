@@ -1,0 +1,15 @@
+class Pt(x: Int, y: Int) {
+   this.x = x;
+   this.y = y;
+
+   def PRINT( ): Nothing {
+      "( ".PRINT();
+      this.x.PRINT();
+      ", ".PRINT();
+      ")".PRINT();
+    }
+
+    def PLUS(other: Pt):Pt {
+        return Pt(this.x+other.x, this.y+other.y);
+    }
+ }
