@@ -18,6 +18,7 @@ class DEBUG_STREAM {
     public:
     bool print_st = false;
     bool print_vt = false;
+    bool found_errors = false;
 
     // Constructor
     DEBUG_STREAM(int n_err){
@@ -79,6 +80,7 @@ class DEBUG_STREAM {
             // Don't want to count debug messages as errors against our error limit
             if(type != "Debug"){
                 /* num_errors--; */
+                found_errors = true;
             }
         }
     }

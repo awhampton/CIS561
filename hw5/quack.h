@@ -1674,6 +1674,12 @@ public:
         C.push_back("};");
         C.push_back("");
 
+        // generate methods
+        // TODO
+
+        // create the singleton struct of methods
+        // TODO
+
         // instantiate the class struct
         C.push_back("class_" + class_name + " the_class_" + class_name + " = &class_" + class_name + "_struct;");
         C.push_back("");

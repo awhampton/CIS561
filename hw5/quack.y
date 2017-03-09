@@ -1072,15 +1072,18 @@ int main(int argc, char **argv) {
 
                 root->type_check();
 
-				// TODO: check if no errors from type checking
+				// only generate code if no errors from type checking
+                if(!LOG.found_errors){
 
-				// if no errors, generate code
-				root->emit_ir_code("*ROOT", "*ROOT");
+    				// generated code is saved in global variable C
+    				root->emit_ir_code("*ROOT", "*ROOT");
 
-				// generate C code file (for now, just print to stdout)
-				for(vector<string>::iterator itr = C.begin(); itr != C.end(); ++itr){
-					cout << *itr << endl;
-				}
+    				// generate C code file (for now, just print to stdout)
+    				for(vector<string>::iterator itr = C.begin(); itr != C.end(); ++itr){
+    					cout << *itr << endl;
+    				}
+
+                }
 
             }
 
