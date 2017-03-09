@@ -29,6 +29,7 @@ extern  bool BREAK_LOOP;
 extern  set<string> BUILTIN_CLASSES;
 extern  unordered_map< string, string > BUILTIN_VALUES;
 extern  vector<string> C;
+extern  map< string, map<string, SymTable> > LOCAL_SYMTABLES;
 
 /////////////////////////////////
 // helper functions
@@ -38,6 +39,7 @@ string find_lca(string s1, string s2, map< string, list<string> > cg);
 bool is_subclass(string s1, string s2, map< string, list<string> > cg);
 SymTable get_intersection(vector< SymTable > tables);
 void print_symtable(SymTable table);
+void local_variable_declarations(string class_name, string method_name);
 
 
 /////////////////////////////////
@@ -668,7 +670,7 @@ public:
         // I think that all of the variable declarations should be made at once (this would maybe require
         // hanging onto all the local symtables ... or just using the declared type and a lot of
         // casting with methods) then assignments shouldn't include a declaration
-        C.push_back("obj_" + left_type + " " + left->emit_ir_code() + " = " + right->emit_ir_code() + ";");
+        C.push_back(left->emit_ir_code() + " = " + right->emit_ir_code() + ";");
         return "OK";
     }
 };
@@ -1731,6 +1733,8 @@ public:
             }
         }
 
+        LOCAL_SYMTABLES["*MAIN"]["*MAIN"] = main_locals;
+
         return "OK";
     }
 
@@ -1752,6 +1756,7 @@ public:
         // call emit_ir_code on the statements
         C.push_back("");
         C.push_back("int main(void){");
+        local_variable_declarations("*MAIN", "*MAIN");
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code();
         }

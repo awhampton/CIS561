@@ -58,6 +58,7 @@ DEBUG_STREAM LOG(10);
 
 // globals for code generation
 vector<string> C;
+map< string, map<string, SymTable> > LOCAL_SYMTABLES;
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -398,6 +399,18 @@ actual_arg_repetition:
 /////////////////////////////////
 // helper functions
 /////////////////////////////////
+
+// code generation functions
+
+void local_variable_declarations(string class_name, string method_name){
+    SymTable local_symtable = LOCAL_SYMTABLES[class_name][method_name];
+    for(SymTable::iterator itr = local_symtable.begin(); itr != local_symtable.end(); ++itr){
+        if(itr->second[0][0] != '*'){
+            C.push_back("obj_" + itr->second[0] + " " + itr->first + ";");
+        }
+    }
+}
+
 
 // LCA functions
 
