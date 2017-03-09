@@ -681,7 +681,7 @@ public:
             s = SymTables[((access_node *) left)->expr_type];
         }
 
-        string cast = "(obj_" + s[left_side][0] + ")";
+        string cast = "(obj_" + s[left_side][1] + ")";
         C.push_back(left_side + " = " + cast + " " + right->emit_ir_code(class_name, method_name) + ";");
         return "OK";
     }

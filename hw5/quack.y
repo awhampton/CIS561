@@ -409,7 +409,7 @@ void local_variable_declarations(string class_name, string method_name){
     SymTable local_symtable = LOCAL_SYMTABLES[class_name][method_name];
     for(SymTable::iterator itr = local_symtable.begin(); itr != local_symtable.end(); ++itr){
         if(itr->second[0][0] != '*'){
-            C.push_back("obj_" + itr->second[0] + " " + itr->first + ";");
+            C.push_back("obj_" + itr->second[1] + " " + itr->first + ";");
         }
     }
 }
@@ -639,7 +639,6 @@ VTable build_vtable(string c, VTable parent_vt){
         res.push_back(make_pair("ATLEAST", int_relation_types));
         res.push_back(make_pair("MORE", int_relation_types));
 
-        IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("MINUS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("TIMES", class_name_list));

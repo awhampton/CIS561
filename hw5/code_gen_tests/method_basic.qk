@@ -1,6 +1,6 @@
-x : Int = 1;
-y : Int = 2;
-z : Int = x + y;
-newline : String = "\n";
+x = 1;
+y = 2;
+z = x + y;
+newline = "\n";
 z.PRINT();
 newline.PRINT();
