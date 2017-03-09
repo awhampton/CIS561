@@ -59,6 +59,7 @@ DEBUG_STREAM LOG(10);
 // globals for code generation
 vector<string> C;
 map< string, map<string, SymTable> > LOCAL_SYMTABLES;
+map<string, VTable> IMPLIED_ARGUMENT;
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -434,21 +435,19 @@ void method_declarations(string class_name){
     }
     con_arg_string = con_arg_string + " )";
     C.push_back("obj_" + class_name + " (*" + "constructor" + ") " + con_arg_string + ";");
+    int method_num = 1;
     for(VTable::iterator itr = v.begin() + 1; itr != v.end(); ++itr){
         string method_name = itr->first;
         list<string> args = itr->second;
-        string arg_string = "(";
-        int arg_count = 0;
+        string arg_string = "( obj_" + IMPLIED_ARGUMENT[class_name][method_num].second.front() + ",";
         for(list<string>::iterator itr2 = args.begin(); itr2 != args.end(); ++itr2){
             arg_string = arg_string + " obj_" + *itr2 + ",";
-            arg_count++;
         }
-        if(arg_count > 0){
-            arg_string.pop_back();
-        }
+        arg_string.pop_back();
         arg_string = arg_string + " )";
         string return_type = RT_MAP[class_name][method_name];
         C.push_back("obj_" + return_type + " (*" + method_name + ") " + arg_string + ";");
+        method_num++;
     }
 }
 
@@ -552,8 +551,11 @@ VTable build_vtable(string c, VTable parent_vt){
     // Initialize variables
 	VTable res = parent_vt;
 	int table_size = res.size();
+    list<string> empty_arg_types;
+    list<string> class_name_list;
+    class_name_list.push_back(c);
 
-    // Crawl through all classes
+    // search through all classes
     list<class_node *> classes = *(root->classes);
 	for(list<class_node *>::iterator itr = classes.begin(); itr != classes.end(); ++itr){
 		string class_name = (*itr)->signature->class_name;
@@ -564,6 +566,7 @@ VTable build_vtable(string c, VTable parent_vt){
                 cons_arg_types.push_back((*formal_itr)->value);
             }
             res[0] = make_pair(class_name, cons_arg_types);
+            IMPLIED_ARGUMENT[c][0] = make_pair(class_name, empty_arg_types);
 
             // Add class methods to its vtable
 			for(list<method_node *>::iterator itr2 = ((*itr)->body->mthds)->begin(); itr2 != ((*itr)->body->mthds)->end(); ++itr2){
@@ -581,6 +584,7 @@ VTable build_vtable(string c, VTable parent_vt){
 				for(int i=1; i < table_size; i++){
 					if(method_name == res[i].first){
 						res[i] = make_pair(method_name, arg_types);
+                        IMPLIED_ARGUMENT[c][i] = make_pair(method_name, class_name_list);
 						inserted = true;
 						break;
 					}
@@ -588,6 +592,7 @@ VTable build_vtable(string c, VTable parent_vt){
                 // If it doesn't, add it
 				if(!inserted){
 					res.push_back(make_pair(method_name, arg_types));
+                    IMPLIED_ARGUMENT[c].push_back(make_pair(method_name, class_name_list));
 				}
 
                 // Also add its return type to the ReturnTypeTable for the class
@@ -601,10 +606,12 @@ VTable build_vtable(string c, VTable parent_vt){
     if(c == "String"){
         list<string> str_constructor_types;
         res[0] = make_pair("String", str_constructor_types);
+        IMPLIED_ARGUMENT[c][0] = make_pair("String", empty_arg_types);
 
         list<string> str_plus_types;
     	str_plus_types.push_back("String");
     	res.push_back(make_pair("PLUS", str_plus_types));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
 
     	RT_MAP["String"]["PLUS"] = "String";
     }
@@ -614,6 +621,7 @@ VTable build_vtable(string c, VTable parent_vt){
 
         list<string> int_constructor_types;
         res[0] = make_pair("Int", int_constructor_types);
+        IMPLIED_ARGUMENT[c][0] = make_pair("Int", empty_arg_types);
 
         list<string> int_relation_types;
     	int_relation_types.push_back("Int");
@@ -627,6 +635,16 @@ VTable build_vtable(string c, VTable parent_vt){
         res.push_back(make_pair("ATLEAST", int_relation_types));
         res.push_back(make_pair("LESS", int_relation_types));
         res.push_back(make_pair("MORE", int_relation_types));
+
+        IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("MINUS", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("TIMES", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("DIVIDE", class_name_list));
+
+        IMPLIED_ARGUMENT[c].push_back(make_pair("ATMOST", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("ATLEAST", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("MORE", class_name_list));
 
     	RT_MAP["Int"]["PLUS"] = "Int";
         RT_MAP["Int"]["MINUS"] = "Int";
@@ -644,6 +662,7 @@ VTable build_vtable(string c, VTable parent_vt){
 
         list<string> bool_constructor_types;
         res[0] = make_pair("Boolean", bool_constructor_types);
+        IMPLIED_ARGUMENT[c][0] = make_pair("Boolean", empty_arg_types);
     }
 
     // if the class is Nothing, update it with builtin methods
@@ -651,6 +670,7 @@ VTable build_vtable(string c, VTable parent_vt){
 
         list<string> nothing_constructor_types;
         res[0] = make_pair("Nothing", nothing_constructor_types);
+        IMPLIED_ARGUMENT[c][0] = make_pair("Nothing", empty_arg_types);
     }
 
 	return res;
@@ -659,6 +679,7 @@ VTable build_vtable(string c, VTable parent_vt){
 void build_vtable_map_recursive(map<string, list<string> > cg, string r, VTable parent_vt, string parent){
 	// cout << "building table for " << r << " from parent " << parent << endl;
 	RT_MAP[r] = RT_MAP[parent];
+    IMPLIED_ARGUMENT[r] = IMPLIED_ARGUMENT[parent];
 	VTable r_vtable = build_vtable(r, parent_vt);
 	VTABLE_MAP[r] = r_vtable;
 	for(list<string>::iterator itr = cg[r].begin(); itr != cg[r].end(); ++itr){
@@ -671,6 +692,8 @@ void build_vtable_map(map<string, list<string> > cg){
 
     // create the Obj vtable and update return types
 	VTable obj_vtable;
+    VTable implied_argument_vtable;
+
 	list<string> obj_equals_types;
 	obj_equals_types.push_back("Obj");
 	list<string> obj_print_types;
@@ -680,7 +703,18 @@ void build_vtable_map(map<string, list<string> > cg){
 	obj_vtable.push_back(make_pair("EQUALS", obj_equals_types));
 	obj_vtable.push_back(make_pair("PRINT", obj_print_types));
 	obj_vtable.push_back(make_pair("STR", obj_str_types));
+
+    list<string> obj_implied_types;
+	obj_implied_types.push_back("Obj");
+    list<string> obj_implied_empty;
+    implied_argument_vtable.push_back(make_pair("Obj", obj_implied_empty));
+	implied_argument_vtable.push_back(make_pair("EQUALS", obj_implied_types));
+	implied_argument_vtable.push_back(make_pair("PRINT", obj_implied_types));
+	implied_argument_vtable.push_back(make_pair("STR", obj_implied_types));
+
 	VTABLE_MAP["Obj"] = obj_vtable;
+    IMPLIED_ARGUMENT["Obj"] = implied_argument_vtable;
+
 	RT_MAP["Obj"]["EQUALS"] = "Boolean";
 	RT_MAP["Obj"]["PRINT"] = "Nothing";
 	RT_MAP["Obj"]["STR"] = "String";
