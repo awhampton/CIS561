@@ -7,11 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>  /* Malloc lives here; might replace with gc.h    */
 #include <string.h>  /* For strcpy; might replace with cords.h from gc */
-#include <string>
 
 #include "Builtins.h"
-
-using namespace std;
 
 /* ==============
  * Obj

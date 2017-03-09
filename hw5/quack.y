@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 #include <iterator>
 #include <list>
 #include <map>
@@ -60,6 +61,7 @@ DEBUG_STREAM LOG(10);
 vector<string> C;
 map< string, map<string, SymTable> > LOCAL_SYMTABLES;
 map<string, VTable> IMPLIED_ARGUMENT;
+string OUTFILE_NAME = "generated.c";
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
@@ -610,7 +612,9 @@ VTable build_vtable(string c, VTable parent_vt){
 
         list<string> str_plus_types;
     	str_plus_types.push_back("String");
+        res.push_back(make_pair("LESS", str_plus_types));
     	res.push_back(make_pair("PLUS", str_plus_types));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
 
     	RT_MAP["String"]["PLUS"] = "String";
@@ -626,31 +630,28 @@ VTable build_vtable(string c, VTable parent_vt){
         list<string> int_relation_types;
     	int_relation_types.push_back("Int");
 
+        res.push_back(make_pair("LESS", int_relation_types));
     	res.push_back(make_pair("PLUS", int_relation_types));
         res.push_back(make_pair("MINUS", int_relation_types));
         res.push_back(make_pair("TIMES", int_relation_types));
         res.push_back(make_pair("DIVIDE", int_relation_types));
-
         res.push_back(make_pair("ATMOST", int_relation_types));
         res.push_back(make_pair("ATLEAST", int_relation_types));
-        res.push_back(make_pair("LESS", int_relation_types));
         res.push_back(make_pair("MORE", int_relation_types));
 
+        IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("MINUS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("TIMES", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("DIVIDE", class_name_list));
-
         IMPLIED_ARGUMENT[c].push_back(make_pair("ATMOST", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("ATLEAST", class_name_list));
-        IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("MORE", class_name_list));
 
     	RT_MAP["Int"]["PLUS"] = "Int";
         RT_MAP["Int"]["MINUS"] = "Int";
         RT_MAP["Int"]["TIMES"] = "Int";
         RT_MAP["Int"]["DIVIDE"] = "Int";
-
         RT_MAP["Int"]["ATMOST"] = "Boolean";
         RT_MAP["Int"]["ATLEAST"] = "Boolean";
         RT_MAP["Int"]["LESS"] = "Boolean";
@@ -700,17 +701,17 @@ void build_vtable_map(map<string, list<string> > cg){
 	list<string> obj_str_types;
     list<string> obj_constructor_types;
     obj_vtable.push_back(make_pair("Obj", obj_constructor_types));
-	obj_vtable.push_back(make_pair("EQUALS", obj_equals_types));
+    obj_vtable.push_back(make_pair("STR", obj_str_types));
 	obj_vtable.push_back(make_pair("PRINT", obj_print_types));
-	obj_vtable.push_back(make_pair("STR", obj_str_types));
+    obj_vtable.push_back(make_pair("EQUALS", obj_equals_types));
 
     list<string> obj_implied_types;
 	obj_implied_types.push_back("Obj");
     list<string> obj_implied_empty;
     implied_argument_vtable.push_back(make_pair("Obj", obj_implied_empty));
+    implied_argument_vtable.push_back(make_pair("STR", obj_implied_types));
+    implied_argument_vtable.push_back(make_pair("PRINT", obj_implied_types));
 	implied_argument_vtable.push_back(make_pair("EQUALS", obj_implied_types));
-	implied_argument_vtable.push_back(make_pair("PRINT", obj_implied_types));
-	implied_argument_vtable.push_back(make_pair("STR", obj_implied_types));
 
 	VTABLE_MAP["Obj"] = obj_vtable;
     IMPLIED_ARGUMENT["Obj"] = implied_argument_vtable;
@@ -1112,10 +1113,13 @@ int main(int argc, char **argv) {
     				// generated code is saved in global variable C
     				root->emit_ir_code("*ROOT", "*ROOT");
 
-    				// generate C code file (for now, just print to stdout)
+    				// generate C code file
+                    ofstream outfile;
+                    outfile.open(OUTFILE_NAME);
     				for(vector<string>::iterator itr = C.begin(); itr != C.end(); ++itr){
-    					cout << *itr << endl;
+    					outfile << *itr << endl;
     				}
+                    outfile.close();
 
                 }
 

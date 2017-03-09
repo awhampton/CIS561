@@ -148,8 +148,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return expr->emit_ir_code(class_name, method_name);
     }
 };
 
@@ -715,7 +714,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+        C.push_back(expr->emit_ir_code(class_name, method_name) + ";");
         return "OK";
     }
 };
@@ -1013,8 +1012,18 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        string expr_code = expr->emit_ir_code(class_name, this->method_name);
+
+        string arg_string = "( " + expr_code + ",";
+        for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            string arg_code = (*itr)->emit_ir_code(class_name, this->method_name);
+            arg_string = arg_string + " " + arg_code + ",";
+        }
+        arg_string.pop_back();
+        arg_string = arg_string + " )";
+
+        string res = expr_code + "->clazz->" + this->method_name + arg_string;
+        return res;
     }
 };
 
@@ -1674,7 +1683,7 @@ public:
         C.push_back("};");
         C.push_back("");
 
-        // generate methods
+        // generate method definitions
         // TODO
 
         // create the singleton struct of methods
@@ -1790,7 +1799,7 @@ public:
         // Do an inorder traversal of the tree and call emit_ir_code(class_name, method_name) at each step to generate the necessary intermediate C code
         C.push_back("#include <stdio.h>");
         C.push_back("#include <stdlib.h>");
-        C.push_back("#include <Builtins.h>");
+        C.push_back("#include \"Builtins.h\"");
         C.push_back("");
 
         // call emit_ir_code on the classes in the right order
