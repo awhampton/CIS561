@@ -353,6 +353,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+        C.push_back("EMIT_IF_ELIFS_ELSE_NODE");
         return "EMIT_IF_ELIFS_ELSE_NODE";
     }
 };
@@ -426,6 +427,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+        C.push_back("EMIT_WHILE_NODE");
         return "EMIT_WHILE_NODE";
     }
 };
