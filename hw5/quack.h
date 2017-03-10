@@ -426,8 +426,12 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        C.push_back("EMIT_WHILE_NODE");
+        C.push_back("while(" + wc->expr->emit_ir_code(class_name, method_name) + "){");
+        for(list<statement_node *>::iterator itr = wc->stmts->begin(); itr != wc->stmts->end(); ++itr){
+            (*itr)->emit_ir_code(class_name, method_name);
+        }
+        C.push_back("}");
+        
         return "EMIT_WHILE_NODE";
     }
 };
