@@ -1528,6 +1528,8 @@ public:
             }
         }
 
+        LOCAL_SYMTABLES[class_name]["*constructor"] = s;
+
         // check if any methods are defined twice
         // (note: this is not a great way to do this ... there's probably something better!)
         for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
@@ -1557,7 +1559,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, set<string> arg_set){
         // little hack: method_name holds the args for the constructor :)
         string constructor_args_code = method_name;
 
@@ -1565,9 +1567,11 @@ public:
         C.push_back("obj_" + class_name + " new_" + class_name + constructor_args_code + " {");
         C.push_back("obj_" + class_name + " new_thing = (obj_" + class_name + ") malloc(sizeof(struct obj_" + class_name + "_struct));");
         C.push_back("new_thing->clazz = the_class_" + class_name + ";");
+        local_variable_declarations_method(class_name, "*constructor", arg_set);
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, "*constructor");
         }
+        C.push_back("return new_thing;");
         C.push_back("}");
         C.push_back("");
 
@@ -1809,7 +1813,11 @@ public:
 
         // generate constructor and method definitions
         string constructor_args_code = signature->emit_ir_code(class_name, method_name);
-        body->emit_ir_code(class_name, constructor_args_code);  // little hack: send constructor args code down
+        set<string> formal_arg_names;
+        for(list<formal_arg_node *>::iterator itr = signature->args->begin(); itr != signature->args->end(); ++itr){
+            formal_arg_names.insert((*itr)->name);
+        }
+        body->emit_ir_code(class_name, constructor_args_code, formal_arg_names);  // little hack: send constructor args code down
 
         // create the singleton struct of methods
         C.push_back("struct class_" + class_name + "_struct the_class_" + class_name + "_struct = {");

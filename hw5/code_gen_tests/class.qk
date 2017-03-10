@@ -1,6 +1,7 @@
 class Pt(x: Int, y: Int) {
    this.x = x;
    this.y = y;
+   z = "hi";
 
    def PRINT( ): Pt {
       "(".PRINT();
@@ -23,7 +24,7 @@ class Pt(x: Int, y: Int) {
         var = 4;
         return;
     }
-    
+
 }
 
 x = 11;
