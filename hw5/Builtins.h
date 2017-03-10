@@ -47,7 +47,7 @@ typedef struct obj_Boolean_struct* obj_Boolean;
  * Fields: None
  * Methods:
  *    Constructor  (called after allocation)
- *    STRING
+ *    STR
  *    PRINT
  *    EQUALS
  *
@@ -64,7 +64,7 @@ typedef struct obj_Obj_struct {
 struct class_Obj_struct {
   /* Method table */
   obj_Obj (*constructor) ( void );
-  obj_String (*STRING) (obj_Obj);
+  obj_String (*STR) (obj_Obj);
   obj_Obj (*PRINT) (obj_Obj);
   obj_Boolean (*EQUALS) (obj_Obj, obj_Obj);
 };
@@ -93,7 +93,7 @@ typedef struct obj_String_struct {
 struct class_String_struct {
   /* Method table: Inherited or overridden */
   obj_String (*constructor) ( void );
-  obj_String (*STRING) (obj_String);
+  obj_String (*STR) (obj_String);
   obj_String (*PRINT) (obj_String);
   obj_Boolean (*EQUALS) (obj_String, obj_Obj);
   /* Method table: Introduced in String */
@@ -129,7 +129,7 @@ typedef struct obj_Boolean_struct {
 struct class_Boolean_struct {
   /* Method table: Inherited or overridden */
   obj_Boolean (*constructor) ( void );
-  obj_String (*STRING) (obj_Boolean);
+  obj_String (*STR) (obj_Boolean);
   obj_Obj (*PRINT) (obj_Obj);               /* Inherit */
   obj_Boolean (*EQUALS) (obj_Obj, obj_Obj); /* Inherit */
 };
@@ -151,7 +151,7 @@ extern obj_Boolean lit_true;
  * Fields: None
  * Methods:
  *    Constructor  (called after allocation)
- *    STRING
+ *    STR
  *    PRINT
  *    EQUALS
  *
@@ -171,7 +171,7 @@ typedef struct obj_Nothing_struct {
 struct class_Nothing_struct {
   /* Method table */
   obj_Nothing (*constructor) ( void );
-  obj_String (*STRING) (obj_Nothing);
+  obj_String (*STR) (obj_Nothing);
   obj_Obj (*PRINT) (obj_Obj);               /* Inherited */
   obj_Boolean (*EQUALS) (obj_Obj, obj_Obj); /* Inherited */
 };
@@ -188,7 +188,7 @@ extern obj_Nothing nothing;
  * Fields:
  *    One hidden field, an int
  * Methods:
- *    STRING  (override)
+ *    STR  (override)
  *    PRINT   (inherit)
  *    EQUALS  (override)
  *    and introducing
@@ -209,7 +209,7 @@ typedef struct obj_Int_struct {
 struct class_Int_struct {
   /* Method table: Inherited or overridden */
   obj_Int (*constructor) ( void );
-  obj_String (*STRING) (obj_Int);  /* Overridden */
+  obj_String (*STR) (obj_Int);  /* Overridden */
   obj_Obj (*PRINT) (obj_Obj);      /* Inherited */
   obj_Boolean (*EQUALS) (obj_Int, obj_Obj); /* Overridden */
   obj_Boolean (*LESS) (obj_Int, obj_Int);   /* Introduced */
@@ -230,15 +230,15 @@ extern obj_Int int_literal(int n);
  * inherit visible to user code
  *================================
  */
-obj_String Obj_method_STRING(obj_Obj this_in);
+obj_String Obj_method_STR(obj_Obj this_in);
 obj_Obj Obj_method_PRINT(obj_Obj this_in);
 obj_Boolean Obj_method_EQUALS(obj_Obj this_in, obj_Obj other);
-obj_String String_method_STRING(obj_String this_in);
+obj_String String_method_STR(obj_String this_in);
 obj_String String_method_PRINT(obj_String this_in);
 obj_Boolean String_method_EQUALS(obj_String this_in, obj_Obj other);
-obj_String Boolean_method_STRING(obj_Boolean this_in);
-obj_String Nothing_method_STRING(obj_Nothing this_in);
-obj_String Int_method_STRING(obj_Int this_in);
+obj_String Boolean_method_STR(obj_Boolean this_in);
+obj_String Nothing_method_STR(obj_Nothing this_in);
+obj_String Int_method_STR(obj_Int this_in);
 obj_Boolean Int_method_EQUALS(obj_Int this_in, obj_Obj other);
 obj_Boolean Int_method_LESS(obj_Int this_in, obj_Int other);
 obj_Int Int_method_PLUS(obj_Int this_in, obj_Int other);

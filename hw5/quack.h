@@ -459,7 +459,7 @@ public:
             (*itr)->emit_ir_code(class_name, method_name);
         }
         C.push_back("}");
-        
+
         return "EMIT_WHILE_NODE";
     }
 };
@@ -1174,7 +1174,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        string arg_string = "( ";
+        string arg_string = "(";
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
             string arg_code = (*itr)->emit_ir_code(class_name, method_name);
             arg_string = arg_string + " " + arg_code + ",";
@@ -1184,7 +1184,7 @@ public:
         }
         arg_string = arg_string + " )";
 
-        string res = "the_class_" + class_name + "->constructor" + arg_string;
+        string res = "the_class_" + this->class_name + "->constructor" + arg_string;
         return res;
     }
 };
@@ -1781,6 +1781,8 @@ public:
         struct_variable_declarations(class_name);
         C.push_back("} *obj_" + class_name + ";");
         C.push_back("");
+
+        // not sure this is necessary
         C.push_back("struct class_" + class_name + "_struct the_class_" + class_name + "_struct;");
         C.push_back("");
 
@@ -1791,7 +1793,8 @@ public:
         C.push_back("");
 
         // forward declaration of the_class_CLASSNAME
-        C.push_back("class_" + class_name + " the_class_" + class_name + ";");
+        C.push_back("extern class_" + class_name + " the_class_" + class_name + ";");
+        C.push_back("");
 
         // generate constructor and method definitions
         string constructor_args_code = signature->emit_ir_code(class_name, method_name);
@@ -1804,7 +1807,7 @@ public:
         C.push_back("");
 
         // instantiate the class struct
-        C.push_back("the_class_" + class_name + " = &the_class_" + class_name + "_struct;");
+        C.push_back("class_" + class_name + " the_class_" + class_name + " = &the_class_" + class_name + "_struct;");
         C.push_back("");
 
 
