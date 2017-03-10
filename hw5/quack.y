@@ -415,6 +415,17 @@ void local_variable_declarations(string class_name, string method_name){
     }
 }
 
+void local_variable_declarations_method(string class_name, string method_name, set<string> args){
+    SymTable local_symtable = LOCAL_SYMTABLES[class_name][method_name];
+    for(SymTable::iterator itr = local_symtable.begin(); itr != local_symtable.end(); ++itr){
+        set<string>::iterator itr_f = args.find(itr->first);
+    	bool not_found = (itr_f == args.end());
+        if(itr->second[0][0] != '*' && itr->second[0][0] != '$' && itr->second[0] != method_name && itr->first != "this" && not_found){
+            C.push_back("obj_" + itr->second[1] + " " + VAR_PREFIX + itr->first + ";");
+        }
+    }
+}
+
 void struct_variable_declarations(string class_name){
     SymTable struct_symtable = SymTables[class_name];
     for(SymTable::iterator itr = struct_symtable.begin(); itr != struct_symtable.end(); ++itr){

@@ -14,6 +14,17 @@ class Pt(x: Int, y: Int) {
     def PLUS(other: Pt):Pt {
         return Pt(this.x+other.x, this.y+other.y);
     }
+
+    def testing_return_nothing1() : Nothing {
+        var = 4;
+    }
+
+    /*
+    def testing_return_nothing2() : Nothing {
+        var = 4;
+        return;
+    }
+    */
 }
 
 x = 11;

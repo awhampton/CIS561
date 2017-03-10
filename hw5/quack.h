@@ -40,6 +40,7 @@ bool is_subclass(string s1, string s2, map< string, list<string> > cg);
 SymTable get_intersection(vector< SymTable > tables);
 void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
+void local_variable_declarations_method(string class_name, string method_name, set<string> args);
 void struct_variable_declarations(string class_name);
 void method_declarations(string class_name);
 void method_declarations_inst(string class_name);
@@ -352,16 +353,16 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        //TODO: need to make sure that the symtables for all branches are stored in LOCAL_SYMTABLES as not doing 
+        //TODO: need to make sure that the symtables for all branches are stored in LOCAL_SYMTABLES as not doing
         //      this means that temp vars declared inside branches won't have a linked type and will cast as (obj_)
-        
+
         // emit code for if
         C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name) + "){");
         for(list<statement_node *>::iterator itr = if_branch->stmts->begin(); itr != if_branch->stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, method_name);
         }
         C.push_back("}");
-        
+
         // emit code for each elif
         if(elif_branches->size() > 0){
             for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
@@ -372,7 +373,7 @@ public:
                 C.push_back("}");
             }
         }
-        
+
         // emit code for else
         if(else_stmts->size() > 0){
             C.push_back("else{");
@@ -381,7 +382,7 @@ public:
             }
             C.push_back("}");
         }
-        
+
         return "OK";
     }
 };
@@ -714,12 +715,12 @@ public:
         string left_side = left->emit_ir_code(class_name, method_name);
         string right_side = right->emit_ir_code(class_name, method_name);
         SymTable s;
-        
+
         if(left->type_of_expression == "ident"){
             s = LOCAL_SYMTABLES[class_name][method_name];
             string left_side_actual = left_side;
             left_side_actual.erase(0,VAR_PREFIX.length());
-            //cout << left_side_actual << " " << s[left_side_actual][1] << endl;
+            cout << left_side_actual << " " << s[left_side_actual][1] << endl;
             string cast = "(obj_" + s[left_side_actual][1] + ")";
             C.push_back(left_side + " = " + cast + " " + right_side + ";");
         }
@@ -1434,17 +1435,25 @@ public:
             }
         }
 
+        // store the symtable for use in code generation
+        LOCAL_SYMTABLES[s["this"][0]][name] = method_symtable;
+
         return "OK";
     }
 
     string emit_ir_code(string class_name, string method_name){
         string arg_string = "( obj_" + class_name + " ID_this,";
+        set<string> formal_arg_names;
         for(list<formal_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
             arg_string = arg_string + " " + (*itr)->emit_ir_code(class_name, method_name) + ",";
+            formal_arg_names.insert((*itr)->name);
         }
         arg_string.pop_back();
         arg_string = arg_string + " )";
         C.push_back("obj_" + RT_MAP[class_name][name] + " " + class_name + "_method_" + name + arg_string + " {");
+
+
+        local_variable_declarations_method(class_name, name, formal_arg_names);
 
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, name);
