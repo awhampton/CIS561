@@ -352,7 +352,36 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+        //TODO: need to make sure that the symtables for all branches are stored in LOCAL_SYMTABLES as not doing 
+        //      this means that temp vars declared inside branches won't have a linked type and will cast as (obj_)
+        
+        // emit code for if
+        C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name) + "){");
+        for(list<statement_node *>::iterator itr = if_branch->stmts->begin(); itr != if_branch->stmts->end(); ++itr){
+            (*itr)->emit_ir_code(class_name, method_name);
+        }
+        C.push_back("}");
+        
+        // emit code for each elif
+        if(elif_branches->size() > 0){
+            for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
+                C.push_back("else if(" + (*itr)->expr->emit_ir_code(class_name, method_name) + "){");
+                for(list<statement_node *>::iterator stmt_itr = (*itr)->stmts->begin(); stmt_itr != (*itr)->stmts->end(); ++stmt_itr){
+                    (*stmt_itr)->emit_ir_code(class_name, method_name);
+                }
+                C.push_back("}");
+            }
+        }
+        
+        // emit code for else
+        if(else_stmts->size() > 0){
+            C.push_back("else{");
+            for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
+                (*itr)->emit_ir_code(class_name, method_name);
+            }
+            C.push_back("}");
+        }
+        
         return "OK";
     }
 };
@@ -685,7 +714,7 @@ public:
         string left_side = left->emit_ir_code(class_name, method_name);
         string right_side = right->emit_ir_code(class_name, method_name);
         SymTable s;
-
+        
         if(left->type_of_expression == "ident"){
             s = LOCAL_SYMTABLES[class_name][method_name];
             string left_side_actual = left_side;

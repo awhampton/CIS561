@@ -8,3 +8,10 @@ while (y < x){
 if ((x < y) or (x > y)){
     z = x - y;
 }
+elif (x > 10){
+    z = 1;
+    x = z;
+}
+else{
+    x = 2;
+}
