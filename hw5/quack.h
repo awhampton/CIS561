@@ -42,6 +42,7 @@ void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
 void struct_variable_declarations(string class_name);
 void method_declarations(string class_name);
+void method_declarations_inst(string class_name);
 
 
 /////////////////////////////////
@@ -667,10 +668,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // note: this isn't totally correct ... just testing
-        // I think that all of the variable declarations should be made at once (this would maybe require
-        // hanging onto all the local symtables ... or just using the declared type and a lot of
-        // casting with methods) then assignments shouldn't include a declaration
+
         string left_side = left->emit_ir_code(class_name, method_name);
         string right_side = right->emit_ir_code(class_name, method_name);
         SymTable s;
@@ -685,7 +683,7 @@ public:
         string left_side_actual = left_side;
         left_side_actual.erase(0,VAR_PREFIX.length());
         string cast = "(obj_" + s[left_side_actual][1] + ")";
-        C.push_back(left_side + " = " + cast + " " + right->emit_ir_code(class_name, method_name) + ";");
+        C.push_back(left_side + " = " + cast + " " + right_side + ";");
         return "OK";
     }
 };
@@ -1690,10 +1688,13 @@ public:
         // TODO
 
         // create the singleton struct of methods
-        // TODO
+        C.push_back("struct class_" + class_name + "_struct the_class_" + class_name + "_struct = {");
+        method_declarations_inst(class_name);
+        C.push_back("};");
+        C.push_back("");
 
         // instantiate the class struct
-        C.push_back("class_" + class_name + " the_class_" + class_name + " = &class_" + class_name + "_struct;");
+        C.push_back("class_" + class_name + " the_class_" + class_name + " = &the_class_" + class_name + "_struct;");
         C.push_back("");
 
 

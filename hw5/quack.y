@@ -454,6 +454,24 @@ void method_declarations(string class_name){
     }
 }
 
+void method_declarations_inst(string class_name){
+    VTable v = VTABLE_MAP[class_name];
+    C.push_back("new_" + class_name + ",");
+    int method_num = 1;
+    int last_entry = v.size();
+    for(VTable::iterator itr = v.begin() + 1; itr != v.end(); ++itr){
+        string method_name = itr->first;
+        string ia = IMPLIED_ARGUMENT[class_name][method_num].second.front();
+        if(method_num < last_entry){
+            C.push_back(ia + "_method_" + method_name + ",");
+        }
+        else{
+            C.push_back(ia + "_method_" + method_name);
+        }
+        method_num++;
+    }
+}
+
 
 // LCA functions
 
