@@ -29,6 +29,7 @@ extern  set<string> BUILTIN_CLASSES;
 extern  unordered_map< string, string > BUILTIN_VALUES;
 extern  vector<string> C;
 extern  map< string, map<string, SymTable> > LOCAL_SYMTABLES;
+extern  string VAR_PREFIX;
 
 /////////////////////////////////
 // helper functions
@@ -476,7 +477,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return ident_value;
+        return VAR_PREFIX + ident_value;
     }
 };
 
@@ -673,14 +674,17 @@ public:
         string left_side = left->emit_ir_code(class_name, method_name);
         string right_side = right->emit_ir_code(class_name, method_name);
         SymTable s;
+
         if(left->type_of_expression == "ident"){
             s = LOCAL_SYMTABLES[class_name][method_name];
         }
-        if(left->type_of_expression == "access"){
+        else if(left->type_of_expression == "access"){
             s = SymTables[((access_node *) left)->expr_type];
         }
 
-        string cast = "(obj_" + s[left_side][1] + ")";
+        string left_side_actual = left_side;
+        left_side_actual.erase(0,3);
+        string cast = "(obj_" + s[left_side_actual][1] + ")";
         C.push_back(left_side + " = " + cast + " " + right->emit_ir_code(class_name, method_name) + ";");
         return "OK";
     }

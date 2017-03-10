@@ -10,7 +10,7 @@ lex.yy.c: ${PROGNAME}.l ${PROGNAME}.tab.h ${PROGNAME}.h
 	flex ${PROGNAME}.l
 
 result: generated.c Builtins.h Builtins.c
-	gcc generated.c Builtins.c -o compiled_quack
+	gcc -D_GNU_SOURCE generated.c Builtins.c -o compiled_quack
 
 clean:
 	rm -f *.o *.tab.* *.yy.* ${PROGNAME} ${PROGNAME}.output
