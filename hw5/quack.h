@@ -40,6 +40,7 @@ bool is_subclass(string s1, string s2, map< string, list<string> > cg);
 SymTable get_intersection(vector< SymTable > tables);
 void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
+void local_variable_declarations_method(string class_name, string method_name, set<string> args);
 void struct_variable_declarations(string class_name);
 void method_declarations(string class_name);
 void method_declarations_inst(string class_name);
@@ -352,16 +353,16 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        //TODO: need to make sure that the symtables for all branches are stored in LOCAL_SYMTABLES as not doing 
+        //TODO: need to make sure that the symtables for all branches are stored in LOCAL_SYMTABLES as not doing
         //      this means that temp vars declared inside branches won't have a linked type and will cast as (obj_)
-        
+
         // emit code for if
         C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name) + "){");
         for(list<statement_node *>::iterator itr = if_branch->stmts->begin(); itr != if_branch->stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, method_name);
         }
         C.push_back("}");
-        
+
         // emit code for each elif
         if(elif_branches->size() > 0){
             for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
@@ -372,7 +373,7 @@ public:
                 C.push_back("}");
             }
         }
-        
+
         // emit code for else
         if(else_stmts->size() > 0){
             C.push_back("else{");
@@ -714,7 +715,7 @@ public:
         string left_side = left->emit_ir_code(class_name, method_name);
         string right_side = right->emit_ir_code(class_name, method_name);
         SymTable s;
-        
+
         if(left->type_of_expression == "ident"){
             s = LOCAL_SYMTABLES[class_name][method_name];
             string left_side_actual = left_side;
@@ -852,7 +853,9 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        C.push_back("return " + expr->emit_ir_code(class_name, method_name) + ";");
+        if(has_return_expr){
+            C.push_back("return " + expr->emit_ir_code(class_name, method_name) + ";");
+        }
         return "EMIT_RETURN_NODE";
     }
 };
@@ -1431,17 +1434,25 @@ public:
             }
         }
 
+        // store the symtable for use in code generation
+        LOCAL_SYMTABLES[s["this"][0]][name] = method_symtable;
+
         return "OK";
     }
 
     string emit_ir_code(string class_name, string method_name){
         string arg_string = "( obj_" + class_name + " ID_this,";
+        set<string> formal_arg_names;
         for(list<formal_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
             arg_string = arg_string + " " + (*itr)->emit_ir_code(class_name, method_name) + ",";
+            formal_arg_names.insert((*itr)->name);
         }
         arg_string.pop_back();
         arg_string = arg_string + " )";
         C.push_back("obj_" + RT_MAP[class_name][name] + " " + class_name + "_method_" + name + arg_string + " {");
+
+
+        local_variable_declarations_method(class_name, name, formal_arg_names);
 
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, name);
@@ -1514,6 +1525,8 @@ public:
             }
         }
 
+        LOCAL_SYMTABLES[class_name]["*constructor"] = s;
+
         // check if any methods are defined twice
         // (note: this is not a great way to do this ... there's probably something better!)
         for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
@@ -1543,7 +1556,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, set<string> arg_set){
         // little hack: method_name holds the args for the constructor :)
         string constructor_args_code = method_name;
 
@@ -1551,9 +1564,11 @@ public:
         C.push_back("obj_" + class_name + " new_" + class_name + constructor_args_code + " {");
         C.push_back("obj_" + class_name + " new_thing = (obj_" + class_name + ") malloc(sizeof(struct obj_" + class_name + "_struct));");
         C.push_back("new_thing->clazz = the_class_" + class_name + ";");
+        local_variable_declarations_method(class_name, "*constructor", arg_set);
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, "*constructor");
         }
+        C.push_back("return new_thing;");
         C.push_back("}");
         C.push_back("");
 
@@ -1767,7 +1782,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, list<class_node *>* class_list){
 
         // generate struct for the class
         C.push_back("struct class_" + class_name + "_struct;");
@@ -1795,7 +1810,11 @@ public:
 
         // generate constructor and method definitions
         string constructor_args_code = signature->emit_ir_code(class_name, method_name);
-        body->emit_ir_code(class_name, constructor_args_code);  // little hack: send constructor args code down
+        set<string> formal_arg_names;
+        for(list<formal_arg_node *>::iterator itr = signature->args->begin(); itr != signature->args->end(); ++itr){
+            formal_arg_names.insert((*itr)->name);
+        }
+        body->emit_ir_code(class_name, constructor_args_code, formal_arg_names);  // little hack: send constructor args code down
 
         // create the singleton struct of methods
         C.push_back("struct class_" + class_name + "_struct the_class_" + class_name + "_struct = {");
@@ -1806,6 +1825,15 @@ public:
         // instantiate the class struct
         C.push_back("class_" + class_name + " the_class_" + class_name + " = &the_class_" + class_name + "_struct;");
         C.push_back("");
+
+        // recurse and check all subclasses, passing our constructor symbol table to them
+        for(list<string>::iterator iter = CLASS_GRAPH[signature->class_name].begin(); iter != CLASS_GRAPH[signature->class_name].end(); ++iter){
+            for(list<class_node *>::iterator c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter){
+                if((*c_iter)->signature->class_name == (*iter)){
+                    (*c_iter)->emit_ir_code((*c_iter)->signature->class_name, "*CLASS", class_list);
+                }
+            }
+        }
 
 
         return "EMIT_CLASS_NODE";
@@ -1919,7 +1947,7 @@ public:
         // call emit_ir_code on the classes in the right order
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
             if(BUILTIN_CLASSES.find((*itr)->signature->class_extends) != BUILTIN_CLASSES.end()){
-                (*itr)->emit_ir_code((*itr)->signature->class_name, "*CLASS");
+                (*itr)->emit_ir_code((*itr)->signature->class_name, "*CLASS", classes);
             }
         }
 
