@@ -818,7 +818,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+        C.push_back("return " + expr->emit_ir_code(class_name, method_name) + ";");
         return "OK";
     }
 };
