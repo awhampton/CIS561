@@ -735,7 +735,7 @@ void build_vtable_map(map<string, list<string> > cg){
     IMPLIED_ARGUMENT["Obj"] = implied_argument_vtable;
 
 	RT_MAP["Obj"]["EQUALS"] = "Boolean";
-	RT_MAP["Obj"]["PRINT"] = "Nothing";
+	RT_MAP["Obj"]["PRINT"] = "Obj";
 	RT_MAP["Obj"]["STR"] = "String";
 
 	for(list<string>::iterator itr = cg["Obj"].begin(); itr != cg["Obj"].end(); ++itr){

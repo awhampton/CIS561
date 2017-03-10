@@ -2,12 +2,13 @@ class Pt(x: Int, y: Int) {
    this.x = x;
    this.y = y;
 
-   def PRINT( ): Nothing {
+   def PRINT( ): Pt {
       "(".PRINT();
       this.x.PRINT();
       ", ".PRINT();
       this.y.PRINT();
       ")".PRINT();
+      return this;
     }
 
     def PLUS(other: Pt):Pt {
