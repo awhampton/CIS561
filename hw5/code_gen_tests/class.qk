@@ -35,7 +35,8 @@ class ReversePt(x: Int, y: Int) extends Pt {
 x = 11;
 y = 31;
 
-
+"Pt\n".PRINT();
+"---------\n".PRINT();
 pt1 = Pt(x,y);
 pt1.PRINT();
 "\n".PRINT();
@@ -44,4 +45,16 @@ pt2.PRINT();
 "\n".PRINT();
 pt3 = pt1 + pt2;
 pt3.PRINT();
+"\n".PRINT();
+"\n".PRINT();
+"ReversePt\n".PRINT();
+"---------\n".PRINT();
+pt4 = ReversePt(x,y);
+pt4.PRINT();
+"\n".PRINT();
+pt5 = ReversePt(y,x);
+pt5.PRINT();
+"\n".PRINT();
+pt6 = pt4 + pt5;
+pt6.PRINT();
 "\n".PRINT();
