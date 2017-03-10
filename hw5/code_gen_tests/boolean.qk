@@ -1,0 +1,15 @@
+x = 1;
+y = 2;
+z = 3;
+newline = "\n";
+
+if(x == y and x < z){
+    x.PRINT();
+}
+elif(y == z or y < x){
+    y.PRINT();
+}
+elif(not z == x){
+    z.PRINT();
+}
+newline.PRINT();
