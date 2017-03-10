@@ -720,7 +720,7 @@ public:
             s = LOCAL_SYMTABLES[class_name][method_name];
             string left_side_actual = left_side;
             left_side_actual.erase(0,VAR_PREFIX.length());
-            cout << left_side_actual << " " << s[left_side_actual][1] << endl;
+            //cout << left_side_actual << " " << s[left_side_actual][1] << endl;
             string cast = "(obj_" + s[left_side_actual][1] + ")";
             C.push_back(left_side + " = " + cast + " " + right_side + ";");
         }
@@ -853,7 +853,9 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        C.push_back("return " + expr->emit_ir_code(class_name, method_name) + ";");
+        if(has_return_expr){
+            C.push_back("return " + expr->emit_ir_code(class_name, method_name) + ";");
+        }
         return "OK";
     }
 };

@@ -19,12 +19,11 @@ class Pt(x: Int, y: Int) {
         var = 4;
     }
 
-    /*
     def testing_return_nothing2() : Nothing {
         var = 4;
         return;
     }
-    */
+    
 }
 
 x = 11;
