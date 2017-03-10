@@ -96,7 +96,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_EXPR_NODE";
+        return "OK";
     }
 };
 
@@ -115,7 +115,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_STATEMENT_NODE";
+        return "OK";
     }
 };
 
@@ -261,7 +261,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_CONDITION_NODE";
+        return "OK";
     }
 };
 
@@ -353,8 +353,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        C.push_back("EMIT_IF_ELIFS_ELSE_NODE");
-        return "EMIT_IF_ELIFS_ELSE_NODE";
+        return "OK";
     }
 };
 
@@ -569,7 +568,17 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return VAR_PREFIX + ident_value;
+
+        string expr_code = expr->emit_ir_code(class_name, method_name);
+        string access_left_side;
+        string res;
+        if(expr_code == "ID_this" && method_name == "*constructor"){
+            res = "new_thing->" + VAR_PREFIX + ident_value;
+        }
+        else{
+            res = expr_code + "->" + VAR_PREFIX + ident_value;
+        }
+        return res;
     }
 };
 
@@ -687,7 +696,7 @@ public:
         }
         else if(left->type_of_expression == "access"){
             s = SymTables[((access_node *) left)->expr_type];
-            string left_side_actual = left_side;
+            string left_side_actual = VAR_PREFIX + ((access_node *) left)->ident_value;  // kind of hacky
             left_side_actual.erase(0,VAR_PREFIX.length());
             //cout << "left side actual: " << left_side_actual << " type: " << s[left_side_actual][1] << endl;
             string cast = "(obj_" + s[left_side_actual][1] + ")";
@@ -736,7 +745,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         C.push_back(expr->emit_ir_code(class_name, method_name) + ";");
-        return "EMIT_BARE_EXPR_NODE";
+        return "OK";
     }
 };
 
@@ -814,8 +823,8 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_RETURN_NODE";
+        C.push_back("return " + expr->emit_ir_code(class_name, method_name) + ";");
+        return "OK";
     }
 };
 
@@ -1136,8 +1145,18 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_CLASS_INSTANTIATION_NODE";
+        string arg_string = "( ";
+        for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            string arg_code = (*itr)->emit_ir_code(class_name, method_name);
+            arg_string = arg_string + " " + arg_code + ",";
+        }
+        if(args->size() > 0){
+            arg_string.pop_back();
+        }
+        arg_string = arg_string + " )";
+
+        string res = "the_class_" + class_name + "->constructor" + arg_string;
+        return res;
     }
 };
 
@@ -1194,7 +1213,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_AND_NODE";
+        return "OK";
     }
 };
 
@@ -1251,7 +1270,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_OR_NODE";
+        return "OK";
     }
 };
 
@@ -1296,7 +1315,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_NOT_NODE";
+        return "OK";
     }
 };
 
@@ -1390,8 +1409,22 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "EMIT_METHOD_NODE";
+        string arg_string = "( obj_" + class_name + " ID_this,";
+        for(list<formal_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            arg_string = arg_string + " " + (*itr)->emit_ir_code(class_name, method_name) + ",";
+        }
+        arg_string.pop_back();
+        arg_string = arg_string + " )";
+        C.push_back("obj_" + RT_MAP[class_name][name] + " " + class_name + "_method_" + name + arg_string + " {");
+
+        for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+            (*itr)->emit_ir_code(class_name, name);
+        }
+
+        C.push_back("}");
+        C.push_back("");
+
+        return "OK";
     }
 };
 
@@ -1498,11 +1531,12 @@ public:
         C.push_back("}");
         C.push_back("");
 
-
         // build the methods
+        for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
+            (*itr)->emit_ir_code(class_name, "*method");
+        }
 
-
-        return "EMIT_CLASS_BODY_NODE";
+        return "OK";
     }
 
 };
@@ -1742,7 +1776,7 @@ public:
         C.push_back("");
 
 
-        return "EMIT_CLASS_NODE";
+        return "OK";
     }
 
 };
@@ -1866,7 +1900,7 @@ public:
         }
         C.push_back("}");
 
-        return "EMIT_PGM_NODE";
+        return "OK";
     }
 };
 

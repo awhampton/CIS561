@@ -12,4 +12,4 @@ class Pt(x: Int, y: Int) {
     def PLUS(other: Pt):Pt {
         return Pt(this.x+other.x, this.y+other.y);
     }
- }
+}
