@@ -1756,6 +1756,9 @@ public:
         C.push_back("};");
         C.push_back("");
 
+        // forward declaration of the_class_CLASSNAME
+        C.push_back("class_" + class_name + " the_class_" + class_name + ";");
+
         // generate constructor and method definitions
         string constructor_args_code = signature->emit_ir_code(class_name, method_name);
         body->emit_ir_code(class_name, constructor_args_code);  // little hack: send constructor args code down
@@ -1767,7 +1770,7 @@ public:
         C.push_back("");
 
         // instantiate the class struct
-        C.push_back("class_" + class_name + " the_class_" + class_name + " = &the_class_" + class_name + "_struct;");
+        C.push_back("the_class_" + class_name + " = &the_class_" + class_name + "_struct;");
         C.push_back("");
 
 

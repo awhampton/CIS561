@@ -13,3 +13,13 @@ class Pt(x: Int, y: Int) {
         return Pt(this.x+other.x, this.y+other.y);
     }
 }
+
+x = 11;
+y = 31;
+
+pt1 = Pt(x,y);
+pt1.PRINT();
+pt2 = Pt(y,x);
+pt2.PRINT();
+pt3 = pt1 + pt2;
+pt3.PRINT();
