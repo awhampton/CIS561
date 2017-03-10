@@ -197,8 +197,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "obj_" + value + " " + VAR_PREFIX + name;
     }
 };
 
@@ -564,8 +563,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return VAR_PREFIX + ident_value;
     }
 };
 
@@ -675,15 +673,31 @@ public:
 
         if(left->type_of_expression == "ident"){
             s = LOCAL_SYMTABLES[class_name][method_name];
+            string left_side_actual = left_side;
+            left_side_actual.erase(0,VAR_PREFIX.length());
+            //cout << left_side_actual << " " << s[left_side_actual][1] << endl;
+            string cast = "(obj_" + s[left_side_actual][1] + ")";
+            C.push_back(left_side + " = " + cast + " " + right_side + ";");
         }
         else if(left->type_of_expression == "access"){
             s = SymTables[((access_node *) left)->expr_type];
+            string left_side_actual = left_side;
+            left_side_actual.erase(0,VAR_PREFIX.length());
+            //cout << "left side actual: " << left_side_actual << " type: " << s[left_side_actual][1] << endl;
+            string cast = "(obj_" + s[left_side_actual][1] + ")";
+
+            string expr_code = ((access_node *) left)->expr->emit_ir_code(class_name, method_name);
+            string access_left_side;
+            if(expr_code == "ID_this" && method_name == "*constructor"){
+                access_left_side = "new_thing->" + VAR_PREFIX + ((access_node *) left)->ident_value;
+            }
+            else{
+                access_left_side = expr_code + "->" + VAR_PREFIX + ((access_node *) left)->ident_value;
+            }
+
+            C.push_back(access_left_side + " = " + cast + " " + right_side + ";");
         }
 
-        string left_side_actual = left_side;
-        left_side_actual.erase(0,VAR_PREFIX.length());
-        string cast = "(obj_" + s[left_side_actual][1] + ")";
-        C.push_back(left_side + " = " + cast + " " + right_side + ";");
         return "OK";
     }
 };
@@ -1465,7 +1479,23 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
+        // little hack: method_name holds the args for the constructor :)
+        string constructor_args_code = method_name;
+
+        // build the constructor
+        C.push_back("obj_" + class_name + " new_" + class_name + constructor_args_code + " {");
+        C.push_back("obj_" + class_name + " new_thing = (obj_" + class_name + ") malloc(sizeof(struct obj_" + class_name + "_struct));");
+        C.push_back("new_thing->clazz = the_class_" + class_name + ";");
+        for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+            (*itr)->emit_ir_code(class_name, "*constructor");
+        }
+        C.push_back("}");
+        C.push_back("");
+
+
+        // build the methods
+
+
         return "OK";
     }
 
@@ -1526,8 +1556,15 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        string res = "(";
+        for(list<formal_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            res = res + " " + (*itr)->emit_ir_code(class_name, method_name) + ",";
+        }
+        if(args->size() > 0){
+            res.pop_back();
+        }
+        res = res + " )";
+        return res;
     }
 };
 
@@ -1684,8 +1721,9 @@ public:
         C.push_back("};");
         C.push_back("");
 
-        // generate method definitions
-        // TODO
+        // generate constructor and method definitions
+        string constructor_args_code = signature->emit_ir_code(class_name, method_name);
+        body->emit_ir_code(class_name, constructor_args_code);  // little hack: send constructor args code down
 
         // create the singleton struct of methods
         C.push_back("struct class_" + class_name + "_struct the_class_" + class_name + "_struct = {");
