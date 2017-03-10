@@ -462,7 +462,7 @@ void method_declarations_inst(string class_name){
     for(VTable::iterator itr = v.begin() + 1; itr != v.end(); ++itr){
         string method_name = itr->first;
         string ia = IMPLIED_ARGUMENT[class_name][method_num].second.front();
-        if(method_num < last_entry){
+        if(method_num < last_entry - 1){
             C.push_back(ia + "_method_" + method_name + ",");
         }
         else{

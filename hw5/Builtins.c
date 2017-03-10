@@ -15,7 +15,7 @@
  * Fields: None
  * Methods:
  *    Constructor  (called after allocation)
- *    STRING
+ *    STR
  *    PRINT
  *    EQUALS
  *
@@ -29,8 +29,8 @@ obj_Obj new_Obj(  ) {
   return new_thing;
 }
 
-/* Obj:STRING */
-obj_String Obj_method_STRING(obj_Obj this_in) {
+/* Obj:STR */
+obj_String Obj_method_STR(obj_Obj this_in) {
   long addr = (long) this_in;
   char *rep;
   asprintf(&rep, "<Object at %ld>", addr);
@@ -42,7 +42,7 @@ obj_String Obj_method_STRING(obj_Obj this_in) {
 
 /* Obj:PRINT */
 obj_Obj Obj_method_PRINT(obj_Obj this_in) {
-  obj_String str = this_in->clazz->STRING(this_in);
+  obj_String str = this_in->clazz->STR(this_in);
   fprintf(stdout, "%s", str->text);
   return this_in;
 }
@@ -60,7 +60,7 @@ obj_Boolean Obj_method_EQUALS(obj_Obj this_in, obj_Obj other) {
 /* The Obj Class (a singleton) */
 struct  class_Obj_struct  the_class_Obj_struct = {
   new_Obj,     /* Constructor */
-  Obj_method_STRING,
+  Obj_method_STR,
   Obj_method_PRINT,
   Obj_method_EQUALS
 };
@@ -86,8 +86,8 @@ obj_String new_String(  ) {
   return new_thing;
 }
 
-/* String:STRING */
-obj_String String_method_STRING(obj_String this_in) {
+/* String:STR */
+obj_String String_method_STR(obj_String this_in) {
   return this_in;
 }
 
@@ -114,7 +114,7 @@ obj_Boolean String_method_EQUALS(obj_String this_in, obj_Obj other) {
 /* The String Class (a singleton) */
 struct  class_String_struct  the_class_String_struct = {
   new_String,     /* Constructor */
-  String_method_STRING,
+  String_method_STR,
   String_method_PRINT,
   String_method_EQUALS
 };
@@ -148,8 +148,8 @@ obj_Boolean new_Boolean(  ) {
   return new_thing;
 }
 
-/* Boolean:STRING */
-obj_String Boolean_method_STRING(obj_Boolean this_in) {
+/* Boolean:STR */
+obj_String Boolean_method_STR(obj_Boolean this_in) {
   if (this_in == lit_true) {
     return str_literal(strdup("true"));
   } else if (this_in == lit_false) {
@@ -163,12 +163,12 @@ obj_String Boolean_method_STRING(obj_Boolean this_in) {
  * objects of class Boolean.
  */
 
-/* Inherit Obj:PRINT, which will call Boolean:STRING */
+/* Inherit Obj:PRINT, which will call Boolean:STR */
 
 /* The Boolean Class (a singleton) */
 struct  class_Boolean_struct  the_class_Boolean_struct = {
   new_Boolean,     /* Constructor */
-  Boolean_method_STRING,
+  Boolean_method_STR,
   Obj_method_PRINT,
   Obj_method_EQUALS
 };
@@ -192,7 +192,7 @@ obj_Boolean lit_true = &lit_true_struct;
  * Fields: None
  * Methods:
  *    Constructor  (called after allocation)
- *    STRING
+ *    STR
  *    PRINT
  *    EQUALS
  *
@@ -203,8 +203,8 @@ obj_Nothing new_Nothing(  ) {
   return nothing;
 }
 
-/* Boolean:STRING */
-obj_String Nothing_method_STRING(obj_Nothing this_in) {
+/* Boolean:STR */
+obj_String Nothing_method_STR(obj_Nothing this_in) {
     return str_literal(strdup("<nothing>"));
 }
 
@@ -212,12 +212,12 @@ obj_String Nothing_method_STRING(obj_Nothing this_in) {
  * object of class None
  */
 
-/* Inherit Obj:PRINT, which will call Nothing:STRING */
+/* Inherit Obj:PRINT, which will call Nothing:STR */
 
 /* The Nothing Class (a singleton) */
 struct  class_Nothing_struct  the_class_Nothing_struct = {
   new_Nothing,     /* Constructor */
-  Nothing_method_STRING,
+  Nothing_method_STR,
   Obj_method_PRINT,
   Obj_method_EQUALS
 };
@@ -253,8 +253,8 @@ obj_Int new_Int(  ) {
   return new_thing;
 }
 
-/* Int:STRING */
-obj_String Int_method_STRING(obj_Int this_in) {
+/* Int:STR */
+obj_String Int_method_STR(obj_Int this_in) {
   char *rep;
   asprintf(&rep, "%d", this_in->value);
   return str_literal(rep);
@@ -273,7 +273,7 @@ obj_Boolean Int_method_EQUALS(obj_Int this_in, obj_Obj other) {
   return lit_true;
 }
 
-/* Inherit Obj:PRINT, which will call Int:STRING */
+/* Inherit Obj:PRINT, which will call Int:STR */
 
 /* LESS (new method) */
 obj_Boolean Int_method_LESS(obj_Int this_in, obj_Int other) {
@@ -291,7 +291,7 @@ obj_Int Int_method_PLUS(obj_Int this_in, obj_Int other) {
 /* The Int Class (a singleton) */
 struct  class_Int_struct  the_class_Int_struct = {
   new_Int,     /* Constructor */
-  Int_method_STRING,
+  Int_method_STR,
   Obj_method_PRINT,
   Int_method_EQUALS,
   Int_method_LESS,
