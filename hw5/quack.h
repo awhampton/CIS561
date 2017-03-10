@@ -683,7 +683,7 @@ public:
         }
 
         string left_side_actual = left_side;
-        left_side_actual.erase(0,3);
+        left_side_actual.erase(0,VAR_PREFIX.length());
         string cast = "(obj_" + s[left_side_actual][1] + ")";
         C.push_back(left_side + " = " + cast + " " + right->emit_ir_code(class_name, method_name) + ";");
         return "OK";
