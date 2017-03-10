@@ -1140,8 +1140,18 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        string arg_string = "( ";
+        for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            string arg_code = (*itr)->emit_ir_code(class_name, method_name);
+            arg_string = arg_string + " " + arg_code + ",";
+        }
+        if(args->size() > 0){
+            arg_string.pop_back();
+        }
+        arg_string = arg_string + " )";
+
+        string res = "the_class_" + class_name + "->constructor" + arg_string;
+        return res;
     }
 };
 
@@ -1394,18 +1404,12 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        VTable v = VTABLE_MAP[class_name];
         string arg_string = "( obj_" + class_name + " ID_this,";
-        for(VTable::iterator itr = v.begin() + 1; itr != v.end(); ++itr){
-            if( itr->first == name ){
-                list<string> args = itr->second;
-                for(list<string>::iterator itr2 = args.begin(); itr2 != args.end(); ++itr2){
-                    arg_string = arg_string + " obj_" + *itr2 + ",";
-                }
-                arg_string.pop_back();
-                arg_string = arg_string + " )";
-            }
+        for(list<formal_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            arg_string = arg_string + " " + (*itr)->emit_ir_code(class_name, method_name) + ",";
         }
+        arg_string.pop_back();
+        arg_string = arg_string + " )";
         C.push_back("obj_" + RT_MAP[class_name][name] + " " + class_name + "_method_" + name + arg_string + " {");
 
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
