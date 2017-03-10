@@ -27,6 +27,11 @@ class Pt(x: Int, y: Int) {
 
 }
 
+class ReversePt(x: Int, y: Int) extends Pt {
+    this.y = y;
+    this.x = x;
+}
+
 x = 11;
 y = 31;
 

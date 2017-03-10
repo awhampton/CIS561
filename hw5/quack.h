@@ -1785,7 +1785,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, list<class_node *>* class_list){
 
         // generate struct for the class
         C.push_back("struct class_" + class_name + "_struct;");
@@ -1828,6 +1828,15 @@ public:
         // instantiate the class struct
         C.push_back("class_" + class_name + " the_class_" + class_name + " = &the_class_" + class_name + "_struct;");
         C.push_back("");
+
+        // recurse and check all subclasses, passing our constructor symbol table to them
+        for(list<string>::iterator iter = CLASS_GRAPH[signature->class_name].begin(); iter != CLASS_GRAPH[signature->class_name].end(); ++iter){
+            for(list<class_node *>::iterator c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter){
+                if((*c_iter)->signature->class_name == (*iter)){
+                    (*c_iter)->emit_ir_code((*c_iter)->signature->class_name, "*CLASS", class_list);
+                }
+            }
+        }
 
 
         return "OK";
@@ -1941,7 +1950,7 @@ public:
         // call emit_ir_code on the classes in the right order
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
             if(BUILTIN_CLASSES.find((*itr)->signature->class_extends) != BUILTIN_CLASSES.end()){
-                (*itr)->emit_ir_code((*itr)->signature->class_name, "*CLASS");
+                (*itr)->emit_ir_code((*itr)->signature->class_name, "*CLASS", classes);
             }
         }
 
