@@ -96,7 +96,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_EXPR_NODE";
     }
 };
 
@@ -115,7 +115,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_STATEMENT_NODE";
     }
 };
 
@@ -261,7 +261,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_CONDITION_NODE";
     }
 };
 
@@ -353,7 +353,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_IF_ELIFS_ELSE_NODE";
     }
 };
 
@@ -426,7 +426,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_WHILE_NODE";
     }
 };
 
@@ -730,7 +730,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         C.push_back(expr->emit_ir_code(class_name, method_name) + ";");
-        return "OK";
+        return "EMIT_BARE_EXPR_NODE";
     }
 };
 
@@ -809,7 +809,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_RETURN_NODE";
     }
 };
 
@@ -1131,7 +1131,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_CLASS_INSTANTIATION_NODE";
     }
 };
 
@@ -1188,7 +1188,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_AND_NODE";
     }
 };
 
@@ -1245,7 +1245,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_OR_NODE";
     }
 };
 
@@ -1290,7 +1290,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_NOT_NODE";
     }
 };
 
@@ -1385,7 +1385,7 @@ public:
 
     string emit_ir_code(string class_name, string method_name){
         // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
-        return "OK";
+        return "EMIT_METHOD_NODE";
     }
 };
 
@@ -1496,7 +1496,7 @@ public:
         // build the methods
 
 
-        return "OK";
+        return "EMIT_CLASS_BODY_NODE";
     }
 
 };
@@ -1736,7 +1736,7 @@ public:
         C.push_back("");
 
 
-        return "OK";
+        return "EMIT_CLASS_NODE";
     }
 
 };
@@ -1860,7 +1860,7 @@ public:
         }
         C.push_back("}");
 
-        return "OK";
+        return "EMIT_PGM_NODE";
     }
 };
 
