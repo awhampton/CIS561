@@ -78,7 +78,7 @@ public:
     virtual string type_check(SymTable &s) { return "OK"; }
     virtual string type_check(SymTable &s, SymTable &t) { return "OK"; }
     virtual string type_check(SymTable &s, string class_name) { return "OK"; }
-    virtual string emit_ir_code(string class_name, string method_name) { return "EMIT_NODE"; }
+    virtual string emit_ir_code(string class_name, string method_name, SymTable s) { return "EMIT_NODE"; }
 };
 
 // expression node
@@ -95,7 +95,7 @@ public:
     virtual list<node *> get_children() = 0;
     virtual string get_name() = 0;
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         return "EMIT_EXPR_NODE";
     }
 };
@@ -113,7 +113,7 @@ public:
     virtual ~statement_node() {};
     virtual list<node *> get_children() = 0;
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         return "EMIT_STATEMENT_NODE";
     }
 };
@@ -147,8 +147,8 @@ public:
         return expr->type_check(s);
     }
 
-    string emit_ir_code(string class_name, string method_name){
-        return expr->emit_ir_code(class_name, method_name);
+    string emit_ir_code(string class_name, string method_name, SymTable s){
+        return expr->emit_ir_code(class_name, method_name, s);
     }
 };
 
@@ -195,7 +195,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         return "obj_" + value + " " + VAR_PREFIX + name;
     }
 };
@@ -206,6 +206,7 @@ class condition_node : public node {
 public:
     expr_node *expr;
     list<statement_node *>  *stmts;
+    SymTable ar;
 
     condition_node(expr_node *e, list<statement_node *> *s, int ln){
         type_of_node = "condition";
@@ -255,10 +256,12 @@ public:
             }
         }
 
+        ar = s;  // hang onto the symtable for code generation
+
         return "OK";  // don't think we actually need to return anything
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         return "EMIT_CONDITION_NODE";
     }
 };
@@ -270,6 +273,7 @@ public:
     condition_node            *if_branch;
     list<condition_node *>    *elif_branches;
     list<statement_node *>    *else_stmts;
+    SymTable else_ar;
 
     if_elifs_else_node(condition_node *i, list<condition_node *> *elifs, list<statement_node *> *els){
         if_branch = i;
@@ -340,6 +344,7 @@ public:
         }
         tables.push_back(else_branch_symtable);
         tables_dm.push_back(SymTables[s["this"][0]]);
+        else_ar = else_branch_symtable;  // hang onto this symtable for code generation
 
         // need some way to intersect the symbol tables that were generated in the branches
         // this intersection should update the types with the LCA function
@@ -349,23 +354,23 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         //TODO: need to make sure that the symtables for all branches are stored in LOCAL_SYMTABLES as not doing
         //      this means that temp vars declared inside branches won't have a linked type and will cast as (obj_)
 
         // emit code for if
-        C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name) + "){");
+        C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name, s) + "){");
         for(list<statement_node *>::iterator itr = if_branch->stmts->begin(); itr != if_branch->stmts->end(); ++itr){
-            (*itr)->emit_ir_code(class_name, method_name);
+            (*itr)->emit_ir_code(class_name, method_name, if_branch->ar);
         }
         C.push_back("}");
 
         // emit code for each elif
         if(elif_branches->size() > 0){
             for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
-                C.push_back("else if(" + (*itr)->expr->emit_ir_code(class_name, method_name) + "){");
+                C.push_back("else if(" + (*itr)->expr->emit_ir_code(class_name, method_name, s) + "){");
                 for(list<statement_node *>::iterator stmt_itr = (*itr)->stmts->begin(); stmt_itr != (*itr)->stmts->end(); ++stmt_itr){
-                    (*stmt_itr)->emit_ir_code(class_name, method_name);
+                    (*stmt_itr)->emit_ir_code(class_name, method_name, (*itr)->ar);
                 }
                 C.push_back("}");
             }
@@ -375,11 +380,11 @@ public:
         if(else_stmts->size() > 0){
             C.push_back("else{");
             for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
-                (*itr)->emit_ir_code(class_name, method_name);
+                (*itr)->emit_ir_code(class_name, method_name, else_ar);
             }
             C.push_back("}");
         }
-        
+
         return "EMIT_IF_ELIFS_ELSE_NODE";
     }
 };
@@ -451,10 +456,10 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
-        C.push_back("while(" + wc->expr->emit_ir_code(class_name, method_name) + "){");
+    string emit_ir_code(string class_name, string method_name, SymTable s){
+        C.push_back("while(" + wc->expr->emit_ir_code(class_name, method_name, s) + "){");
         for(list<statement_node *>::iterator itr = wc->stmts->begin(); itr != wc->stmts->end(); ++itr){
-            (*itr)->emit_ir_code(class_name, method_name);
+            (*itr)->emit_ir_code(class_name, method_name, wc->ar);
         }
         C.push_back("}");
 
@@ -508,7 +513,7 @@ public:
         return s[ident_value][1];
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         // catch and return directly builtin values
         if(ident_value == "true" || ident_value == "false"){
             return "lit_" + ident_value;
@@ -516,7 +521,7 @@ public:
         else if(ident_value == "none"){
             return "nothing"; //TODO: fix this?
         }
-        
+
         // otherwise add a prefix to prevent quack->c name conflicts
         return VAR_PREFIX + ident_value;
     }
@@ -603,9 +608,9 @@ public:
         return SymTables[expr_type][ident_value][1];
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
 
-        string expr_code = expr->emit_ir_code(class_name, method_name);
+        string expr_code = expr->emit_ir_code(class_name, method_name, s);
         string access_left_side;
         string res;
         if(expr_code == "ID_this" && method_name == "*constructor"){
@@ -716,28 +721,28 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
 
-        string left_side = left->emit_ir_code(class_name, method_name);
-        string right_side = right->emit_ir_code(class_name, method_name);
-        SymTable s;
+        string left_side = left->emit_ir_code(class_name, method_name, s);
+        string right_side = right->emit_ir_code(class_name, method_name, s);
+        SymTable st;
 
         if(left->type_of_expression == "ident"){
-            s = LOCAL_SYMTABLES[class_name][method_name];
+            st = LOCAL_SYMTABLES[class_name][method_name];
             string left_side_actual = left_side;
             left_side_actual.erase(0,VAR_PREFIX.length());
             //cout << left_side_actual << " " << s[left_side_actual][1] << endl;
-            string cast = "(obj_" + s[left_side_actual][1] + ")";
+            string cast = "(obj_" + st[left_side_actual][1] + ")";
             C.push_back(left_side + " = " + cast + " " + right_side + ";");
         }
         else if(left->type_of_expression == "access"){
-            s = SymTables[((access_node *) left)->expr_type];
+            st = SymTables[((access_node *) left)->expr_type];
             string left_side_actual = VAR_PREFIX + ((access_node *) left)->ident_value;  // kind of hacky
             left_side_actual.erase(0,VAR_PREFIX.length());
             //cout << "left side actual: " << left_side_actual << " type: " << s[left_side_actual][1] << endl;
-            string cast = "(obj_" + s[left_side_actual][1] + ")";
+            string cast = "(obj_" + st[left_side_actual][1] + ")";
 
-            string expr_code = ((access_node *) left)->expr->emit_ir_code(class_name, method_name);
+            string expr_code = ((access_node *) left)->expr->emit_ir_code(class_name, method_name, st);
             string access_left_side;
             if(expr_code == "ID_this" && method_name == "*constructor"){
                 access_left_side = "new_thing->" + VAR_PREFIX + ((access_node *) left)->ident_value;
@@ -779,8 +784,8 @@ public:
         return expr->type_check(s);
     }
 
-    string emit_ir_code(string class_name, string method_name){
-        C.push_back(expr->emit_ir_code(class_name, method_name) + ";");
+    string emit_ir_code(string class_name, string method_name, SymTable s){
+        C.push_back(expr->emit_ir_code(class_name, method_name, s) + ";");
         return "EMIT_BARE_EXPR_NODE";
     }
 };
@@ -858,9 +863,9 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         if(has_return_expr){
-            C.push_back("return " + expr->emit_ir_code(class_name, method_name) + ";");
+            C.push_back("return " + expr->emit_ir_code(class_name, method_name, s) + ";");
         }
         return "EMIT_RETURN_NODE";
     }
@@ -894,7 +899,7 @@ public:
         return "String";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         return "str_literal(" + strlit_value + ")";
     }
 };
@@ -927,7 +932,7 @@ public:
         return "Int";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         return "int_literal(" + to_string(intlit_value) + ")";
     }
 };
@@ -1079,12 +1084,12 @@ public:
         return RT_MAP[expr_type][method_name];
     }
 
-    string emit_ir_code(string class_name, string method_name){
-        string expr_code = expr->emit_ir_code(class_name, this->method_name);
+    string emit_ir_code(string class_name, string method_name, SymTable s){
+        string expr_code = expr->emit_ir_code(class_name, this->method_name, s);
 
         string arg_string = "( " + expr_code + ",";
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
-            string arg_code = (*itr)->emit_ir_code(class_name, this->method_name);
+            string arg_code = (*itr)->emit_ir_code(class_name, this->method_name, s);
             arg_string = arg_string + " " + arg_code + ",";
         }
         arg_string.pop_back();
@@ -1182,10 +1187,10 @@ public:
         return class_name;
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         string arg_string = "(";
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
-            string arg_code = (*itr)->emit_ir_code(class_name, method_name);
+            string arg_code = (*itr)->emit_ir_code(class_name, method_name, s);
             arg_string = arg_string + " " + arg_code + ",";
         }
         if(args->size() > 0){
@@ -1249,8 +1254,8 @@ public:
         return "Boolean";
     }
 
-    string emit_ir_code(string class_name, string method_name){
-        return "LIT_AND((" + left->emit_ir_code(class_name, method_name) + " == lit_true), (" + right->emit_ir_code(class_name, method_name) + " == lit_true))";
+    string emit_ir_code(string class_name, string method_name, SymTable s){
+        return "LIT_AND((" + left->emit_ir_code(class_name, method_name, s) + " == lit_true), (" + right->emit_ir_code(class_name, method_name, s) + " == lit_true))";
     }
 };
 
@@ -1305,8 +1310,8 @@ public:
         return "Boolean";
     }
 
-    string emit_ir_code(string class_name, string method_name){
-        return "LIT_OR((" + left->emit_ir_code(class_name, method_name) + " == lit_true), (" + right->emit_ir_code(class_name, method_name) + " == lit_true))";
+    string emit_ir_code(string class_name, string method_name, SymTable s){
+        return "LIT_OR((" + left->emit_ir_code(class_name, method_name, s) + " == lit_true), (" + right->emit_ir_code(class_name, method_name, s) + " == lit_true))";
     }
 };
 
@@ -1349,8 +1354,8 @@ public:
         return "Boolean";
     }
 
-    string emit_ir_code(string class_name, string method_name){
-        return "LIT_NOT(" + expr->emit_ir_code(class_name, method_name) + " == lit_true)";
+    string emit_ir_code(string class_name, string method_name, SymTable s){
+        return "LIT_NOT(" + expr->emit_ir_code(class_name, method_name, s) + " == lit_true)";
     }
 };
 
@@ -1446,11 +1451,11 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         string arg_string = "( obj_" + class_name + " ID_this,";
         set<string> formal_arg_names;
         for(list<formal_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
-            arg_string = arg_string + " " + (*itr)->emit_ir_code(class_name, method_name) + ",";
+            arg_string = arg_string + " " + (*itr)->emit_ir_code(class_name, method_name, s) + ",";
             formal_arg_names.insert((*itr)->name);
         }
         arg_string.pop_back();
@@ -1461,7 +1466,7 @@ public:
         local_variable_declarations_method(class_name, name, formal_arg_names);
 
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->emit_ir_code(class_name, name);
+            (*itr)->emit_ir_code(class_name, name, s);
         }
 
         C.push_back("}");
@@ -1562,7 +1567,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name, set<string> arg_set){
+    string emit_ir_code(string class_name, string method_name, set<string> arg_set, SymTable s){
         // little hack: method_name holds the args for the constructor :)
         string constructor_args_code = method_name;
 
@@ -1572,7 +1577,7 @@ public:
         C.push_back("new_thing->clazz = the_class_" + class_name + ";");
         local_variable_declarations_method(class_name, "*constructor", arg_set);
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->emit_ir_code(class_name, "*constructor");
+            (*itr)->emit_ir_code(class_name, "*constructor", s);
         }
         C.push_back("return new_thing;");
         C.push_back("}");
@@ -1580,7 +1585,7 @@ public:
 
         // build the methods
         for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
-            (*itr)->emit_ir_code(class_name, "*method");
+            (*itr)->emit_ir_code(class_name, "*method", s);
         }
 
         return "EMIT_CLASS_BODY_NODE";
@@ -1642,10 +1647,10 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name){
+    string emit_ir_code(string class_name, string method_name, SymTable s){
         string res = "(";
         for(list<formal_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
-            res = res + " " + (*itr)->emit_ir_code(class_name, method_name) + ",";
+            res = res + " " + (*itr)->emit_ir_code(class_name, method_name, s) + ",";
         }
         if(args->size() > 0){
             res.pop_back();
@@ -1788,7 +1793,7 @@ public:
         return "OK";
     }
 
-    string emit_ir_code(string class_name, string method_name, list<class_node *>* class_list){
+    string emit_ir_code(string class_name, string method_name, list<class_node *>* class_list, SymTable s){
 
         // generate struct for the class
         C.push_back("struct class_" + class_name + "_struct;");
@@ -1815,12 +1820,12 @@ public:
         C.push_back("");
 
         // generate constructor and method definitions
-        string constructor_args_code = signature->emit_ir_code(class_name, method_name);
+        string constructor_args_code = signature->emit_ir_code(class_name, method_name, s);
         set<string> formal_arg_names;
         for(list<formal_arg_node *>::iterator itr = signature->args->begin(); itr != signature->args->end(); ++itr){
             formal_arg_names.insert((*itr)->name);
         }
-        body->emit_ir_code(class_name, constructor_args_code, formal_arg_names);  // little hack: send constructor args code down
+        body->emit_ir_code(class_name, constructor_args_code, formal_arg_names, s);  // little hack: send constructor args code down
 
         // create the singleton struct of methods
         C.push_back("struct class_" + class_name + "_struct the_class_" + class_name + "_struct = {");
@@ -1836,7 +1841,7 @@ public:
         for(list<string>::iterator iter = CLASS_GRAPH[signature->class_name].begin(); iter != CLASS_GRAPH[signature->class_name].end(); ++iter){
             for(list<class_node *>::iterator c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter){
                 if((*c_iter)->signature->class_name == (*iter)){
-                    (*c_iter)->emit_ir_code((*c_iter)->signature->class_name, "*CLASS", class_list);
+                    (*c_iter)->emit_ir_code((*c_iter)->signature->class_name, "*CLASS", class_list, s);
                 }
             }
         }
@@ -1951,18 +1956,22 @@ public:
         C.push_back("");
 
         // call emit_ir_code on the classes in the right order
+        // note: just pass down an empty symtable, might need to change
+        SymTable tmp;
         for(list<class_node *>::iterator itr = classes->begin(); itr != classes->end(); ++itr){
             if(BUILTIN_CLASSES.find((*itr)->signature->class_extends) != BUILTIN_CLASSES.end()){
-                (*itr)->emit_ir_code((*itr)->signature->class_name, "*CLASS", classes);
+                (*itr)->emit_ir_code((*itr)->signature->class_name, "*CLASS", classes, tmp);
             }
         }
 
         // call emit_ir_code on the statements
+        // pass down the symtable for the main statement block
         C.push_back("");
         C.push_back("int main(void){");
         local_variable_declarations("*MAIN", "*MAIN");
+        SymTable main_block_s = LOCAL_SYMTABLES["*MAIN"]["*MAIN"];
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->emit_ir_code("*MAIN", "*MAIN");
+            (*itr)->emit_ir_code("*MAIN", "*MAIN", main_block_s);
         }
         C.push_back("}");
 
