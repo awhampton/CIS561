@@ -41,6 +41,7 @@ SymTable get_intersection(vector< SymTable > tables);
 void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
 void local_variable_declarations_method(string class_name, string method_name, set<string> args, SymTable local_symtable);
+void local_variable_declarations_branch(string class_name, string method_name, SymTable local_symtable, SymTable parent_symtable);
 void struct_variable_declarations(string class_name);
 void method_declarations(string class_name);
 void method_declarations_inst(string class_name);
@@ -359,7 +360,8 @@ public:
         //      this means that temp vars declared inside branches won't have a linked type and will cast as (obj_)
 
         // emit code for if
-        C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name, s) + "){");
+        C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name, s) + " == lit_true){");
+        local_variable_declarations_branch(class_name, method_name, if_branch->ar, s);
         for(list<statement_node *>::iterator itr = if_branch->stmts->begin(); itr != if_branch->stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, method_name, if_branch->ar);
         }
@@ -368,7 +370,8 @@ public:
         // emit code for each elif
         if(elif_branches->size() > 0){
             for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
-                C.push_back("else if(" + (*itr)->expr->emit_ir_code(class_name, method_name, s) + "){");
+                C.push_back("else if(" + (*itr)->expr->emit_ir_code(class_name, method_name, s) + " == lit_true){");
+                local_variable_declarations_branch(class_name, method_name, (*itr)->ar, s);
                 for(list<statement_node *>::iterator stmt_itr = (*itr)->stmts->begin(); stmt_itr != (*itr)->stmts->end(); ++stmt_itr){
                     (*stmt_itr)->emit_ir_code(class_name, method_name, (*itr)->ar);
                 }
@@ -379,6 +382,7 @@ public:
         // emit code for else
         if(else_stmts->size() > 0){
             C.push_back("else{");
+            local_variable_declarations_branch(class_name, method_name, else_ar, s);
             for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
                 (*itr)->emit_ir_code(class_name, method_name, else_ar);
             }
@@ -457,7 +461,8 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name, SymTable s){
-        C.push_back("while(" + wc->expr->emit_ir_code(class_name, method_name, s) + "){");
+        C.push_back("while(" + wc->expr->emit_ir_code(class_name, method_name, s) + " == lit_true){");
+        local_variable_declarations_branch(class_name, method_name, wc->ar, s);
         for(list<statement_node *>::iterator itr = wc->stmts->begin(); itr != wc->stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, method_name, wc->ar);
         }
