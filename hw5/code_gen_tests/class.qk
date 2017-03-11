@@ -39,6 +39,7 @@ class ReversePt(x: Int, y: Int) extends Pt {
 x = 11;
 y = 31;
 
+// do stuff with Pt
 "Pt\n".PRINT();
 "---------\n".PRINT();
 pt1 = Pt(x,y);
@@ -51,6 +52,9 @@ pt3 = pt1 + pt2;
 pt3.PRINT();
 "\n".PRINT();
 "\n".PRINT();
+
+// check that the data members are in the right place in the struct for subclass
+// the output here should be the same as above
 "ReversePt\n".PRINT();
 "---------\n".PRINT();
 pt4 = ReversePt(x,y);
@@ -61,4 +65,15 @@ pt5.PRINT();
 "\n".PRINT();
 pt6 = pt4 + pt5;
 pt6.PRINT();
+"\n".PRINT();
+"\n".PRINT();
+
+// what happens if we add a Pt and a ReversePt?
+"MIXING\n".PRINT();
+"---------\n".PRINT();
+pt7 = pt1 + pt4;
+pt7.PRINT();
+"\n".PRINT();
+pt8 = pt4 + pt1;
+pt8.PRINT();
 "\n".PRINT();
