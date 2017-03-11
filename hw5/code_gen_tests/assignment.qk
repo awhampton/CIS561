@@ -23,4 +23,3 @@ boolC : Boolean = boolA and boolB;
 boolD           = boolA or  boolC;
 boolD.PRINT();
 newline.PRINT();
-    // right now this fails because of boolC and boolD returning collapsing to C true/false instead of to quack lit_true/lit_false

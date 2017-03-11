@@ -1250,7 +1250,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return "(" + left->emit_ir_code(class_name, method_name) + " == lit_true && " + right->emit_ir_code(class_name, method_name) + " == lit_true)";
+        return "LIT_AND((" + left->emit_ir_code(class_name, method_name) + " == lit_true), (" + right->emit_ir_code(class_name, method_name) + " == lit_true))";
     }
 };
 
@@ -1306,7 +1306,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return "(" + left->emit_ir_code(class_name, method_name) + " == lit_true || " + right->emit_ir_code(class_name, method_name) + " == lit_true)";
+        return "LIT_OR((" + left->emit_ir_code(class_name, method_name) + " == lit_true), (" + right->emit_ir_code(class_name, method_name) + " == lit_true))";
     }
 };
 
@@ -1350,7 +1350,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return "(!(" + expr->emit_ir_code(class_name, method_name) + " == lit_true))";
+        return "LIT_NOT(" + expr->emit_ir_code(class_name, method_name) + " == lit_true)";
     }
 };
 

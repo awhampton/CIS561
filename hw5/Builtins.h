@@ -243,4 +243,13 @@ obj_Boolean Int_method_EQUALS(obj_Int this_in, obj_Obj other);
 obj_Boolean Int_method_LESS(obj_Int this_in, obj_Int other);
 obj_Int Int_method_PLUS(obj_Int this_in, obj_Int other);
 
+/* ======================++======
+ * LIT_BOOL functions for testing
+ * and, or, not with quack
+ * ====================++========
+ */
+obj_Boolean LIT_OR(int, int);
+obj_Boolean LIT_AND(int, int);
+obj_Boolean LIT_NOT(int);
+
 #endif

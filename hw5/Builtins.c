@@ -309,3 +309,26 @@ obj_Int int_literal(int n) {
   boxed->value = n;
   return boxed;
 }
+
+/* ===================================
+ * Functions for converting c booleans 
+ * to quack boolean literals
+ * ===================================
+ */
+obj_Boolean LIT_OR(int a, int b){
+    if (a || b)
+        return lit_true;
+    return lit_false;
+}
+
+obj_Boolean LIT_AND(int a, int b){
+    if (a && b)
+        return lit_true;
+    return lit_false;
+}
+
+obj_Boolean LIT_NOT(int a){
+    if (a)
+        return lit_false;
+    return lit_true;
+}
