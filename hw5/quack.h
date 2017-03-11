@@ -42,7 +42,7 @@ void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
 void local_variable_declarations_method(string class_name, string method_name, set<string> args, SymTable local_symtable);
 void local_variable_declarations_branch(string class_name, string method_name, SymTable local_symtable, SymTable parent_symtable);
-void struct_variable_declarations(string class_name);
+void struct_variable_declarations(string class_name, string parent_name);
 void method_declarations(string class_name);
 void method_declarations_inst(string class_name);
 
@@ -1807,7 +1807,7 @@ public:
         C.push_back("");
         C.push_back("typedef struct obj_" + class_name + "_struct {");
         C.push_back("class_" + class_name + " clazz;");
-        struct_variable_declarations(class_name);
+        struct_variable_declarations(class_name, signature->class_extends);
         C.push_back("} *obj_" + class_name + ";");
         C.push_back("");
 

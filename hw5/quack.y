@@ -441,10 +441,22 @@ void local_variable_declarations_branch(string class_name, string method_name, S
     }
 }
 
-void struct_variable_declarations(string class_name){
+void struct_variable_declarations(string class_name, string parent_name){
     SymTable struct_symtable = SymTables[class_name];
-    for(SymTable::iterator itr = struct_symtable.begin(); itr != struct_symtable.end(); ++itr){
+    SymTable parent_symtable = SymTables[parent_name];
+    for(SymTable::iterator itr = parent_symtable.begin(); itr != parent_symtable.end(); ++itr){
         if(itr->second[1][0] != '*'){
+            C.push_back("obj_" + itr->second[1] + " " + VAR_PREFIX + itr->first + ";");
+        }
+    }
+    for(SymTable::iterator itr = struct_symtable.begin(); itr != struct_symtable.end(); ++itr){
+        bool not_found = true;
+        for(SymTable::iterator itr2 = parent_symtable.begin(); itr2 != parent_symtable.end(); ++itr2){
+            if(itr->first == itr2->first){
+                not_found = false;
+            }
+        }
+        if(itr->second[1][0] != '*' && not_found){
             C.push_back("obj_" + itr->second[1] + " " + VAR_PREFIX + itr->first + ";");
         }
     }
