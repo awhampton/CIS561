@@ -674,6 +674,12 @@ VTable build_vtable(string c, VTable parent_vt){
         IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
 
+        // also need to set implied argument of STR, PRINT, and EQUALS methods to String
+        IMPLIED_ARGUMENT[c][1] = make_pair("STR", class_name_list);
+        IMPLIED_ARGUMENT[c][2] = make_pair("PRINT", class_name_list);
+        IMPLIED_ARGUMENT[c][3] = make_pair("EQUALS", class_name_list);
+
+
     	RT_MAP["String"]["PLUS"] = "String";
     }
 
@@ -683,6 +689,8 @@ VTable build_vtable(string c, VTable parent_vt){
         list<string> int_constructor_types;
         res[0] = make_pair("Int", int_constructor_types);
         IMPLIED_ARGUMENT[c][0] = make_pair("Int", empty_arg_types);
+        IMPLIED_ARGUMENT[c][1] = make_pair("STR", class_name_list);
+        IMPLIED_ARGUMENT[c][3] = make_pair("EQUALS", class_name_list);
 
         list<string> int_relation_types;
     	int_relation_types.push_back("Int");
@@ -720,6 +728,7 @@ VTable build_vtable(string c, VTable parent_vt){
         list<string> bool_constructor_types;
         res[0] = make_pair("Boolean", bool_constructor_types);
         IMPLIED_ARGUMENT[c][0] = make_pair("Boolean", empty_arg_types);
+        IMPLIED_ARGUMENT[c][1] = make_pair("STR", class_name_list);
     }
 
     // if the class is Nothing, update it with builtin methods
@@ -728,6 +737,7 @@ VTable build_vtable(string c, VTable parent_vt){
         list<string> nothing_constructor_types;
         res[0] = make_pair("Nothing", nothing_constructor_types);
         IMPLIED_ARGUMENT[c][0] = make_pair("Nothing", empty_arg_types);
+        IMPLIED_ARGUMENT[c][1] = make_pair("STR", class_name_list);
     }
 
 	return res;

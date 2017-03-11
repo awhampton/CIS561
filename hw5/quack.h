@@ -29,6 +29,7 @@ extern  set<string> BUILTIN_CLASSES;
 extern  unordered_map< string, string > BUILTIN_VALUES;
 extern  vector<string> C;
 extern  map< string, map<string, SymTable> > LOCAL_SYMTABLES;
+extern  map<string, VTable> IMPLIED_ARGUMENT;
 extern  string VAR_PREFIX;
 
 /////////////////////////////////
@@ -951,6 +952,7 @@ public:
     expr_node                *expr;
     string                    method_name;
     list<actual_arg_node *>  *args;
+    string                    expr_type;  // save this from type checking
 
     method_call_node(expr_node *e, string s, list<actual_arg_node *> *a, int ln){
         expr = e;
@@ -1011,7 +1013,7 @@ public:
     }
 
     string type_check(SymTable &s){
-        string expr_type = expr->type_check(s);
+        expr_type = expr->type_check(s);
 
         vector<string> arg_types;
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
@@ -1093,10 +1095,34 @@ public:
     string emit_ir_code(string class_name, string method_name, SymTable s){
         string expr_code = expr->emit_ir_code(class_name, this->method_name, s);
 
-        string arg_string = "( " + expr_code + ",";
+        //cout << expr_type << endl;
+        VTable v_ia = IMPLIED_ARGUMENT[expr_type];
+        string ia_type;
+        for(VTable::iterator itr = v_ia.begin(); itr != v_ia.end(); ++itr){
+            //cout << itr->first << endl;
+            if(itr->first == this->method_name){
+                ia_type = itr->second.front();
+            }
+        }
+        string cast = "(obj_" + ia_type + ")";
+        string arg_string = "( " + cast + " " + expr_code + ",";
+
+        VTable v = VTABLE_MAP[expr_type];
+        list<string> fargs;
+        for(VTable::iterator itr = v.begin(); itr != v.end(); ++itr){
+            //cout << itr->first << endl;
+            if(itr->first == this->method_name){
+                fargs = itr->second;
+            }
+        }
+
+        list<string>::iterator fargs_itr = fargs.begin();
+
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            cast = "(obj_" + *fargs_itr + ")";
             string arg_code = (*itr)->emit_ir_code(class_name, this->method_name, s);
-            arg_string = arg_string + " " + arg_code + ",";
+            arg_string = arg_string + " " + cast + " " + arg_code + ",";
+            ++fargs_itr;
         }
         arg_string.pop_back();
         arg_string = arg_string + " )";

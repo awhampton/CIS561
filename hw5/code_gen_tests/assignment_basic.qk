@@ -1,0 +1,11 @@
+/* Test Assignments */
+
+newline = "\n";
+
+// Test redefinition
+x = 4;
+x.PRINT();
+newline.PRINT();
+x = "hi";
+x.PRINT();
+newline.PRINT();
