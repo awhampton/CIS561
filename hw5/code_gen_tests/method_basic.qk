@@ -1,6 +1,0 @@
-x = 1;
-y = 2;
-z = x + y;
-newline = "\n";
-z.PRINT();
-newline.PRINT();

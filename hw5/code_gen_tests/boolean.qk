@@ -1,15 +1,48 @@
-x = 1;
-y = 2;
-z = 3;
+/* Test Booleans */
+
 newline = "\n";
 
-if(x == y and x < z){
-    x.PRINT();
+// Test simple boolean conditions
+boolA = true;
+boolB = false;
+
+if(boolA){
+    boolA.PRINT();
 }
-elif(y == z or y < x){
-    y.PRINT();
+elif(boolB){
+    boolB.PRINT();
 }
-elif(not z == x){
-    z.PRINT();
+
+// Test simple OR
+if(boolA or boolB){
+    (boolA or boolB).PRINT();
 }
-newline.PRINT();
+
+// Test simple AND
+if(boolA and boolB){
+    (boolA and boolB).PRINT();
+}
+
+// Test simple NOT
+if(not boolA){
+    boolB.PRINT();
+}
+elif(not boolB){
+    boolA.PRINT();
+}
+
+// Test complex example
+if((not (boolA or boolB)) and (not boolB)){
+    ((not (boolA or boolB)) and (not boolB)).PRINT();
+}
+
+// Test complex boolean comparison
+intA = 1;
+intB = 2;
+
+if(intA > intB){
+    intA.PRINT();
+}
+elif(intA == intB or intA < intB or false){
+    intB.PRINT();
+}

@@ -1,3 +1,6 @@
+/* Test Custom Class Generation and Inheritence */
+
+// Test custom class
 class Pt(x: Int, y: Int) {
    this.x = x;
    this.y = y;
@@ -27,6 +30,7 @@ class Pt(x: Int, y: Int) {
 
 }
 
+// Test class inheritence
 class ReversePt(x: Int, y: Int) extends Pt {
     this.y = y;
     this.x = x;

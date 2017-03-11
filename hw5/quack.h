@@ -78,7 +78,7 @@ public:
     virtual string type_check(SymTable &s) { return "OK"; }
     virtual string type_check(SymTable &s, SymTable &t) { return "OK"; }
     virtual string type_check(SymTable &s, string class_name) { return "OK"; }
-    virtual string emit_ir_code(string class_name, string method_name) { return "OK"; }
+    virtual string emit_ir_code(string class_name, string method_name) { return "EMIT_NODE"; }
 };
 
 // expression node
@@ -96,7 +96,6 @@ public:
     virtual string get_name() = 0;
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "EMIT_EXPR_NODE";
     }
 };
@@ -115,7 +114,6 @@ public:
     virtual list<node *> get_children() = 0;
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "EMIT_STATEMENT_NODE";
     }
 };
@@ -261,7 +259,6 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        // TODO: note - not all nodes ir code emitters might actually need to emit anything themselves
         return "EMIT_CONDITION_NODE";
     }
 };
@@ -512,6 +509,15 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
+        // catch and return directly builtin values
+        if(ident_value == "true" || ident_value == "false"){
+            return "lit_" + ident_value;
+        }
+        else if(ident_value == "none"){
+            return "nothing"; //TODO: fix this?
+        }
+        
+        // otherwise add a prefix to prevent quack->c name conflicts
         return VAR_PREFIX + ident_value;
     }
 };
@@ -1244,7 +1250,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return left->emit_ir_code(class_name, method_name) + " == lit_true && " + right->emit_ir_code(class_name, method_name) + " == lit_true";
+        return "(" + left->emit_ir_code(class_name, method_name) + " == lit_true && " + right->emit_ir_code(class_name, method_name) + " == lit_true)";
     }
 };
 
@@ -1300,7 +1306,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return left->emit_ir_code(class_name, method_name) + " == lit_true || " + right->emit_ir_code(class_name, method_name) + " == lit_true";
+        return "(" + left->emit_ir_code(class_name, method_name) + " == lit_true || " + right->emit_ir_code(class_name, method_name) + " == lit_true)";
     }
 };
 
@@ -1344,7 +1350,7 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name){
-        return "!(" + expr->emit_ir_code(class_name, method_name) + " == lit_true)";
+        return "(!(" + expr->emit_ir_code(class_name, method_name) + " == lit_true))";
     }
 };
 

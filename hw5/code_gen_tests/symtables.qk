@@ -1,3 +1,5 @@
+/* Test Symbol Tables */
+
 class A() {
     this.foo = 1;
     this.bar = 2;

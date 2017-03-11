@@ -1,2 +1,5 @@
+/* Test Operating Directly on Literals */
+
 10.PRINT();
 "\n".PRINT();
+true.PRINT();

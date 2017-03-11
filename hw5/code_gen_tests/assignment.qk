@@ -1,3 +1,26 @@
-x : Int = 4;
-y = 2;
-z = "hi";
+/* Test Assignments */
+
+newline = "\n";
+
+// Test integer assignment
+intA : Int = 1;
+intB       = 2;
+intC : Int = intA + intB;
+intC.PRINT();
+newline.PRINT();
+
+// Test string assignment
+strA : String = "hello ";
+strB          = "world";
+//strC : String = strA + strB;
+strB.PRINT();
+newline.PRINT();
+
+// Test boolean assignment
+boolA : Boolean = true;
+boolB           = false;
+boolC : Boolean = boolA and boolB;
+boolD           = boolA or  boolC;
+boolD.PRINT();
+newline.PRINT();
+    // right now this fails because of boolC and boolD returning collapsing to C true/false instead of to quack lit_true/lit_false

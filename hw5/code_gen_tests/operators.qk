@@ -1,0 +1,33 @@
+/* Test Builtin Operators */
+
+intA = 1;
+intB = 2;
+(intA +  intB).PRINT();
+(intA -  intB).PRINT();
+(intA *  intB).PRINT();
+(intA /  intB).PRINT();
+(intA <  intB).PRINT();
+(intA <= intB).PRINT();
+(intA == intB).PRINT();
+(intA >  intB).PRINT();
+(intA >= intB).PRINT();
+
+strA = "foo";
+strB = "bar";
+(strA +  strB).PRINT();
+(strA <  strB).PRINT();
+(strA <= strB).PRINT();
+(strA == strB).PRINT();
+(strA >  strB).PRINT();
+(strA >= strB).PRINT();
+
+boolA = true;
+boolB = false;
+(boolA <  boolB).PRINT();
+(boolA <= boolB).PRINT();
+(boolA == boolB).PRINT();
+(boolA >  boolB).PRINT();
+(boolA >= boolB).PRINT();
+(boolA and boolB).PRINT();
+(boolA or boolB).PRINT();
+(not boolA).PRINT();
