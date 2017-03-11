@@ -40,7 +40,7 @@ bool is_subclass(string s1, string s2, map< string, list<string> > cg);
 SymTable get_intersection(vector< SymTable > tables);
 void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
-void local_variable_declarations_method(string class_name, string method_name, set<string> args);
+void local_variable_declarations_method(string class_name, string method_name, set<string> args, SymTable local_symtable);
 void struct_variable_declarations(string class_name);
 void method_declarations(string class_name);
 void method_declarations_inst(string class_name);
@@ -725,24 +725,25 @@ public:
 
         string left_side = left->emit_ir_code(class_name, method_name, s);
         string right_side = right->emit_ir_code(class_name, method_name, s);
-        SymTable st;
 
         if(left->type_of_expression == "ident"){
-            st = LOCAL_SYMTABLES[class_name][method_name];
+            //st = LOCAL_SYMTABLES[class_name][method_name];
             string left_side_actual = left_side;
             left_side_actual.erase(0,VAR_PREFIX.length());
             //cout << left_side_actual << " " << s[left_side_actual][1] << endl;
-            string cast = "(obj_" + st[left_side_actual][1] + ")";
+            string cast = "(obj_" + s[left_side_actual][1] + ")";
             C.push_back(left_side + " = " + cast + " " + right_side + ";");
         }
         else if(left->type_of_expression == "access"){
-            st = SymTables[((access_node *) left)->expr_type];
+            // note: I think this absolute reference to SymTables is OK, because we can't create
+            //       new data members outside of the constructor
+            SymTable st = SymTables[((access_node *) left)->expr_type];
             string left_side_actual = VAR_PREFIX + ((access_node *) left)->ident_value;  // kind of hacky
             left_side_actual.erase(0,VAR_PREFIX.length());
             //cout << "left side actual: " << left_side_actual << " type: " << s[left_side_actual][1] << endl;
-            string cast = "(obj_" + st[left_side_actual][1] + ")";
+            string cast = "(obj_" + st[left_side_actual][1] + ")";  // should be st?
 
-            string expr_code = ((access_node *) left)->expr->emit_ir_code(class_name, method_name, st);
+            string expr_code = ((access_node *) left)->expr->emit_ir_code(class_name, method_name, s);  // should be s?
             string access_left_side;
             if(expr_code == "ID_this" && method_name == "*constructor"){
                 access_left_side = "new_thing->" + VAR_PREFIX + ((access_node *) left)->ident_value;
@@ -1463,7 +1464,7 @@ public:
         C.push_back("obj_" + RT_MAP[class_name][name] + " " + class_name + "_method_" + name + arg_string + " {");
 
 
-        local_variable_declarations_method(class_name, name, formal_arg_names);
+        local_variable_declarations_method(class_name, name, formal_arg_names, s);
 
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, name, s);
@@ -1575,9 +1576,9 @@ public:
         C.push_back("obj_" + class_name + " new_" + class_name + constructor_args_code + " {");
         C.push_back("obj_" + class_name + " new_thing = (obj_" + class_name + ") malloc(sizeof(struct obj_" + class_name + "_struct));");
         C.push_back("new_thing->clazz = the_class_" + class_name + ";");
-        local_variable_declarations_method(class_name, "*constructor", arg_set);
+        local_variable_declarations_method(class_name, "*constructor", arg_set, LOCAL_SYMTABLES[class_name]["*constructor"]);
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-            (*itr)->emit_ir_code(class_name, "*constructor", s);
+            (*itr)->emit_ir_code(class_name, "*constructor", LOCAL_SYMTABLES[class_name]["*constructor"]);
         }
         C.push_back("return new_thing;");
         C.push_back("}");
@@ -1585,7 +1586,7 @@ public:
 
         // build the methods
         for(list<method_node *>::iterator itr = mthds->begin(); itr != mthds->end(); ++itr){
-            (*itr)->emit_ir_code(class_name, "*method", s);
+            (*itr)->emit_ir_code(class_name, "*method", LOCAL_SYMTABLES[class_name][(*itr)->name]);
         }
 
         return "EMIT_CLASS_BODY_NODE";

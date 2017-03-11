@@ -406,6 +406,7 @@ actual_arg_repetition:
 
 // code generation functions
 
+// note: this one is only used for the main block
 void local_variable_declarations(string class_name, string method_name){
     SymTable local_symtable = LOCAL_SYMTABLES[class_name][method_name];
     for(SymTable::iterator itr = local_symtable.begin(); itr != local_symtable.end(); ++itr){
@@ -415,8 +416,8 @@ void local_variable_declarations(string class_name, string method_name){
     }
 }
 
-void local_variable_declarations_method(string class_name, string method_name, set<string> args){
-    SymTable local_symtable = LOCAL_SYMTABLES[class_name][method_name];
+void local_variable_declarations_method(string class_name, string method_name, set<string> args, SymTable local_symtable){
+    //SymTable local_symtable = LOCAL_SYMTABLES[class_name][method_name];
     for(SymTable::iterator itr = local_symtable.begin(); itr != local_symtable.end(); ++itr){
         set<string>::iterator itr_f = args.find(itr->first);
     	bool not_found = (itr_f == args.end());
