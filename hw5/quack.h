@@ -1220,10 +1220,16 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name, SymTable s){
+        VTable v = VTABLE_MAP[this->class_name];
+        list<string> fargs = v[0].second;
+        list<string>::iterator fargs_itr = fargs.begin();
+
         string arg_string = "(";
         for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+            string cast = "(obj_" + *fargs_itr + ")";
             string arg_code = (*itr)->emit_ir_code(class_name, method_name, s);
-            arg_string = arg_string + " " + arg_code + ",";
+            arg_string = arg_string + " " + cast + " " + arg_code + ",";
+            ++fargs_itr;
         }
         if(args->size() > 0){
             arg_string.pop_back();
