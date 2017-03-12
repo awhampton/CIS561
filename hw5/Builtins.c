@@ -288,6 +288,21 @@ obj_Int Int_method_PLUS(obj_Int this_in, obj_Int other) {
   return int_literal(this_in->value + other->value);
 }
 
+/* MINUS */
+obj_Int Int_method_MINUS(obj_Int this_in, obj_Int other) {
+  return int_literal(this_in->value - other->value);
+}
+
+/* TIMES */
+obj_Int Int_method_TIMES(obj_Int this_in, obj_Int other) {
+  return int_literal(this_in->value * other->value);
+}
+
+/* DIVIDE */
+obj_Int Int_method_DIVIDE(obj_Int this_in, obj_Int other) {
+  return int_literal(this_in->value / other->value);
+}
+
 /* The Int Class (a singleton) */
 struct  class_Int_struct  the_class_Int_struct = {
   new_Int,     /* Constructor */
@@ -295,7 +310,10 @@ struct  class_Int_struct  the_class_Int_struct = {
   Obj_method_PRINT,
   Int_method_EQUALS,
   Int_method_LESS,
-  Int_method_PLUS
+  Int_method_PLUS,
+  Int_method_MINUS,
+  Int_method_TIMES,
+  Int_method_DIVIDE
 };
 
 class_Int the_class_Int = &the_class_Int_struct;
@@ -315,20 +333,20 @@ obj_Int int_literal(int n) {
  * to quack boolean literals
  * ===================================
  */
-obj_Boolean LIT_OR(int a, int b){
-    if (a || b)
+obj_Boolean bool_to_lit(int bool_in){
+    if(bool_in)
         return lit_true;
     return lit_false;
+}
+
+obj_Boolean LIT_OR(int a, int b){
+    return bool_to_lit(a || b);
 }
 
 obj_Boolean LIT_AND(int a, int b){
-    if (a && b)
-        return lit_true;
-    return lit_false;
+    return bool_to_lit(a && b);
 }
 
 obj_Boolean LIT_NOT(int a){
-    if (a)
-        return lit_false;
-    return lit_true;
+    return bool_to_lit(!a);
 }
