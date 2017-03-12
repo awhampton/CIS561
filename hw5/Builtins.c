@@ -111,12 +111,45 @@ obj_Boolean String_method_EQUALS(obj_String this_in, obj_Obj other) {
   }
 }
 
+/* String:LESS */
+obj_Boolean String_method_LESS(obj_String this_in, obj_String other) {
+  return bool_to_lit(this_in->text < other->text);
+}
+
+/* String:PLUS */
+obj_String String_method_PLUS(obj_String this_in, obj_String other) {
+  char* concat_string = malloc((strlen(this_in->text) + strlen(other->text) + 1)*sizeof(char));
+  strcpy(concat_string, this_in->text);
+  strcat(concat_string, other->text);
+  return str_literal(concat_string);
+}
+
+/* String:ATMOST */
+obj_Boolean String_method_ATMOST(obj_String this_in, obj_String other) {
+  return bool_to_lit(this_in->text <= other->text);
+}
+
+/* String:ATLEAST */
+obj_Boolean String_method_ATLEAST(obj_String this_in, obj_String other) {
+  return bool_to_lit(this_in->text >= other->text);
+}
+
+/* String:MORE */
+obj_Boolean String_method_MORE(obj_String this_in, obj_String other) {
+  return bool_to_lit(this_in->text > other->text);
+}
+
 /* The String Class (a singleton) */
 struct  class_String_struct  the_class_String_struct = {
   new_String,     /* Constructor */
   String_method_STR,
   String_method_PRINT,
-  String_method_EQUALS
+  String_method_EQUALS,
+  String_method_LESS,
+  String_method_PLUS,
+  String_method_ATMOST,
+  String_method_ATLEAST,
+  String_method_MORE
 };
 
 class_String the_class_String = &the_class_String_struct;

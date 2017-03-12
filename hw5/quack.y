@@ -671,16 +671,28 @@ VTable build_vtable(string c, VTable parent_vt){
     	str_plus_types.push_back("String");
         res.push_back(make_pair("LESS", str_plus_types));
     	res.push_back(make_pair("PLUS", str_plus_types));
+    	res.push_back(make_pair("ATMOST", str_plus_types));
+    	res.push_back(make_pair("ATLEAST", str_plus_types));
+    	res.push_back(make_pair("MORE", str_plus_types));
         IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("ATMOST", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("ATLEAST", class_name_list));
+        IMPLIED_ARGUMENT[c].push_back(make_pair("MORE", class_name_list));
 
         // also need to set implied argument of STR, PRINT, and EQUALS methods to String
         IMPLIED_ARGUMENT[c][1] = make_pair("STR", class_name_list);
         IMPLIED_ARGUMENT[c][2] = make_pair("PRINT", class_name_list);
         IMPLIED_ARGUMENT[c][3] = make_pair("EQUALS", class_name_list);
 
-
     	RT_MAP["String"]["PLUS"] = "String";
+        RT_MAP["String"]["MINUS"] = "String";
+        RT_MAP["String"]["TIMES"] = "String";
+        RT_MAP["String"]["DIVIDE"] = "String";
+        RT_MAP["String"]["ATMOST"] = "Boolean";
+        RT_MAP["String"]["ATLEAST"] = "Boolean";
+        RT_MAP["String"]["LESS"] = "Boolean";
+        RT_MAP["String"]["MORE"] = "Boolean";
     }
 
     // if the class is Int, update it with builtin methods

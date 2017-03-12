@@ -98,6 +98,10 @@ struct class_String_struct {
   obj_Boolean (*EQUALS) (obj_String, obj_Obj);
   /* Method table: Introduced in String */
   obj_Boolean (*LESS) (obj_String, obj_String);
+  obj_String (*PLUS) (obj_String, obj_String);
+  obj_Boolean (*ATMOST) (obj_String, obj_String);
+  obj_Boolean (*ATLEAST) (obj_String, obj_String);
+  obj_Boolean (*MORE) (obj_String, obj_String);
 };
 
 extern class_String the_class_String;
@@ -245,6 +249,11 @@ obj_Boolean Obj_method_EQUALS(obj_Obj this_in, obj_Obj other);
 obj_String  String_method_STR(obj_String this_in);
 obj_String  String_method_PRINT(obj_String this_in);
 obj_Boolean String_method_EQUALS(obj_String this_in, obj_Obj other);
+obj_Boolean String_method_LESS(obj_String this_in, obj_String other);
+obj_String  String_method_PLUS(obj_String this_in, obj_String other);
+obj_Boolean String_method_ATMOST(obj_String this_in, obj_String other);
+obj_Boolean String_method_ATLEAST(obj_String this_in, obj_String other);
+obj_Boolean String_method_MORE(obj_String this_in, obj_String other);
 
 // Boolean
 obj_String  Boolean_method_STR(obj_Boolean this_in);
