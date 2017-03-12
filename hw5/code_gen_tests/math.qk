@@ -1,0 +1,44 @@
+/* computes some math functions on integers */
+
+class Math() {
+
+    // returns x!
+    def factorial(x : Int) : Int {
+        if(x < 0){
+            return -1;
+        }
+        else{
+            res = 1;
+            while(x > 0){
+                res = res * x;
+                x = x - 1;
+            }
+            return res;
+        }
+    }
+
+    // return x ^ y (try to implement with squaring?)
+    def power(x : Int, y : Int) : Int {
+        if(y < 0){
+            return -1;
+        }
+        else{
+            res = 1;
+            while(y > 0){
+                res = res * x;
+                y = y - 1;
+            }
+            return res;
+        }
+    }
+
+}
+
+math_library = Math();
+"5! = ".PRINT();
+math_library.factorial(5).PRINT();
+"\n".PRINT();
+"\n".PRINT();
+"2^10 = ".PRINT();
+math_library.power(2,10).PRINT();
+"\n".PRINT();
