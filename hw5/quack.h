@@ -1450,6 +1450,42 @@ public:
                 if( (*itr)->type_of_statement == "return" ){
                     found_return_node = true;
                 }
+                if( (*itr)->type_of_statement == "if" ){
+                    bool found_return_all_branches = true;
+                    bool found_on_branch = false;
+
+                    // check the if branch
+                    for(list<statement_node *>::iterator itr2 = ( (if_elifs_else_node *) (*itr) )->if_branch->stmts->begin(); itr2 != ( (if_elifs_else_node *) (*itr) )->if_branch->stmts->end(); ++itr2){
+                        if( (*itr2)->type_of_statement == "return" ){
+                            found_on_branch = true;
+                        }
+                    }
+                    found_return_all_branches = found_return_all_branches && found_on_branch;
+
+                    // check the elifs
+                    for(list<condition_node *>::iterator itr_elifs = ( (if_elifs_else_node *) (*itr) )->elif_branches->begin(); itr_elifs != ( (if_elifs_else_node *) (*itr) )->elif_branches->end(); ++itr_elifs){
+                        found_on_branch = false;
+                        for(list<statement_node *>::iterator itr2 = (*itr_elifs)->stmts->begin(); itr2 != (*itr_elifs)->stmts->end(); ++itr2){
+                            if( (*itr2)->type_of_statement == "return" ){
+                                found_on_branch = true;
+                            }
+                        }
+                        found_return_all_branches = found_return_all_branches && found_on_branch;
+                    }
+
+                    // check the else branch
+                    found_on_branch = false;
+                    for(list<statement_node *>::iterator itr2 = ( (if_elifs_else_node *) (*itr) )->else_stmts->begin(); itr2 != ( (if_elifs_else_node *) (*itr) )->else_stmts->end(); ++itr2){
+                        if( (*itr2)->type_of_statement == "return" ){
+                            found_on_branch = true;
+                        }
+                    }
+                    found_return_all_branches = found_return_all_branches && found_on_branch;
+
+                    if(found_return_all_branches){
+                        found_return_node = true;
+                    }
+                }
             }
             if(!found_return_node){
                 string msg = "method " + name + " does not have a return statement";

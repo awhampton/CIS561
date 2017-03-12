@@ -1,0 +1,19 @@
+/* computes some math functions on integers */
+
+class Math() {
+
+    def factorial(x : Int) : Int {
+        if(x < 0){
+            return -1;
+        }
+        else{
+            res = 1;
+            while(x > 0){
+                res = res * x;
+                x = x - 1;
+            }
+            return res;
+        }
+    }
+
+}
