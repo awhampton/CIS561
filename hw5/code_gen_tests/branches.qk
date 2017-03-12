@@ -1,6 +1,10 @@
 /* Tests Conditional Branching */
 
 // Test if-elifs-else
+// Should print out 3
+x = 3;
+y = 3;
+
 if ((x < y) or (x > y)){
     z = x - y;
     x = z;
@@ -14,3 +18,6 @@ else{
 }
 x.PRINT();
 "\n".PRINT();
+
+// Test complex conditionals
+
