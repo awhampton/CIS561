@@ -3,3 +3,6 @@
 10.PRINT();
 "\n".PRINT();
 true.PRINT();
+"\n".PRINT();
+(1 < 2).PRINT();
+"\n".PRINT();

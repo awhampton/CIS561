@@ -704,6 +704,7 @@ VTable build_vtable(string c, VTable parent_vt){
         res.push_back(make_pair("ATLEAST", int_relation_types));
         res.push_back(make_pair("MORE", int_relation_types));
 
+        IMPLIED_ARGUMENT[c].push_back(make_pair("LESS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("PLUS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("MINUS", class_name_list));
         IMPLIED_ARGUMENT[c].push_back(make_pair("TIMES", class_name_list));
