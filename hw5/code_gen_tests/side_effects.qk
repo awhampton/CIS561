@@ -4,9 +4,9 @@
 class Counter(x: Int) {
     this.counter = x;
 
-    def increment() : Int {
+    def increment() : Counter {
         this.counter = this.counter + 1;
-        return this.counter;
+        return this;
     }
 
     def get() : Int {
@@ -30,5 +30,6 @@ my_counter.PRINT();  /* this should print counter: 0 */
 my_counter.increment();
 my_counter.PRINT(); /* this should print counter: 1 */
 
-my_counter.increment().PRINT();  /* this should print 2 */
-"\n".PRINT();
+my_counter.increment().PRINT();  /* this should print counter: 2 */
+
+my_counter.increment().increment().PRINT();  /* this should print counter: 4 */
