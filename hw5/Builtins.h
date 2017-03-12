@@ -217,6 +217,9 @@ struct class_Int_struct {
   obj_Int (*MINUS) (obj_Int, obj_Int);
   obj_Int (*TIMES) (obj_Int, obj_Int);
   obj_Int (*DIVIDE) (obj_Int, obj_Int);
+  obj_Boolean (*ATMOST) (obj_Int, obj_Int);
+  obj_Boolean (*ATLEAST) (obj_Int, obj_Int);
+  obj_Boolean (*MORE) (obj_Int, obj_Int);
 };
 
 extern class_Int the_class_Int;
@@ -257,6 +260,9 @@ obj_Int     Int_method_PLUS(obj_Int this_in, obj_Int other);
 obj_Int     Int_method_MINUS(obj_Int this_in, obj_Int other);
 obj_Int     Int_method_TIMES(obj_Int this_in, obj_Int other);
 obj_Int     Int_method_DIVIDE(obj_Int this_in, obj_Int other);
+obj_Boolean Int_method_ATMOST(obj_Int this_in, obj_Int other);
+obj_Boolean Int_method_ATLEAST(obj_Int this_in, obj_Int other);
+obj_Boolean Int_method_MORE(obj_Int this_in, obj_Int other);
 
 /* ======================++======
  * LIT_BOOL functions for testing

@@ -1,0 +1,22 @@
+a = 4;
+b = 2;
+
+(a + b).PRINT();
+"\n".PRINT();
+(a - b).PRINT();
+"\n".PRINT();
+(a * b).PRINT();
+"\n".PRINT();
+(a / b).PRINT();
+"\n".PRINT();
+
+(a == b).PRINT();
+"\n".PRINT();
+(a < b).PRINT();
+"\n".PRINT();
+(a > b).PRINT();
+"\n".PRINT();
+(a <= b).PRINT();
+"\n".PRINT();
+(a >= b).PRINT();
+"\n".PRINT();

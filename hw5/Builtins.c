@@ -277,10 +277,7 @@ obj_Boolean Int_method_EQUALS(obj_Int this_in, obj_Obj other) {
 
 /* LESS (new method) */
 obj_Boolean Int_method_LESS(obj_Int this_in, obj_Int other) {
-  if (this_in->value < other->value) {
-    return lit_true;
-  }
-  return lit_false;
+  return bool_to_lit(this_in->value < other->value);
 }
 
 /* PLUS (new method) */
@@ -303,6 +300,21 @@ obj_Int Int_method_DIVIDE(obj_Int this_in, obj_Int other) {
   return int_literal(this_in->value / other->value);
 }
 
+/* ATMOST */
+obj_Boolean Int_method_ATMOST(obj_Int this_in, obj_Int other) {
+  return bool_to_lit(this_in->value <= other->value);
+}
+
+/* ATLEAST */
+obj_Boolean Int_method_ATLEAST(obj_Int this_in, obj_Int other) {
+  return bool_to_lit(this_in->value >= other->value);
+}
+
+/* MORE */
+obj_Boolean Int_method_MORE(obj_Int this_in, obj_Int other) {
+  return bool_to_lit(this_in->value > other->value);
+}
+
 /* The Int Class (a singleton) */
 struct  class_Int_struct  the_class_Int_struct = {
   new_Int,     /* Constructor */
@@ -313,7 +325,10 @@ struct  class_Int_struct  the_class_Int_struct = {
   Int_method_PLUS,
   Int_method_MINUS,
   Int_method_TIMES,
-  Int_method_DIVIDE
+  Int_method_DIVIDE,
+  Int_method_ATMOST,
+  Int_method_ATLEAST,
+  Int_method_MORE
 };
 
 class_Int the_class_Int = &the_class_Int_struct;
