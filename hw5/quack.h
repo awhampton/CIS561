@@ -1488,7 +1488,7 @@ public:
                 }
             }
             if(!found_return_node){
-                string msg = "method " + name + " does not have a return statement";
+                string msg = "method " + name + " does not have a (guaranteed) return";
                 LOG.insert("TypeError", line_number, msg);
             }
         }
