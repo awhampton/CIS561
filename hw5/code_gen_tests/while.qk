@@ -1,0 +1,38 @@
+/* Tests While Loops */
+
+// Standard while loop
+x = 0;
+mod = 10;
+while(not (x/mod == 1)){
+    x.PRINT();
+    "\n".PRINT();
+    x = x + 1;
+}
+"\n".PRINT();
+
+// For loop
+i = 1;
+maxI = 5;
+total = 1;
+while(i <= maxI){
+    total = total * i;
+    i = i + 1;
+}
+total.PRINT();
+"\n\n".PRINT();
+
+// Nested loops
+i = 0;
+j = 10;
+k = 10;
+nestTotal = 0;
+while (i < j){
+    i = i + 1;
+    tmp = 0;
+    while (tmp < k){
+        tmp = tmp + 1;
+        nestTotal = nestTotal + 1;
+    }
+}
+nestTotal.PRINT();
+"\n".PRINT();
