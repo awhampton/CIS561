@@ -63,6 +63,7 @@ map< string, map<string, SymTable> > LOCAL_SYMTABLES;
 map<string, VTable> IMPLIED_ARGUMENT;
 string OUTFILE_NAME = "generated.c";
 string VAR_PREFIX = "ID_";
+int TMP_VAR_CTR = 0;
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();

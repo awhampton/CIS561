@@ -31,6 +31,7 @@ extern  vector<string> C;
 extern  map< string, map<string, SymTable> > LOCAL_SYMTABLES;
 extern  map<string, VTable> IMPLIED_ARGUMENT;
 extern  string VAR_PREFIX;
+extern  int TMP_VAR_CTR;
 
 /////////////////////////////////
 // helper functions
@@ -1104,9 +1105,14 @@ public:
                 ia_type = itr->second.front();
             }
         }
-        string cast = "(obj_" + ia_type + ")";
-        string arg_string = "( " + cast + " " + expr_code + ",";
 
+        // create temp variable to hold the expr code (so it doesn't get executed twice)
+        string cast = "(obj_" + ia_type + ")";
+        int temp_var_num = TMP_VAR_CTR;
+        TMP_VAR_CTR++;
+        C.push_back("obj_" + ia_type + " tmp_" + to_string(temp_var_num) + " = " + cast + " " + expr_code + ";");
+
+        string arg_string = "( " + cast + " tmp_" + to_string(temp_var_num) + ",";
         VTable v = VTABLE_MAP[expr_type];
         list<string> fargs;
         for(VTable::iterator itr = v.begin(); itr != v.end(); ++itr){
@@ -1127,7 +1133,7 @@ public:
         arg_string.pop_back();
         arg_string = arg_string + " )";
 
-        string res = expr_code + "->clazz->" + this->method_name + arg_string;
+        string res = "tmp_" + to_string(temp_var_num) + "->clazz->" + this->method_name + arg_string;
         return res;
     }
 };
