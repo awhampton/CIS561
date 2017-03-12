@@ -1,3 +1,16 @@
 /* Tests Conditional Branching */
 
-
+// Test if-elifs-else
+if ((x < y) or (x > y)){
+    z = x - y;
+    x = z;
+}
+elif (x > 10){
+    z = 1;
+    x = z;
+}
+else{
+    x = 2;
+}
+x.PRINT();
+"\n".PRINT();
