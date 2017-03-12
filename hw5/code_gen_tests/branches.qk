@@ -8,6 +8,7 @@ while (y < x){
     y = y + 1;
 }
 y.PRINT();
+"\n".PRINT();
 
 // Test if-elifs-else
 if ((x < y) or (x > y)){
@@ -22,3 +23,4 @@ else{
     x = 2;
 }
 x.PRINT();
+"\n".PRINT();
