@@ -31,6 +31,7 @@ extern  vector<string> C;
 extern  map< string, map<string, SymTable> > LOCAL_SYMTABLES;
 extern  map<string, VTable> IMPLIED_ARGUMENT;
 extern  string VAR_PREFIX;
+extern  int TMP_VAR_CTR;
 
 /////////////////////////////////
 // helper functions
@@ -1093,42 +1094,87 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name, SymTable s){
-        string expr_code = expr->emit_ir_code(class_name, this->method_name, s);
+        if(expr->type_of_expression != "ident"){
+            string expr_code = expr->emit_ir_code(class_name, this->method_name, s);
 
-        //cout << expr_type << endl;
-        VTable v_ia = IMPLIED_ARGUMENT[expr_type];
-        string ia_type;
-        for(VTable::iterator itr = v_ia.begin(); itr != v_ia.end(); ++itr){
-            //cout << itr->first << endl;
-            if(itr->first == this->method_name){
-                ia_type = itr->second.front();
+            //cout << expr_type << endl;
+            VTable v_ia = IMPLIED_ARGUMENT[expr_type];
+            string ia_type;
+            for(VTable::iterator itr = v_ia.begin(); itr != v_ia.end(); ++itr){
+                //cout << itr->first << endl;
+                if(itr->first == this->method_name){
+                    ia_type = itr->second.front();
+                }
             }
-        }
-        string cast = "(obj_" + ia_type + ")";
-        string arg_string = "( " + cast + " " + expr_code + ",";
 
-        VTable v = VTABLE_MAP[expr_type];
-        list<string> fargs;
-        for(VTable::iterator itr = v.begin(); itr != v.end(); ++itr){
-            //cout << itr->first << endl;
-            if(itr->first == this->method_name){
-                fargs = itr->second;
+            // create temp variable to hold the expr code (so it doesn't get executed twice)
+            string cast = "(obj_" + ia_type + ")";
+            int temp_var_num = TMP_VAR_CTR;
+            TMP_VAR_CTR++;
+            C.push_back("obj_" + ia_type + " tmp_" + to_string(temp_var_num) + " = " + cast + " " + expr_code + ";");
+
+            string arg_string = "( " + cast + " tmp_" + to_string(temp_var_num) + ",";
+            VTable v = VTABLE_MAP[expr_type];
+            list<string> fargs;
+            for(VTable::iterator itr = v.begin(); itr != v.end(); ++itr){
+                //cout << itr->first << endl;
+                if(itr->first == this->method_name){
+                    fargs = itr->second;
+                }
             }
+
+            list<string>::iterator fargs_itr = fargs.begin();
+
+            for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+                cast = "(obj_" + *fargs_itr + ")";
+                string arg_code = (*itr)->emit_ir_code(class_name, this->method_name, s);
+                arg_string = arg_string + " " + cast + " " + arg_code + ",";
+                ++fargs_itr;
+            }
+            arg_string.pop_back();
+            arg_string = arg_string + " )";
+
+            string res = "tmp_" + to_string(temp_var_num) + "->clazz->" + this->method_name + arg_string;
+            return res;
         }
+        else{
+            string expr_code = expr->emit_ir_code(class_name, this->method_name, s);
 
-        list<string>::iterator fargs_itr = fargs.begin();
+            //cout << expr_type << endl;
+            VTable v_ia = IMPLIED_ARGUMENT[expr_type];
+            string ia_type;
+            for(VTable::iterator itr = v_ia.begin(); itr != v_ia.end(); ++itr){
+                //cout << itr->first << endl;
+                if(itr->first == this->method_name){
+                    ia_type = itr->second.front();
+                }
+            }
+            string cast = "(obj_" + ia_type + ")";
+            string arg_string = "( " + cast + " " + expr_code + ",";
 
-        for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
-            cast = "(obj_" + *fargs_itr + ")";
-            string arg_code = (*itr)->emit_ir_code(class_name, this->method_name, s);
-            arg_string = arg_string + " " + cast + " " + arg_code + ",";
-            ++fargs_itr;
+            VTable v = VTABLE_MAP[expr_type];
+            list<string> fargs;
+            for(VTable::iterator itr = v.begin(); itr != v.end(); ++itr){
+                //cout << itr->first << endl;
+                if(itr->first == this->method_name){
+                    fargs = itr->second;
+                }
+            }
+
+            list<string>::iterator fargs_itr = fargs.begin();
+
+            for(list<actual_arg_node *>::iterator itr = args->begin(); itr != args->end(); ++itr){
+                cast = "(obj_" + *fargs_itr + ")";
+                string arg_code = (*itr)->emit_ir_code(class_name, this->method_name, s);
+                arg_string = arg_string + " " + cast + " " + arg_code + ",";
+                ++fargs_itr;
+            }
+            arg_string.pop_back();
+            arg_string = arg_string + " )";
+
+            string res = expr_code + "->clazz->" + this->method_name + arg_string;
+            return res;
         }
-        arg_string.pop_back();
-        arg_string = arg_string + " )";
-
-        string res = expr_code + "->clazz->" + this->method_name + arg_string;
-        return res;
     }
 };
 
