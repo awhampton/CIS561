@@ -11,3 +11,4 @@ hw5/*.o
 hw5/quack.output
 hw5/generated.c
 hw5/compiled_quack
+hw5/test.qk
