@@ -463,7 +463,8 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name, SymTable s){
-        C.push_back("while(" + wc->expr->emit_ir_code(class_name, method_name, s) + " == lit_true){");
+        C.push_back("while(1){");
+        C.push_back("if(!(" + wc->expr->emit_ir_code(class_name, method_name, s) + " == lit_true)){ break; }");
         local_variable_declarations_branch(class_name, method_name, wc->ar, s);
         for(list<statement_node *>::iterator itr = wc->stmts->begin(); itr != wc->stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, method_name, wc->ar);
