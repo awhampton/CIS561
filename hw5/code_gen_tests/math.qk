@@ -27,24 +27,43 @@ class Math() {
         }
     }
 
-    // return x ^ y (try to implement with squaring?)
+    // return x ^ y (computed by repeated squaring)
     def power(x : Int, y : Int) : Int {
         if(y < 0){
             return -1;
         }
+        elif(y == 0){
+            return 1;
+        }
         else{
             res = 1;
-            while(y > 0){
-                res = res * x;
-                y = y - 1;
+            while(y > 1){
+                if(this.mod(y, 2) == 0){
+                    x = x * x;
+                    y = y / 2;
+                }
+                else{
+                    res = res * x;
+                    x = x * x;
+                    y = (y - 1) / 2;
+                }
             }
-            return res;
+            return res * x;
         }
     }
 
-    // return floor(sqrt(x))
+    // return floor(sqrt(x)) (computed by newton's method)
     def sqrt(x : Int) : Int {
-        return -1;
+        if(x < 0){
+            return -1;
+        }
+        current = -1;
+        next = x;
+        while(not current == next){
+            current = next;
+            next = (current + (x / current)) / 2;
+        }
+        return current;
     }
 
 }
@@ -63,5 +82,16 @@ math_library.factorial(5).PRINT();
 
 "2^10 = ".PRINT();
 math_library.power(2,10).PRINT();
+"\n".PRINT();
+"5^3 = ".PRINT();
+math_library.power(5,3).PRINT();
+"\n".PRINT();
+"-5^3 = ".PRINT();
+math_library.power(-5,3).PRINT();
+"\n".PRINT();
+"\n".PRINT();
+
+"sqrt(25) = ".PRINT();
+math_library.sqrt(25).PRINT();
 "\n".PRINT();
 "\n".PRINT();
