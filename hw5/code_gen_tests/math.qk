@@ -2,6 +2,16 @@
 
 class Math() {
 
+    // returns x mod m
+    def mod(x : Int, m : Int) : Int {
+        if( m < 2){
+            return -1;
+        }
+
+        q = x / m;
+        return x - q * m;
+    }
+
     // returns x!
     def factorial(x : Int) : Int {
         if(x < 0){
@@ -32,13 +42,26 @@ class Math() {
         }
     }
 
+    // return floor(sqrt(x))
+    def sqrt(x : Int) : Int {
+        return -1;
+    }
+
 }
 
 math_library = Math();
+
+"7 mod 2 = ".PRINT();
+math_library.mod(7,2).PRINT();
+"\n".PRINT();
+"\n".PRINT();
+
 "5! = ".PRINT();
 math_library.factorial(5).PRINT();
 "\n".PRINT();
 "\n".PRINT();
+
 "2^10 = ".PRINT();
 math_library.power(2,10).PRINT();
+"\n".PRINT();
 "\n".PRINT();
