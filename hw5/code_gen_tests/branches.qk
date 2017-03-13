@@ -20,4 +20,19 @@ x.PRINT();
 "\n".PRINT();
 
 // Test complex conditionals
+// Should print out "foohello world"
+str1 = "foo";
+str2 = "bar";
 
+("foobar" < "hello").PRINT();
+"\n".PRINT();
+
+if((str1 + str2) > "hello"){
+    strTmp = "hello ";
+    str1 = str1 + strTmp;
+    if (str2 <= "boo"){
+        str1 = str1 + "world";
+    }
+}
+str1.PRINT();
+"\n".PRINT();

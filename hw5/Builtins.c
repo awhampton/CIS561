@@ -113,7 +113,43 @@ obj_Boolean String_method_EQUALS(obj_String this_in, obj_Obj other) {
 
 /* String:LESS */
 obj_Boolean String_method_LESS(obj_String this_in, obj_String other) {
-  return bool_to_lit(this_in->text < other->text);
+    // If they're the same length
+    // Check each one character by character until one is different or we're done
+    if(strlen(this_in->text) == strlen(other->text)){
+        int i = 0;
+        for (; i < strlen(this_in->text); i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis < currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return lit_false; //lit_true;
+    }
+    
+    // If they aren't
+    // Check until we hit the end of the smaller string or until one is different
+    // If we hit the end of the smaller string without a difference, the smaller string is less
+    else{
+        int i = 0;
+        int min = ((strlen(this_in->text) < strlen(other->text)) ? strlen(this_in->text) : strlen(other->text));
+        for (; i < min; i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis < currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return ((strlen(this_in->text) == min) ? lit_true : lit_false);
+    }
 }
 
 /* String:PLUS */
@@ -126,17 +162,125 @@ obj_String String_method_PLUS(obj_String this_in, obj_String other) {
 
 /* String:ATMOST */
 obj_Boolean String_method_ATMOST(obj_String this_in, obj_String other) {
-  return bool_to_lit(this_in->text <= other->text);
+    // If they're the same length
+    // Check each one character by character until one is different or we're done
+    if(strlen(this_in->text) == strlen(other->text)){
+        int i = 0;
+        for (; i < strlen(this_in->text); i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis < currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return lit_true;
+    }
+    
+    // If they aren't
+    // Check until we hit the end of the smaller string or until one is different
+    // If we hit the end of the smaller string without a difference, the smaller string is less
+    else{
+        int i = 0;
+        int min = ((strlen(this_in->text) < strlen(other->text)) ? strlen(this_in->text) : strlen(other->text));
+        for (; i < min; i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis < currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return ((strlen(this_in->text) == min) ? lit_true : lit_false);
+    }
 }
 
 /* String:ATLEAST */
 obj_Boolean String_method_ATLEAST(obj_String this_in, obj_String other) {
-  return bool_to_lit(this_in->text >= other->text);
+    // If they're the same length
+    // Check each one character by character until one is different or we're done
+    if(strlen(this_in->text) == strlen(other->text)){
+        int i = 0;
+        for (; i < strlen(this_in->text); i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis > currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return lit_true;
+    }
+    
+    // If they aren't
+    // Check until we hit the end of the smaller string or until one is different
+    // If we hit the end of the smaller string without a difference, the larger string is more
+    else{
+        int i = 0;
+        int min = ((strlen(this_in->text) < strlen(other->text)) ? strlen(this_in->text) : strlen(other->text));
+        for (; i < min; i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis > currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return ((strlen(other->text) == min) ? lit_true : lit_false);
+    }
 }
 
 /* String:MORE */
 obj_Boolean String_method_MORE(obj_String this_in, obj_String other) {
-  return bool_to_lit(this_in->text > other->text);
+    // If they're the same length
+    // Check each one character by character until one is different or we're done
+    if(strlen(this_in->text) == strlen(other->text)){
+        int i = 0;
+        for (; i < strlen(this_in->text); i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis > currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return lit_false;
+    }
+    
+    // If they aren't
+    // Check until we hit the end of the smaller string or until one is different
+    // If we hit the end of the smaller string without a difference, the larger string is more
+    else{
+        int i = 0;
+        int min = ((strlen(this_in->text) < strlen(other->text)) ? strlen(this_in->text) : strlen(other->text));
+        for (; i < min; i++){
+            char currThis = this_in->text[i];
+            char currOther = other->text[i];
+            
+            if (currThis == currOther)
+                continue;
+            else if (currThis > currOther)
+                return lit_true;
+            else
+                return lit_false;
+        }
+        return ((strlen(other->text) == min) ? lit_true : lit_false);
+    }
 }
 
 /* The String Class (a singleton) */
