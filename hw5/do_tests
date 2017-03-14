@@ -14,7 +14,12 @@ make
 for filename in ${1}/*.qk; do
 	echo
 	echo $(basename $filename .qk)
+    echo "===================="
 	./quack $filename
-    make result
-    ./compiled_quack
+    if [ -f ${PWD}/generated.c ]; then
+        make result
+        ./compiled_quack
+    fi
+    rm -f ${PWD}/compiled_quack ${PWD}/generated.c
+    echo "===================="
 done
