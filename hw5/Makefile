@@ -13,4 +13,4 @@ result: generated.c Builtins.h Builtins.c
 	gcc -D_GNU_SOURCE generated.c Builtins.c -o compiled_quack
 
 clean:
-	rm -f *.o *.tab.* *.yy.* ${PROGNAME} ${PROGNAME}.output
+	rm -f *.o *.tab.* *.yy.* ${PROGNAME} ${PROGNAME}.output compiled_quack generated.c

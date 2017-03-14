@@ -15,4 +15,6 @@ for filename in ${1}/*.qk; do
 	echo
 	echo $(basename $filename .qk)
 	./quack $filename
+    make result
+    ./compiled_quack
 done
