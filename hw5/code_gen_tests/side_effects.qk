@@ -18,7 +18,7 @@ class Counter(x: Int) {
     }
 
     def PRINT() : Counter {
-        ("counter: " + this.STR() + "\n").PRINT();
+        ("counter *" + this.STR() + "*").PRINT();
         return this;
     }
 
@@ -26,10 +26,18 @@ class Counter(x: Int) {
 
 my_counter = Counter(0);
 my_counter.PRINT();  /* this should print counter: 0 */
+"  <-- correct:  counter *0*".PRINT();
+"\n".PRINT();
 
 my_counter.increment();
 my_counter.PRINT(); /* this should print counter: 1 */
+"  <-- correct:  counter *1*".PRINT();
+"\n".PRINT();
 
 my_counter.increment().PRINT();  /* this should print counter: 2 */
+"  <-- correct:  counter *2*".PRINT();
+"\n".PRINT();
 
 my_counter.increment().increment().PRINT();  /* this should print counter: 4 */
+"  <-- correct:  counter *4*".PRINT();
+"\n".PRINT();

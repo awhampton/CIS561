@@ -3,11 +3,15 @@
 // Standard while loop
 x = 0;
 mod = 10;
+"\n".PRINT();
+"the following should be integers 0 through 9\n".PRINT();
+"--------------------------------------------\n".PRINT();
 while(not (x/mod == 1)){
     x.PRINT();
     "\n".PRINT();
     x = x + 1;
 }
+"--------------------------------------------\n".PRINT();
 "\n".PRINT();
 
 // For loop
@@ -19,6 +23,7 @@ while(i <= maxI){
     i = i + 1;
 }
 total.PRINT();
+"  <-- correct: 120".PRINT();
 "\n\n".PRINT();
 
 // Nested loops
@@ -35,4 +40,5 @@ while (i < j){
     }
 }
 nestTotal.PRINT();
+"  <-- correct: 100".PRINT();
 "\n".PRINT();
