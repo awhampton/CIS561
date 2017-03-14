@@ -6,35 +6,44 @@ newline = "\n";
 boolA = true;
 boolB = false;
 
-if(boolA){
-    boolA.PRINT();
+if(boolB){
+    "B".PRINT();
 }
-elif(boolB){
-    boolB.PRINT();
+elif(boolA){
+    "A".PRINT();
 }
+"  <-- correct: A".PRINT();
+newline.PRINT();
 
 // Test simple OR
 if(boolA or boolB){
-    (boolA or boolB).PRINT();
+    "OR success".PRINT();
 }
+"  <-- correct: OR success".PRINT();
+newline.PRINT();
 
 // Test simple AND
 if(boolA and boolB){
     (boolA and boolB).PRINT();
 }
+/* nothing should print here */
 
 // Test simple NOT
 if(not boolA){
-    boolB.PRINT();
+    "not A".PRINT();
 }
 elif(not boolB){
-    boolA.PRINT();
+    "not B".PRINT();
 }
+"  <-- correct: not B".PRINT();
+newline.PRINT();
 
 // Test complex example
-if((not (boolA or boolB)) and (not boolB)){
-    ((not (boolA or boolB)) and (not boolB)).PRINT();
+if((not (boolA and boolB)) and (not boolB)){
+    "COMPLEX success".PRINT();
 }
+"  <-- correct: COMPLEX SUCCESS".PRINT();
+newline.PRINT();
 
 // Test complex boolean comparison
 intA = 1;
@@ -46,3 +55,5 @@ if(intA > intB){
 elif(intA == intB or intA < intB or false){
     intB.PRINT();
 }
+"  <-- correct: 2".PRINT();
+newline.PRINT();
