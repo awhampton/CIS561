@@ -7,13 +7,15 @@ intA : Int = 1;
 intB       = 2;
 intC : Int = intA + intB;
 intC.PRINT();
+"  <-- correct: 3".PRINT();
 newline.PRINT();
 
 // Test string assignment
 strA : String = "hello ";
 strB          = "world";
-//strC : String = strA + strB;
-strB.PRINT();
+strC : String = strA + strB;
+strC.PRINT();
+"  <-- correct: hello world".PRINT();
 newline.PRINT();
 
 // Test boolean assignment
@@ -22,4 +24,5 @@ boolB           = false;
 boolC : Boolean = boolA and boolB;
 boolD           = boolA or  boolC;
 boolD.PRINT();
+"  <-- correct: true".PRINT();
 newline.PRINT();
