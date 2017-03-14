@@ -91,6 +91,37 @@ class Math() {
         }
     }
 
+    // prime factorization (very very slow!)
+    def prime_factors(x : Int) : String {
+        if(x <= 1){
+            return "input > 1";
+        }
+        else{
+            res = "";
+            while(x > 1){
+                if(this.is_prime(x)){
+                    res = res + x.STR();
+                    x = 1;
+                }
+                else{
+                    found_factor = false;
+                    d = 2;
+                    while(not found_factor){
+                        if(this.mod(x,d) == 0){
+                            res = res + d.STR() + ", ";
+                            x = x / d;
+                            found_factor = true;
+                        }
+                        else{
+                            d = d + 1;
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+    }
+
 }
 
 math_library = Math();
@@ -150,4 +181,15 @@ math_library.is_prime(8).PRINT();
 "\n".PRINT();
 "7877 is prime: ".PRINT();
 math_library.is_prime(7877).PRINT();
+"\n".PRINT();
+"\n".PRINT();
+
+"prime factorization of 7: ".PRINT();
+math_library.prime_factors(7).PRINT();
+"\n".PRINT();
+"prime factorization of 21: ".PRINT();
+math_library.prime_factors(21).PRINT();
+"\n".PRINT();
+"prime factorization of 300: ".PRINT();
+math_library.prime_factors(300).PRINT();
 "\n".PRINT();
