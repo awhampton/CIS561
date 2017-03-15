@@ -1,10 +1,11 @@
 class Turtle() {
+    /* should this be a type checking error or runtime misfortune? */
     this.floor = Turtle(); //Turtles all the way down
-    
+
     def PLUS(other : Turtle) : Turtle {
         return Turtle();
     }
-    
+
     //def PRINT() : String {
     //    return "Turtle";
     //}
