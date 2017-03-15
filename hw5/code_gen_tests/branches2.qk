@@ -1,0 +1,15 @@
+cond1 = true;
+cond2 = true;
+
+if(cond1){
+  x = 2;
+  a = x + 4;
+}
+elif(cond2){
+  x = "foo";
+  b = x + "bar";
+}
+else{
+  x = true;
+  c = not x;
+}
