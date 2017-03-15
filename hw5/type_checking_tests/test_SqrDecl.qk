@@ -38,8 +38,8 @@ class Rect(ll: Pt, ur: Pt) extends Obj {
       lr = Pt( this.ur._y(), this.ll._x() );  // lower right
       ul = Pt( this.ll._x(), this.ur._y() );  // upper left
       return "(" + this.ll.STR() + ", "
-                 +      ul.STR() + ","
-                 + this.ur.STR() + ","
+                 +      ul.STR() + ", "
+                 + this.ur.STR() + ", "
                  +      lr.STR() + ")";
   }
 }
@@ -52,3 +52,4 @@ class Square(ll: Pt, side: Int) extends Rect {
 a_square: Rect = Square( Pt(3,3), 5 );
 a_square = a_square.translate( Pt(2,2) );
 a_square.PRINT();
+"\n".PRINT();
