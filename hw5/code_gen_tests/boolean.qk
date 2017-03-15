@@ -42,7 +42,7 @@ newline.PRINT();
 if((not (boolA and boolB)) and (not boolB)){
     "COMPLEX success".PRINT();
 }
-"  <-- correct: COMPLEX SUCCESS".PRINT();
+"  <-- correct: COMPLEX success".PRINT();
 newline.PRINT();
 
 // Test complex boolean comparison
