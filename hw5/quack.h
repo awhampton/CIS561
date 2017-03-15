@@ -1697,6 +1697,7 @@ public:
         C.push_back("obj_" + class_name + " new_thing = (obj_" + class_name + ") malloc(sizeof(struct obj_" + class_name + "_struct));");
         C.push_back("new_thing->clazz = the_class_" + class_name + ";");
         local_variable_declarations_method(class_name, "*constructor", arg_set, LOCAL_SYMTABLES[class_name]["*constructor"]);
+        C.push_back("obj_" + class_name + " ID_this = new_thing;");
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, "*constructor", LOCAL_SYMTABLES[class_name]["*constructor"]);
         }
