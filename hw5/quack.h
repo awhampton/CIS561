@@ -876,6 +876,9 @@ public:
         if(has_return_expr){
             C.push_back("return " + expr->emit_ir_code(class_name, method_name, s) + ";");
         }
+        else{
+            C.push_back("return nothing;");
+        }
         return "EMIT_RETURN_NODE";
     }
 };
@@ -1453,6 +1456,7 @@ public:
     string return_type;
     list<formal_arg_node *> *args;
     list<statement_node *>  *stmts;
+    bool found_return_node;
 
     method_node(string n, string rt, list<formal_arg_node *> *a, list<statement_node *> *s, int ln){
         type_of_node = "method";
@@ -1490,54 +1494,52 @@ public:
     string type_check(SymTable &s){
 
         // if the method has a return type other than 'Nothing', check that it actually
-        // has a return statement
-        if(return_type != "Nothing"){
-            bool found_return_node = false;
-            for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
-                if( (*itr)->type_of_statement == "return" ){
+        // has a return statement ... if it's 'Nothing', save this info for code generation
+        found_return_node = false;
+        for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
+            if( (*itr)->type_of_statement == "return" ){
+                found_return_node = true;
+            }
+            if( (*itr)->type_of_statement == "if" ){
+                bool found_return_all_branches = true;
+                bool found_on_branch = false;
+
+                // check the if branch
+                for(list<statement_node *>::iterator itr2 = ( (if_elifs_else_node *) (*itr) )->if_branch->stmts->begin(); itr2 != ( (if_elifs_else_node *) (*itr) )->if_branch->stmts->end(); ++itr2){
+                    if( (*itr2)->type_of_statement == "return" ){
+                        found_on_branch = true;
+                    }
+                }
+                found_return_all_branches = found_return_all_branches && found_on_branch;
+
+                // check the elifs
+                for(list<condition_node *>::iterator itr_elifs = ( (if_elifs_else_node *) (*itr) )->elif_branches->begin(); itr_elifs != ( (if_elifs_else_node *) (*itr) )->elif_branches->end(); ++itr_elifs){
+                    found_on_branch = false;
+                    for(list<statement_node *>::iterator itr2 = (*itr_elifs)->stmts->begin(); itr2 != (*itr_elifs)->stmts->end(); ++itr2){
+                        if( (*itr2)->type_of_statement == "return" ){
+                            found_on_branch = true;
+                        }
+                    }
+                    found_return_all_branches = found_return_all_branches && found_on_branch;
+                }
+
+                // check the else branch
+                found_on_branch = false;
+                for(list<statement_node *>::iterator itr2 = ( (if_elifs_else_node *) (*itr) )->else_stmts->begin(); itr2 != ( (if_elifs_else_node *) (*itr) )->else_stmts->end(); ++itr2){
+                    if( (*itr2)->type_of_statement == "return" ){
+                        found_on_branch = true;
+                    }
+                }
+                found_return_all_branches = found_return_all_branches && found_on_branch;
+
+                if(found_return_all_branches){
                     found_return_node = true;
                 }
-                if( (*itr)->type_of_statement == "if" ){
-                    bool found_return_all_branches = true;
-                    bool found_on_branch = false;
-
-                    // check the if branch
-                    for(list<statement_node *>::iterator itr2 = ( (if_elifs_else_node *) (*itr) )->if_branch->stmts->begin(); itr2 != ( (if_elifs_else_node *) (*itr) )->if_branch->stmts->end(); ++itr2){
-                        if( (*itr2)->type_of_statement == "return" ){
-                            found_on_branch = true;
-                        }
-                    }
-                    found_return_all_branches = found_return_all_branches && found_on_branch;
-
-                    // check the elifs
-                    for(list<condition_node *>::iterator itr_elifs = ( (if_elifs_else_node *) (*itr) )->elif_branches->begin(); itr_elifs != ( (if_elifs_else_node *) (*itr) )->elif_branches->end(); ++itr_elifs){
-                        found_on_branch = false;
-                        for(list<statement_node *>::iterator itr2 = (*itr_elifs)->stmts->begin(); itr2 != (*itr_elifs)->stmts->end(); ++itr2){
-                            if( (*itr2)->type_of_statement == "return" ){
-                                found_on_branch = true;
-                            }
-                        }
-                        found_return_all_branches = found_return_all_branches && found_on_branch;
-                    }
-
-                    // check the else branch
-                    found_on_branch = false;
-                    for(list<statement_node *>::iterator itr2 = ( (if_elifs_else_node *) (*itr) )->else_stmts->begin(); itr2 != ( (if_elifs_else_node *) (*itr) )->else_stmts->end(); ++itr2){
-                        if( (*itr2)->type_of_statement == "return" ){
-                            found_on_branch = true;
-                        }
-                    }
-                    found_return_all_branches = found_return_all_branches && found_on_branch;
-
-                    if(found_return_all_branches){
-                        found_return_node = true;
-                    }
-                }
             }
-            if(!found_return_node){
-                string msg = "method " + name + " does not have a (guaranteed) return";
-                LOG.insert("TypeError", line_number, msg);
-            }
+        }
+        if(!found_return_node && return_type != "Nothing"){
+            string msg = "method " + name + " does not have a (guaranteed) return";
+            LOG.insert("TypeError", line_number, msg);
         }
 
         // make a symtable local to just this method
@@ -1588,6 +1590,10 @@ public:
 
         for(list<statement_node *>::iterator itr = stmts->begin(); itr != stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, name, s);
+        }
+
+        if(!found_return_node && return_type == "Nothing"){
+            C.push_back("return nothing;");
         }
 
         C.push_back("}");
