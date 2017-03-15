@@ -1270,6 +1270,17 @@ public:
     }
 
     string emit_ir_code(string class_name, string method_name, SymTable s){
+
+        // note: i'm not sure if this should actually be a type error or just
+        //       let it crash at runtime ... if it's a type error, obviously
+        //       this should be done in the typechecking phase :)
+        if(method_name == "*constructor" && class_name == this->class_name){
+            string msg = "turtles all the way down";
+            LOG.insert("TypeError", line_number, msg);
+            LOG.print_logs();
+            exit(1);
+        }
+
         VTable v = VTABLE_MAP[this->class_name];
         list<string> fargs = v[0].second;
         list<string>::iterator fargs_itr = fargs.begin();
