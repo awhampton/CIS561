@@ -1878,8 +1878,11 @@ public:
         }
 
         // add this class to SymTables (so we don't throw an error in the constructor)
-        SymTable just_to_initialize_the_map;
-        SymTables[signature->class_name] = just_to_initialize_the_map;
+        //SymTable just_to_initialize_the_map;
+        //SymTables[signature->class_name] = just_to_initialize_the_map;
+
+        // initialize this class in SymTables with parent class values
+        SymTables[signature->class_name] = SymTables[signature->class_extends];
 
         // make a temp symtable that is just used for typechecking the constructor definition
         //   note: the string "this" has special meaning in this context, it refers to the class name
