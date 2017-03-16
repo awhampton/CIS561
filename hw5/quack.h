@@ -24,7 +24,9 @@ extern  map<string, map<string, string> > RT_MAP;
 extern  DEBUG_STREAM LOG;
 extern  vector< pair< int, string > > ERROR_BUFFER;
 extern  bool TYPE_CHECK_AGAIN;
+extern  bool TYPE_CHECK_AGAIN_IF;
 extern  bool BREAK_LOOP;
+extern  bool BREAK_LOOP_IF;
 extern  set<string> BUILTIN_CLASSES;
 extern  unordered_map< string, string > BUILTIN_VALUES;
 extern  vector<string> C;
@@ -32,6 +34,7 @@ extern  map< string, map<string, SymTable> > LOCAL_SYMTABLES;
 extern  map<string, VTable> IMPLIED_ARGUMENT;
 extern  string VAR_PREFIX;
 extern  int TMP_VAR_CTR;
+extern  set<string> IF_SEEN;
 
 /////////////////////////////////
 // helper functions
@@ -43,7 +46,7 @@ SymTable get_intersection(vector< SymTable > tables);
 void print_symtable(SymTable table);
 void local_variable_declarations(string class_name, string method_name);
 void local_variable_declarations_method(string class_name, string method_name, set<string> args, SymTable local_symtable);
-void local_variable_declarations_branch(string class_name, string method_name, SymTable local_symtable, SymTable parent_symtable);
+void local_variable_declarations_branch(string class_name, string method_name, SymTable local_symtable, SymTable parent_symtable, SymTable inter_symtable);
 void struct_variable_declarations(string class_name, string parent_name);
 void method_declarations(string class_name);
 void method_declarations_inst(string class_name);
@@ -277,6 +280,8 @@ public:
     list<condition_node *>    *elif_branches;
     list<statement_node *>    *else_stmts;
     SymTable else_ar;
+    SymTable intersected;
+    SymTable prior;
 
     if_elifs_else_node(condition_node *i, list<condition_node *> *elifs, list<statement_node *> *els){
         if_branch = i;
@@ -309,50 +314,64 @@ public:
 
     string type_check(SymTable &s){
 
-        // we will accumulate symtables from each branch, then intersect them
-        vector<SymTable> tables;
-        vector<SymTable> tables_dm;
+        // save the incoming SymTable
+        prior = s;
 
-        // make a copy of the data members symtable
-        SymTable dm_copy = SymTables[s["this"][0]];
+        // keep checking all of the branches until the types settle
+        TYPE_CHECK_AGAIN_IF = true;
+        BREAK_LOOP_IF = false;
+        IF_SEEN.clear();
+        int type_check_num_if = 0;
+        while(TYPE_CHECK_AGAIN_IF && !BREAK_LOOP_IF){
+            TYPE_CHECK_AGAIN_IF = false;
+            type_check_num_if++;
 
-        // make a copy of the passed-in symtable, typecheck the branch, and save the copy in tables
-        SymTable if_branch_symtable = s;
-        if_branch->type_check(if_branch_symtable);
-        tables.push_back(if_branch_symtable);
-        tables_dm.push_back(SymTables[s["this"][0]]);
+            // we will accumulate symtables from each branch, then intersect them
+            vector<SymTable> tables;
+            vector<SymTable> tables_dm;
 
-        for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
-            SymTables[s["this"][0]] = dm_copy;  // reset the data member symtable
-            SymTable elif_branch_symtable = s;
-            (*itr)->type_check(elif_branch_symtable);
-            tables.push_back(elif_branch_symtable);
+            // make a copy of the data members symtable
+            SymTable dm_copy = SymTables[s["this"][0]];
+
+            // make a copy of the passed-in symtable, typecheck the branch, and save the copy in tables
+            SymTable if_branch_symtable = s;
+            if_branch->type_check(if_branch_symtable);
+            tables.push_back(if_branch_symtable);
             tables_dm.push_back(SymTables[s["this"][0]]);
-        }
 
-        // the 'else' branch is a little goofy because it's just a list of statements here
-        SymTable else_branch_symtable = s;
-        SymTables[s["this"][0]] = dm_copy;
-        TYPE_CHECK_AGAIN = true;
-        BREAK_LOOP = false;
-        int num_type_checks = 0;
-        while(TYPE_CHECK_AGAIN && !BREAK_LOOP){
-            TYPE_CHECK_AGAIN = false;
-            num_type_checks++;
-            string msg = "type check num: " + to_string(num_type_checks);
-            LOG.insert("Debug", -1, msg);
-            for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
-                (*itr)->type_check(else_branch_symtable);
+            for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
+                SymTables[s["this"][0]] = dm_copy;  // reset the data member symtable
+                SymTable elif_branch_symtable = s;
+                (*itr)->type_check(elif_branch_symtable);
+                tables.push_back(elif_branch_symtable);
+                tables_dm.push_back(SymTables[s["this"][0]]);
             }
-        }
-        tables.push_back(else_branch_symtable);
-        tables_dm.push_back(SymTables[s["this"][0]]);
-        else_ar = else_branch_symtable;  // hang onto this symtable for code generation
 
-        // need some way to intersect the symbol tables that were generated in the branches
-        // this intersection should update the types with the LCA function
-        s = get_intersection(tables);
-        SymTables[s["this"][0]] = get_intersection(tables_dm);
+            // the 'else' branch is a little goofy because it's just a list of statements here
+            SymTable else_branch_symtable = s;
+            SymTables[s["this"][0]] = dm_copy;
+            TYPE_CHECK_AGAIN = true;
+            BREAK_LOOP = false;
+            int num_type_checks = 0;
+            while(TYPE_CHECK_AGAIN && !BREAK_LOOP){
+                TYPE_CHECK_AGAIN = false;
+                num_type_checks++;
+                string msg = "type check num: " + to_string(num_type_checks);
+                LOG.insert("Debug", -1, msg);
+                for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
+                    (*itr)->type_check(else_branch_symtable);
+                }
+            }
+            tables.push_back(else_branch_symtable);
+            tables_dm.push_back(SymTables[s["this"][0]]);
+            else_ar = else_branch_symtable;  // hang onto this symtable for code generation
+
+            // need some way to intersect the symbol tables that were generated in the branches
+            // this intersection should update the types with the LCA function
+            intersected = get_intersection(tables);
+            s = intersected;
+            SymTables[s["this"][0]] = get_intersection(tables_dm);
+        }
 
         return "OK";
     }
@@ -363,7 +382,7 @@ public:
 
         // emit code for if
         C.push_back("if(" + if_branch->expr->emit_ir_code(class_name, method_name, s) + " == lit_true){");
-        local_variable_declarations_branch(class_name, method_name, if_branch->ar, s);
+        local_variable_declarations_branch(class_name, method_name, if_branch->ar, s, intersected);
         for(list<statement_node *>::iterator itr = if_branch->stmts->begin(); itr != if_branch->stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, method_name, if_branch->ar);
         }
@@ -373,7 +392,7 @@ public:
         if(elif_branches->size() > 0){
             for(list<condition_node *>::iterator itr = elif_branches->begin(); itr != elif_branches->end(); ++itr){
                 C.push_back("else if(" + (*itr)->expr->emit_ir_code(class_name, method_name, s) + " == lit_true){");
-                local_variable_declarations_branch(class_name, method_name, (*itr)->ar, s);
+                local_variable_declarations_branch(class_name, method_name, (*itr)->ar, s, intersected);
                 for(list<statement_node *>::iterator stmt_itr = (*itr)->stmts->begin(); stmt_itr != (*itr)->stmts->end(); ++stmt_itr){
                     (*stmt_itr)->emit_ir_code(class_name, method_name, (*itr)->ar);
                 }
@@ -384,7 +403,7 @@ public:
         // emit code for else
         if(else_stmts->size() > 0){
             C.push_back("else{");
-            local_variable_declarations_branch(class_name, method_name, else_ar, s);
+            local_variable_declarations_branch(class_name, method_name, else_ar, s, intersected);
             for(list<statement_node *>::iterator itr = else_stmts->begin(); itr != else_stmts->end(); ++itr){
                 (*itr)->emit_ir_code(class_name, method_name, else_ar);
             }
@@ -419,6 +438,8 @@ public:
 class while_node : public statement_node {
 public:
     while_condition_node  *wc;
+    SymTable intersected;
+    SymTable prior;
 
     while_node(while_condition_node *w){
         wc = w;
@@ -437,6 +458,8 @@ public:
     }
 
     string type_check(SymTable &s){
+        // save a copy of the incoming symtable
+        prior = s;
 
         // we will get a symtable from the while branch and intersect it with s
         //   i think this will correctly update both the types and the declarations
@@ -456,7 +479,8 @@ public:
 
         // need some way to intersect the symbol tables that were generated in the branches
         // this intersection should update the types with the LCA function
-        s = get_intersection(tables);
+        intersected = get_intersection(tables);
+        s = intersected;
         SymTables[s["this"][0]] = get_intersection(tables_dm);
 
         return "OK";
@@ -465,7 +489,7 @@ public:
     string emit_ir_code(string class_name, string method_name, SymTable s){
         C.push_back("while(1){");
         C.push_back("if(!(" + wc->expr->emit_ir_code(class_name, method_name, s) + " == lit_true)){ break; }");
-        local_variable_declarations_branch(class_name, method_name, wc->ar, s);
+        local_variable_declarations_branch(class_name, method_name, wc->ar, s, intersected);
         for(list<statement_node *>::iterator itr = wc->stmts->begin(); itr != wc->stmts->end(); ++itr){
             (*itr)->emit_ir_code(class_name, method_name, wc->ar);
         }
@@ -698,6 +722,14 @@ public:
         if(left->type_of_expression == "ident"){
             if(left_type_eval != find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)){
                 TYPE_CHECK_AGAIN = true;
+
+                // only typecheck all the if/elif/else branches again if it's a problem across all branches
+                set<string>::iterator f_ident = IF_SEEN.find( ((ident_node *) left)->ident_value );
+                if(f_ident == IF_SEEN.end()){
+                    IF_SEEN.insert(((ident_node *) left)->ident_value);
+                    TYPE_CHECK_AGAIN_IF = true;
+                }
+
             }
             array<string, 2> sym_val = {left_type, find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)};
             s[((ident_node *) left)->ident_value] = sym_val;
@@ -706,6 +738,7 @@ public:
         if(left->type_of_expression == "access"){
             if(left_type_eval != find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)){
                 TYPE_CHECK_AGAIN = true;
+                TYPE_CHECK_AGAIN_IF = true;
             }
 
             // check if the access is to another class than "this"

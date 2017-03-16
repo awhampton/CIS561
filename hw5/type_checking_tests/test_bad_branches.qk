@@ -1,0 +1,25 @@
+/* this should throw an abundance of type errors */
+
+cond1 = false;
+cond2 = false;
+
+if(cond1){
+  x = 2;
+  a = x + 4;
+  a.PRINT();
+  "\n".PRINT();
+}
+elif(cond2){
+  x = "foo";
+  b = x + "bar";
+  b.PRINT();
+  "\n".PRINT();
+}
+else{
+  x = true;
+  c = not x;
+  c.PRINT();
+  "\n".PRINT();
+}
+
+x.PRINT();

@@ -1,17 +1,24 @@
-/* unsure about what should happen with this */
+/* testing behavior for variable that is defined on all paths */
 
-cond1 = true;
+cond1 = false;
 cond2 = true;
 
 if(cond1){
   x = 2;
-  a = x + 4;
+  x.PRINT();
 }
 elif(cond2){
   x = "foo";
-  b = x + "bar";
+  x.PRINT();
 }
 else{
   x = true;
-  c = not x;
+  x.PRINT();
 }
+
+"  <-- correct: foo".PRINT();
+"\n".PRINT();
+
+x.PRINT();
+"  <-- correct: foo".PRINT();
+"\n".PRINT();

@@ -52,7 +52,10 @@ map<string, list<string> > CLASS_GRAPH;
 typedef unordered_map< string, array< string, 2 > > SymTable;
 unordered_map< string, SymTable > SymTables;
 bool TYPE_CHECK_AGAIN;
+bool TYPE_CHECK_AGAIN_IF;
 bool BREAK_LOOP;
+bool BREAK_LOOP_IF;
+set<string> IF_SEEN;
 
 // globals for debugging
 DEBUG_STREAM LOG(10);
@@ -428,7 +431,7 @@ void local_variable_declarations_method(string class_name, string method_name, s
     }
 }
 
-void local_variable_declarations_branch(string class_name, string method_name, SymTable local_symtable, SymTable parent_symtable){
+void local_variable_declarations_branch(string class_name, string method_name, SymTable local_symtable, SymTable parent_symtable, SymTable inter_symtable){
     for(SymTable::iterator itr = local_symtable.begin(); itr != local_symtable.end(); ++itr){
 		bool not_found = true;
 		for(SymTable::iterator itr2 = parent_symtable.begin(); itr2 != parent_symtable.end(); ++itr2){
@@ -436,7 +439,13 @@ void local_variable_declarations_branch(string class_name, string method_name, S
 				not_found = false;
 			}
 		}
-        if(itr->second[0][0] != '*' && itr->second[0][0] != '$' && itr->second[0] != method_name && itr->first != "this" && not_found){
+        // bool not_found_prior = false;
+		// for(SymTable::iterator itr2 = inter_symtable.begin(); itr2 != inter_symtable.end(); ++itr2){
+		// 	if(itr->first == itr2->first){
+		// 		found_inter = true;
+		// 	}
+		// }
+        if( itr->second[0][0] != '*' && itr->second[0][0] != '$' && itr->second[0] != method_name && itr->first != "this" && not_found ){
             C.push_back("obj_" + itr->second[1] + " " + VAR_PREFIX + itr->first + ";");
         }
     }
