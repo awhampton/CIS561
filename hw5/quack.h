@@ -738,7 +738,7 @@ public:
         if(left->type_of_expression == "access"){
             if(left_type_eval != find_lca(left_type_eval, right_type_eval, CLASS_GRAPH)){
                 TYPE_CHECK_AGAIN = true;
-                TYPE_CHECK_AGAIN_IF = true;
+                //TYPE_CHECK_AGAIN_IF = true;  /* I don't think this should ever trigger another loop on the if typechecking */
             }
 
             // check if the access is to another class than "this"
