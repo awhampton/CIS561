@@ -790,7 +790,13 @@ public:
     }
 
     string type_check(SymTable &s){
-        return expr->type_check(s);
+        string res = expr->type_check(s);
+        if(res == "*ERROR"){
+            // add to error list -- can't have bare expression of undeclared variable
+            string msg = "undeclared variable or method in bare expression";
+            LOG.insert("TypeError", expr->line_number, msg);
+        }
+        return res;
     }
 
     string emit_ir_code(string class_name, string method_name, SymTable s){
