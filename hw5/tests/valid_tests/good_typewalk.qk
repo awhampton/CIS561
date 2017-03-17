@@ -5,6 +5,9 @@
  * Iterate to a fixed point (abstract interpretation)?
  * Somehow short-circuit the walk up the type system?
  * Impose some restriction that prevents this problem?
+ *
+ *
+ * UPDATED: modified to also demonstrate dynamic method dispatch
  */
 
 class C1()  extends Obj {
