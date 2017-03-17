@@ -1,3 +1,11 @@
+/* 1. demonstrates that variables must be initialized on every path through conditional
+ *    to be successfully initialized in the containing scope
+ * 2. demonstrates that if a variable is *NOT* on every path, it is considered local to the
+ *    scope of that branch
+ * 3. demonstrates that if a variable *IS* initialized on every path, the type
+ *    is inferred over all branches
+ */
+
 class SampleA() {
     def bad_init(y : Int) : Nothing {
     	if (y > 13) {
@@ -5,22 +13,41 @@ class SampleA() {
     	}
         elif (y < 0) {
     	    x = 13;
+            z = x + 4;  /* this is ok because x is local to the scope of the branch */
     	}
-    	x = x + 1;  /* error, x is not initialized */
+    	x.PRINT();  /* error, x is not initialized */
     	return;
     }
 }
 
 class SampleB() {
     def bad_init(y : Int) : Nothing {
-        x;  /* bare expression with undeclared variable is an error */
+        x;  /* don't try anything clever: bare expression with uninitialized variable is an error */
     	if (y > 13) {
     	    x = y;
     	}
         elif (y < 0) {
     	    x = 13;
     	}
-    	x = x + 1;
+    	x.PRINT();
+    	return;
+    }
+}
+
+class SampleC() {
+    def bad_init(y : Int) : Nothing {
+    	if (y > 13) {
+    	    x = y;
+    	}
+        elif (y < 0) {
+    	    x = 13;
+            z = x + 4;  /* this is not ok, because the type of x is inferred to be Obj */
+    	}
+        else{
+            q = "hi";
+            x = q;
+        }
+    	x.PRINT();  /* this is ok, because x has been initialized on every path and Obj has PRINT */
     	return;
     }
 }
