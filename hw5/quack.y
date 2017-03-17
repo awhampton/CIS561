@@ -697,6 +697,8 @@ VTable build_vtable(string c, VTable parent_vt){
         RT_MAP["String"]["ATLEAST"] = "Boolean";
         RT_MAP["String"]["LESS"] = "Boolean";
         RT_MAP["String"]["MORE"] = "Boolean";
+
+        RT_MAP["String"]["PRINT"] = "String";
     }
 
     // if the class is Int, update it with builtin methods
@@ -737,6 +739,8 @@ VTable build_vtable(string c, VTable parent_vt){
         RT_MAP["Int"]["ATLEAST"] = "Boolean";
         RT_MAP["Int"]["LESS"] = "Boolean";
         RT_MAP["Int"]["MORE"] = "Boolean";
+
+        RT_MAP["Int"]["PRINT"] = "Int";
     }
 
     // if the class is Boolean, update it with builtin methods
@@ -746,6 +750,8 @@ VTable build_vtable(string c, VTable parent_vt){
         res[0] = make_pair("Boolean", bool_constructor_types);
         IMPLIED_ARGUMENT[c][0] = make_pair("Boolean", empty_arg_types);
         IMPLIED_ARGUMENT[c][1] = make_pair("STR", class_name_list);
+
+        RT_MAP["Boolean"]["PRINT"] = "Boolean";
     }
 
     // if the class is Nothing, update it with builtin methods
@@ -755,6 +761,8 @@ VTable build_vtable(string c, VTable parent_vt){
         res[0] = make_pair("Nothing", nothing_constructor_types);
         IMPLIED_ARGUMENT[c][0] = make_pair("Nothing", empty_arg_types);
         IMPLIED_ARGUMENT[c][1] = make_pair("STR", class_name_list);
+
+        RT_MAP["Nothing"]["PRINT"] = "Nothing";
     }
 
 	return res;
