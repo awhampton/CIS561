@@ -1,3 +1,7 @@
+/* 1. demonstrates a successful search for return statements on all possible paths
+ * 2. demonstrates the flexibility of the scoping provided to if/elif/else branches
+*/
+
 class Foo(){
     this.x = 1;
     this.y = 2;
@@ -9,26 +13,30 @@ class Foo(){
         z = this.z;
 
         /* this should be ok because every path has a return */
+        /* note that tmp is present on all branches, so its inferred static type is Int on EVERY branch */
         if (x < y){
             tmp = 3;
-            tmp2 = 5;
+            tmp2 = 2;
             y = tmp2;
-            return 2;
+            return y;
         }
         elif (x > y){
             tmp = 4;
             x = tmp;
-            return 1;
+            return x;
         }
         elif(false){
-            q = 3;
+            q = 5;
+            tmp = q;
             return 0;
         }
         else{
-            tmp = "bar";
-            z = tmp;
+            tmp = 6;
+            tmp2 = "bar";
+            z = tmp2;
             return -1;
         }
+
     }
 }
 
