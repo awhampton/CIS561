@@ -1,5 +1,9 @@
 /* computes some math functions on integers */
 
+/* 1. demonstrates the compiler is sufficient to handle some "normal" use cases
+ * 2. demonstrates that recursive calls are handled correctly
+ */
+
 class Math() {
 
     // returns x mod m
