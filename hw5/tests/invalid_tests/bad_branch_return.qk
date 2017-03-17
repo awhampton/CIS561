@@ -1,3 +1,5 @@
+/* demonstrates catching a missing return path */
+
 class Foo(){
     this.x = 1;
     this.y = 2;
