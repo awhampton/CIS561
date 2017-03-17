@@ -1877,9 +1877,53 @@ public:
             cerr << endl;
         }
 
+        // FIRST: type check the constructor with a blank symtable to catch errors
+
         // add this class to SymTables (so we don't throw an error in the constructor)
-        //SymTable just_to_initialize_the_map;
-        //SymTables[signature->class_name] = just_to_initialize_the_map;
+        SymTable just_to_initialize_the_map;
+        SymTables[signature->class_name] = just_to_initialize_the_map;
+
+        // make a temp symtable that is just used for typechecking the constructor definition
+        //   note: the string "this" has special meaning in this context, it refers to the class name
+        SymTable class_symtable_tmp1;
+        array<string, 2> sym_val1 = {signature->class_name, signature->class_name};
+        class_symtable_tmp1["this"] = sym_val1;
+
+        // send class_symtable_tmp to the signature to add formal arguments
+        //   note: signature->type_check takes a reference for its argument
+        signature->type_check(class_symtable_tmp1);
+
+        // type check the body of the class
+        //    note: during this process, we will build a copy of the symtable with only the class
+        //          datamembers that is saved to the global SymTables
+        //    note: send the class name down for the method symbol tables
+        body->type_check(class_symtable_tmp1, signature->class_name);
+
+        // debug
+        if(LOG.print_st){
+            cout << endl;
+            cout << "local symtable for class " << signature->class_name << " in constructor" << endl;
+            print_symtable(class_symtable_tmp1);
+            cerr << endl;
+        }
+
+        // run constructor initialization verification on all constructor variables
+        for(SymTable::iterator iter = SymTables[signature->class_extends].begin(); iter != SymTables[signature->class_extends].end(); ++iter){
+            // didn't find a constructor variable in the class that was expected by its superclass definition
+            SymTable::iterator s_itr = SymTables[signature->class_name].find(iter->first);
+            if(s_itr == SymTables[signature->class_name].end()){
+                string msg = "class " + signature->class_name + " doesn't initialize variable " + iter->first + " declared by its superclass";
+                LOG.insert("ClassError", signature->line_number, msg);
+            }
+
+            // found the constructor variable but the type was invalid
+            else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
+                string msg = "class " + signature->class_name + " initializes inherited variable " + iter->first + " to invalid type " + s_itr->second[1];
+                LOG.insert("TypeError", signature->line_number, msg);
+            }
+        }
+
+        // SECOND: type check the constructor again with the parent's symtable to get the right types in it
 
         // initialize this class in SymTables with parent class values
         SymTables[signature->class_name] = SymTables[signature->class_extends];
