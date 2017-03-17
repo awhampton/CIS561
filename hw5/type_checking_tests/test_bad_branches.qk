@@ -1,4 +1,5 @@
 /* this should throw an abundance of type errors */
+/* since x is present on all branches, its static type is Obj in EACH branch */
 
 cond1 = false;
 cond2 = false;
