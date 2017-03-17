@@ -1,3 +1,5 @@
+/* demonstrates some things that can go wrong with methods */
+
 class animal() {
     this.name = "animal";
     this.sound = "";
@@ -62,28 +64,34 @@ class badfeline() extends cat {
     }
 
     // everything below should cause issues
+
     def missing_return() : Int {
+        /* missing a return statement */
         x = 4;
-        // return x;
     }
 
     def speak() : Int {
+        /* bad override return type */
         return -1;
     }
 
     def action() : String {
+        /* defined multiple times */
         return this.name + " is very greedy";
     }
 
     def sleep(duration : Int) : Int {
+        /* bad override: wrong number of arguments */
         return duration;
     }
 
     def sleep_more(x : Int) : String {
+        /* bad override: wrong type on arguments */
         return "causing trouble even while sleeping";
     }
 
     def cause_trouble(amount_of_trouble : Int, type_of_trouble : String, amount_of_trouble : Int) {
+        /* repeated arguments */
         return;
     }
 }
