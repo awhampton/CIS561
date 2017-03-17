@@ -1,3 +1,5 @@
+/* demonstrates that class data members must be found on every path through the constructor */
+
 class Schroedinger(box: Int) {
     if box > 0 {
        this.living = 1;
