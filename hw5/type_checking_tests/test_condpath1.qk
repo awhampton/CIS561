@@ -1,3 +1,5 @@
+/* no problems here ... z is initialized on every branch */
+
 x = 1;
 y = 2;
 

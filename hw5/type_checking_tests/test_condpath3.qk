@@ -1,3 +1,5 @@
+/* demonstartes some things that can go wrong with types in conditional branches */
+
 class A() {}
 class B() extends A {}
 class C() extends B {}
@@ -17,7 +19,7 @@ else{
     z = A();
 }
 
-res1 : B = x; // should fail 
+res1 : B = x; // should fail
 res2 : C = w; // should fail
 res3 : B = w; // should fail
 res3 : A = z; // should fail

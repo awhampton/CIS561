@@ -1,3 +1,5 @@
+/* bad initialization in conditional branch */
+
 x = 1;
 y = 2;
 
@@ -9,6 +11,12 @@ elif(x < y){
 }
 else{
     z = x;
+    q = z + 4;
 }
 
-res = z;
+a = x;
+b = y;
+c = z;  /* error here */
+
+/* note: the assignment to q in the else branch is actually ok because
+         of how we've implemented a sort of pseudo-scope on branches */
