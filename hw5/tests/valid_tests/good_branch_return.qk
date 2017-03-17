@@ -34,4 +34,5 @@ class Foo(){
 
 A = Foo();
 A.Bar().PRINT();
+"  <-- correct: 2".PRINT();
 "\n".PRINT();
