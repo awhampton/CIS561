@@ -17,14 +17,17 @@ class Robot(n : String) {
     }
 
     def destroy_city2() : Int {
+        /* this should be ok */
         return this.destroy_city(1000);
     }
 
     def destroy_city3() : String{
+        /* this should be an error */
         return this.destroy_city(4000);
     }
 
-    def destroy_city3() : Robot{
+    def destroy_city4() : Robot{
+        /* this should be ok */
         return SmartRobot(300);
     }
 }
@@ -36,6 +39,6 @@ class SmartRobot(iq: Int) extends Robot {
     this.age = 48;
     this.iq = 2 * iq;
     this.strength = iq / 2;
-    return;
+    return;  /* this is an error */
 
 }
