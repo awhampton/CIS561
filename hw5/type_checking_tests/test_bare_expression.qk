@@ -1,4 +1,0 @@
-x = 4;
-x;  /* this should be ok */
-
-y;  /* this is not ok -- y is uninitialized */
