@@ -1,0 +1,16 @@
+/* no problems here ... z is initialized on every branch */
+
+x = 1;
+y = 2;
+
+if(x > y){
+    z = x + y;
+}
+elif(x < y){
+    z = x - y;
+}
+else{
+    z = x;
+}
+
+res = z;

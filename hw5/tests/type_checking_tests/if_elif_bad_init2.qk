@@ -1,0 +1,13 @@
+class Sample() {
+    def bad_init(y : Int) : Nothing {
+        x;  /* bare expression with undeclared variable is an error */
+    	if (y > 13) {
+    	    x = y;
+    	}
+        elif (y < 0) {
+    	    x = 13;
+    	}
+    	x = x + 1;
+    	return;
+    }
+}

@@ -10,6 +10,7 @@ if [ ! -d "$1" ]; then
     exit
 fi
 
+make clean
 make
 for filename in ${1}/*.qk; do
 	echo
@@ -17,9 +18,12 @@ for filename in ${1}/*.qk; do
     echo "===================="
 	./quack $filename
     if [ -f ${PWD}/generated.c ]; then
+        echo -n "Compiling: "
         make result
+        echo ""
         ./compiled_quack
     fi
     rm -f ${PWD}/compiled_quack ${PWD}/generated.c
     echo "===================="
+    echo ""
 done

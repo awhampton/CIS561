@@ -1,0 +1,22 @@
+/* bad initialization in conditional branch */
+
+x = 1;
+y = 2;
+
+if(x > y){
+    x = 2 * y;
+}
+elif(x < y){
+    y = 2 * x;
+}
+else{
+    z = x;
+    q = z + 4;
+}
+
+a = x;
+b = y;
+c = z;  /* error here */
+
+/* note: the assignment to q in the else branch is actually ok because
+         of how we've implemented a sort of pseudo-scope on branches */
