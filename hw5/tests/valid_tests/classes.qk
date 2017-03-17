@@ -1,4 +1,4 @@
-/* Test Custom Class Generation and Inheritence */
+/* demonstrates that the inherited class structure for data members and methods is correct */
 
 // Test custom class
 class Pt(x: Int, y: Int) {
@@ -17,15 +17,6 @@ class Pt(x: Int, y: Int) {
 
     def PLUS(other: Pt):Pt {
         return Pt(this.x+other.x, this.y+other.y);
-    }
-
-    def testing_return_nothing1() : Nothing {
-        var = 4;
-    }
-
-    def testing_return_nothing2() : Nothing {
-        var = 4;
-        return;
     }
 
 }
