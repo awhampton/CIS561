@@ -1,6 +1,5 @@
 /* test side effects in method calls */
 
-// Test custom class
 class Counter(x: Int) {
     this.counter = x;
 
