@@ -3,7 +3,7 @@ class Foo() {}
 class Bar() extends Int {}
 
 class Blargh() extends String {
-    def PLUS(other : Blargh) : Blargh {
+    def PLUS(other : Blargh) : Blargh {  /* error: bad override */
         return Blargh();
     }
 }
