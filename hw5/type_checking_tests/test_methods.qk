@@ -1,4 +1,4 @@
-/* demonstrates some things that can go wrong with methods */
+/* demonstrates some things that can go wrong with method definitions */
 
 class animal() {
     this.name = "animal";
