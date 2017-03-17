@@ -1,5 +1,5 @@
 /*
-*  CIS 561: HW 4
+*  CIS 561
 *  Garrett Morrison
 *  Andrew Hampton
 *

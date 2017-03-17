@@ -1,3 +1,10 @@
+/*
+*  CIS 561
+*  Garrett Morrison
+*  Andrew Hampton
+*/
+
+
 #ifndef QUACK_H
 #define QUACK_H
 
