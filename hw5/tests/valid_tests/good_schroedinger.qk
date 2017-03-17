@@ -1,3 +1,5 @@
+/* demonstrates that class data members are correctly gathered from conditional paths */
+
 class Schroedinger(box: Int) {
     if box > 0 {
        this.living = true;
