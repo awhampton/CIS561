@@ -1952,22 +1952,6 @@ public:
             cerr << endl;
         }
 
-        // run constructor initialization verification on all constructor variables
-        for(SymTable::iterator iter = SymTables[signature->class_extends].begin(); iter != SymTables[signature->class_extends].end(); ++iter){
-            // didn't find a constructor variable in the class that was expected by its superclass definition
-            SymTable::iterator s_itr = SymTables[signature->class_name].find(iter->first);
-            if(s_itr == SymTables[signature->class_name].end()){
-                string msg = "class " + signature->class_name + " doesn't initialize variable " + iter->first + " declared by its superclass";
-                LOG.insert("ClassError", signature->line_number, msg);
-            }
-
-            // found the constructor variable but the type was invalid
-            else if((s_itr != SymTables[signature->class_name].end()) && (find_lca(s_itr->second[1], iter->second[1], CLASS_GRAPH) != iter->second[1])){
-                string msg = "class " + signature->class_name + " initializes inherited variable " + iter->first + " to invalid type " + s_itr->second[1];
-                LOG.insert("TypeError", signature->line_number, msg);
-            }
-        }
-
         // check that for each method that is an override of the superclass: the formal args
         // are given supertypes; the return type is a subtype
         for(list<method_node *>::iterator itr = body->mthds->begin(); itr != body->mthds->end(); ++itr){
