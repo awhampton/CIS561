@@ -5,12 +5,12 @@ Authors: Garrett Morrison, Andrew Hampton
 ### Test Programs
 The /tests directory contains subdirectories:
 
-type_checking_tests: tests demonstrating type errors that are caught
-code_gen_tests: tests demonstrating code generation for correctly written programs
-class_structure_tests: tests demonstrating class structure errors that are caught
-samples: given code samples
-**invalid_tests**: greatest hits from type_checking_tests, the "bad" directory
-**valid_tests**: greatest hits from code_gen_tests, the "good" directory
+type_checking_tests: tests demonstrating type errors that are caught  
+code_gen_tests: tests demonstrating code generation for correctly written programs  
+class_structure_tests: tests demonstrating class structure errors that are caught  
+samples: given code samples  
+**invalid_tests**: greatest hits from type_checking_tests, the "bad" directory  
+**valid_tests**: greatest hits from code_gen_tests, the "good" directory  
 
 The tests in **invalid_tests** and **valid_tests** showcase the compiler's capabilities. If the user is inclined toward exploring edge cases and associated novelties, the tests in the other directories can perhaps provide some amusement.
 
