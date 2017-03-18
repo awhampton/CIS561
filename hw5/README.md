@@ -26,17 +26,18 @@ The file **generated.c** can be turned into the executable **compiled_quack** wi
 
 Example:
 
-./quack tests/code_gen_tests/math.qk  
-make result  
-./compiled_quack  
-
+```
+./quack tests/code_gen_tests/math.qk
+make result
+./compiled_quack
+```
 
 ### Pro Usage
 There is an executable script called **do_tests** that takes one argument: the name of a directory.
 
 This script will run **quack** on each file in that directory. For each file that does not produce any compilation errors, the script will automatically compile and run the generated C code. The results are formatted for immediate consumption.
 
-Example: ./do_tests tests/valid_tests/
+Example: `./do_tests tests/valid_tests/`
 
 
 ### Implementation Note
