@@ -81,4 +81,4 @@ x = D();  /* the type of x is LCA(A,B,C,D) in the containing scope */
 /* no other x assignments in the containing scope */
 ```
 
-Hopefully this difference isn't too much of a departure from the intended behavior! As a benefit, the scope on the branch provides the quack programmer with a bit more flexibility.
+Hopefully this difference isn't too much of a departure from the intended implementation! As a benefit, the scope on the branch provides the quack programmer with a bit more flexibility.
