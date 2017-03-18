@@ -5,9 +5,9 @@ Authors: Garrett Morrison, Andrew Hampton
 ### Test Programs
 The /tests directory contains subdirectories:
 
-type_checking_tests: tests demonstrating type errors that are caught  
-code_gen_tests: tests demonstrating code generation for correctly written programs  
-class_structure_tests: tests demonstrating class structure errors that are caught  
+type_checking_tests: demonstrates type errors that are caught  
+code_gen_tests: demonstrates code generation for correctly written programs  
+class_structure_tests: demonstrates class structure errors that are caught  
 samples: given code samples  
 **invalid_tests**: greatest hits from type_checking_tests, the "bad" directory  
 **valid_tests**: greatest hits from code_gen_tests, the "good" directory  
@@ -18,17 +18,17 @@ The tests in **invalid_tests** and **valid_tests** showcase the compiler's capab
 ### Basic Usage
 The compiler is run through an executable **quack** that takes one argument: the name of the quack source file.
 
-For an incorrect program, **quack** will write errors to *stderr*.
+For an incorrect program, errors are written to *stderr*.
 
-For a correct program, **quack** will produce a C file named **generated.c**.
+For a correct program, a C file named **generated.c** is produced.
 
 The file **generated.c** can be turned into the executable **compiled_quack** with the command **make result**.
 
 Example:
 
-./quack tests/code_gen_tests/math.qk
-make result
-./compiled_quack
+./quack tests/code_gen_tests/math.qk  
+make result  
+./compiled_quack  
 
 
 ### Pro Usage
